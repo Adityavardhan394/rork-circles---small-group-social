@@ -8,21 +8,22 @@ export const trpc = createTRPCReact<AppRouter>();
 
 const getBaseUrl = () => {
   const url = process.env.EXPO_PUBLIC_RORK_API_BASE_URL;
-
   if (!url) {
-    throw new Error(
-      "Rork did not set EXPO_PUBLIC_RORK_API_BASE_URL, please use support",
-    );
+    console.warn('[trpc] EXPO_PUBLIC_RORK_API_BASE_URL not set, backend features disabled');
+    return null;
   }
-
   return url;
 };
+
+const BASE_URL = getBaseUrl();
 
 export const trpcClient = trpc.createClient({
   links: [
     httpLink({
-      url: `${getBaseUrl()}/api/trpc`,
+      url: BASE_URL ? `${BASE_URL}/api/trpc` : 'http://localhost:0/api/trpc',
       transformer: superjson,
     }),
   ],
 });
+
+export const isBackendAvailable = !!BASE_URL;

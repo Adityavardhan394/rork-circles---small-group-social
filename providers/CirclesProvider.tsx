@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import createContextHook from '@nkzw/create-context-hook';
 import { useQuery } from '@tanstack/react-query';
 import { Circle, Post, Poll, CircleEvent, BoardItem, Notification } from '@/types';
-import { trpc } from '@/lib/trpc';
+import { trpc, isBackendAvailable } from '@/lib/trpc';
 import { useUser } from '@/providers/UserProvider';
 
 const STORAGE_KEYS = {
@@ -26,29 +26,31 @@ export const [CirclesProvider, useCircles] = createContextHook(() => {
   const { user } = useUser();
   const userId = user?.id ?? '';
 
+  const backendEnabled = isBackendAvailable && !!userId;
+
   const circlesQuery = trpc.circles.list.useQuery(
     { userId },
-    { enabled: !!userId, retry: 1, staleTime: 5000 }
+    { enabled: backendEnabled, retry: 1, staleTime: 5000 }
   );
   const postsQuery = trpc.posts.list.useQuery(
     { userId },
-    { enabled: !!userId, retry: 1, staleTime: 5000 }
+    { enabled: backendEnabled, retry: 1, staleTime: 5000 }
   );
   const pollsQuery = trpc.polls.list.useQuery(
     { userId },
-    { enabled: !!userId, retry: 1, staleTime: 5000 }
+    { enabled: backendEnabled, retry: 1, staleTime: 5000 }
   );
   const eventsQuery = trpc.events.list.useQuery(
     { userId },
-    { enabled: !!userId, retry: 1, staleTime: 5000 }
+    { enabled: backendEnabled, retry: 1, staleTime: 5000 }
   );
   const boardQuery = trpc.board.list.useQuery(
     { userId },
-    { enabled: !!userId, retry: 1, staleTime: 5000 }
+    { enabled: backendEnabled, retry: 1, staleTime: 5000 }
   );
   const notifsQuery = trpc.notifications.list.useQuery(
     { userId },
-    { enabled: !!userId, retry: 1, staleTime: 5000 }
+    { enabled: backendEnabled, retry: 1, staleTime: 5000 }
   );
 
   const localDataQuery = useQuery({
@@ -171,7 +173,7 @@ export const [CirclesProvider, useCircles] = createContextHook(() => {
       persistLocal(STORAGE_KEYS.circles, updated);
       return updated;
     });
-    if (userId) {
+    if (userId && isBackendAvailable) {
       createCircleMutation.mutate(
         { userId, circle },
         {
@@ -188,7 +190,7 @@ export const [CirclesProvider, useCircles] = createContextHook(() => {
       persistLocal(STORAGE_KEYS.posts, updated);
       return updated;
     });
-    if (userId) {
+    if (userId && isBackendAvailable) {
       createPostMutation.mutate(
         { userId, post },
         {
@@ -217,10 +219,12 @@ export const [CirclesProvider, useCircles] = createContextHook(() => {
           persistLocal(STORAGE_KEYS.notifications, updated);
           return updated;
         });
-        createNotifMutation.mutate({ userId, notification: notif });
+        if (isBackendAvailable) {
+          createNotifMutation.mutate({ userId, notification: notif });
+        }
       }
     }
-  }, [userId, createPostMutation, createNotifMutation, persistLocal, circles]);
+  }, [userId, createPostMutation, persistLocal, circles]);
 
   const toggleReaction = useCallback((postId: string, emoji: string, reactUserId: string) => {
     setPosts(prev => {
@@ -241,7 +245,7 @@ export const [CirclesProvider, useCircles] = createContextHook(() => {
       persistLocal(STORAGE_KEYS.posts, updated);
       return updated;
     });
-    if (userId) {
+    if (userId && isBackendAvailable) {
       toggleReactionMutation.mutate({ userId, postId, emoji, reactUserId });
     }
   }, [userId, toggleReactionMutation, persistLocal]);
@@ -254,7 +258,7 @@ export const [CirclesProvider, useCircles] = createContextHook(() => {
       persistLocal(STORAGE_KEYS.posts, updated);
       return updated;
     });
-    if (userId) {
+    if (userId && isBackendAvailable) {
       togglePinMutation.mutate({ userId, postId });
     }
   }, [userId, togglePinMutation, persistLocal]);
@@ -265,7 +269,7 @@ export const [CirclesProvider, useCircles] = createContextHook(() => {
       persistLocal(STORAGE_KEYS.polls, updated);
       return updated;
     });
-    if (userId) {
+    if (userId && isBackendAvailable) {
       createPollMutation.mutate(
         { userId, poll },
         {
@@ -293,7 +297,7 @@ export const [CirclesProvider, useCircles] = createContextHook(() => {
       persistLocal(STORAGE_KEYS.polls, updated);
       return updated;
     });
-    if (userId) {
+    if (userId && isBackendAvailable) {
       votePollMutation.mutate({ userId, pollId, optionId, voterId });
     }
   }, [userId, votePollMutation, persistLocal]);
@@ -304,7 +308,7 @@ export const [CirclesProvider, useCircles] = createContextHook(() => {
       persistLocal(STORAGE_KEYS.events, updated);
       return updated;
     });
-    if (userId) {
+    if (userId && isBackendAvailable) {
       createEventMutation.mutate(
         { userId, event },
         {
@@ -329,7 +333,7 @@ export const [CirclesProvider, useCircles] = createContextHook(() => {
       persistLocal(STORAGE_KEYS.events, updated);
       return updated;
     });
-    if (userId) {
+    if (userId && isBackendAvailable) {
       rsvpEventMutation.mutate({ userId, eventId, attendeeId, status });
     }
   }, [userId, rsvpEventMutation, persistLocal]);
@@ -340,7 +344,7 @@ export const [CirclesProvider, useCircles] = createContextHook(() => {
       persistLocal(STORAGE_KEYS.board, updated);
       return updated;
     });
-    if (userId) {
+    if (userId && isBackendAvailable) {
       createBoardItemMutation.mutate(
         { userId, item },
         {
@@ -359,7 +363,7 @@ export const [CirclesProvider, useCircles] = createContextHook(() => {
       persistLocal(STORAGE_KEYS.board, updated);
       return updated;
     });
-    if (userId) {
+    if (userId && isBackendAvailable) {
       toggleBoardTodoMutation.mutate({ userId, itemId });
     }
   }, [userId, toggleBoardTodoMutation, persistLocal]);
@@ -372,7 +376,7 @@ export const [CirclesProvider, useCircles] = createContextHook(() => {
       persistLocal(STORAGE_KEYS.notifications, updated);
       return updated;
     });
-    if (userId) {
+    if (userId && isBackendAvailable) {
       markNotifReadMutation.mutate({ userId, notifId });
     }
   }, [userId, markNotifReadMutation, persistLocal]);
@@ -383,7 +387,7 @@ export const [CirclesProvider, useCircles] = createContextHook(() => {
       persistLocal(STORAGE_KEYS.notifications, updated);
       return updated;
     });
-    if (userId) {
+    if (userId && isBackendAvailable) {
       markAllNotifReadMutation.mutate({ userId });
     }
   }, [userId, markAllNotifReadMutation, persistLocal]);
