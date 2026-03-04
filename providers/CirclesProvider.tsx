@@ -255,17 +255,50 @@ export const [CirclesProvider, useCircles] = createContextHook(() => {
   }, [userId, toggleReactionMutation, persistLocal]);
 
   const togglePin = useCallback((postId: string) => {
+    const post = posts.find(p => p.id === postId);
+    if (!post) return;
+
+    const willBePinned = !post.pinned;
+
     setPosts(prev => {
       const updated = prev.map(p =>
-        p.id === postId ? { ...p, pinned: !p.pinned } : p
+        p.id === postId ? { ...p, pinned: willBePinned } : p
       );
       persistLocal(STORAGE_KEYS.posts, updated);
       return updated;
     });
+
+    if (willBePinned) {
+      const boardItem: BoardItem = {
+        id: `board-pin-${postId}`,
+        circleId: post.circleId,
+        author: post.author,
+        title: post.text?.slice(0, 80) || 'Pinned post',
+        type: 'note',
+        content: post.text || '',
+        createdAt: new Date().toISOString(),
+      };
+      setBoardItems(prev => {
+        const exists = prev.some(b => b.id === `board-pin-${postId}`);
+        if (exists) return prev;
+        const updated = [boardItem, ...prev];
+        persistLocal(STORAGE_KEYS.board, updated);
+        return updated;
+      });
+      console.log('[CirclesProvider] Post pinned to board:', postId);
+    } else {
+      setBoardItems(prev => {
+        const updated = prev.filter(b => b.id !== `board-pin-${postId}`);
+        persistLocal(STORAGE_KEYS.board, updated);
+        return updated;
+      });
+      console.log('[CirclesProvider] Post unpinned from board:', postId);
+    }
+
     if (userId && isBackendAvailable) {
       togglePinMutation.mutate({ userId, postId });
     }
-  }, [userId, togglePinMutation, persistLocal]);
+  }, [userId, posts, togglePinMutation, persistLocal]);
 
   const addComment = useCallback((postId: string, comment: Comment) => {
     setPosts(prev => {
