@@ -38,26 +38,39 @@ export default function ChatScreen() {
   const [text, setText] = useState('');
   const scrollRef = useRef<ScrollView>(null);
 
-  const conversationData = useMemo(() => {
+  const headerInfo = useMemo(() => {
     if (circleId) {
       const circle = circles.find(c => c.id === circleId);
       if (!circle || !user) return null;
-      const conv = getOrCreateGroupChat(circle.id, circle.name, circle.emoji, circle.members);
-      return { conv, title: circle.name, subtitle: `${circle.members.length} members`, avatar: null, emoji: circle.emoji, color: circle.color };
+      return { convId: `group-${circle.id}`, title: circle.name, subtitle: `${circle.members.length} members`, avatar: null, emoji: circle.emoji, color: circle.color };
     }
     if (userId) {
       const otherUser = circles.flatMap(c => c.members).find(m => m.id === userId);
       if (!otherUser || !user) return null;
-      const conv = getOrCreateDM(user, otherUser);
-      return { conv, title: otherUser.name, subtitle: 'Direct message', avatar: otherUser.avatar, emoji: null, color: null };
+      return { convId: `dm-${user.id}-${otherUser.id}`, title: otherUser.name, subtitle: 'Direct message', avatar: otherUser.avatar, emoji: null, color: null };
     }
     return null;
+  }, [circleId, userId, circles, user]);
+
+  useEffect(() => {
+    if (!user) return;
+    if (circleId) {
+      const circle = circles.find(c => c.id === circleId);
+      if (circle) {
+        getOrCreateGroupChat(circle.id, circle.name, circle.emoji, circle.members);
+      }
+    } else if (userId) {
+      const otherUser = circles.flatMap(c => c.members).find(m => m.id === userId);
+      if (otherUser) {
+        getOrCreateDM(user, otherUser);
+      }
+    }
   }, [circleId, userId, circles, user, getOrCreateDM, getOrCreateGroupChat]);
 
   const currentConv = useMemo(() => {
-    if (!conversationData) return null;
-    return conversations.find(c => c.id === conversationData.conv.id) ?? conversationData.conv;
-  }, [conversations, conversationData]);
+    if (!headerInfo) return null;
+    return conversations.find(c => c.id === headerInfo.convId) ?? null;
+  }, [conversations, headerInfo]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -83,7 +96,7 @@ export default function ChatScreen() {
     setText('');
   }, [text, currentConv, user, sendMessage]);
 
-  if (!conversationData || !currentConv) {
+  if (!headerInfo || !currentConv) {
     return (
       <View style={styles.container}>
         <SafeAreaView edges={['top']}>
@@ -106,16 +119,16 @@ export default function ChatScreen() {
             <ArrowLeft size={22} color={Colors.text} />
           </TouchableOpacity>
           <View style={styles.headerInfo}>
-            {conversationData.avatar ? (
-              <Image source={{ uri: conversationData.avatar }} style={styles.headerAvatar} />
+            {headerInfo.avatar ? (
+              <Image source={{ uri: headerInfo.avatar }} style={styles.headerAvatar} />
             ) : (
-              <View style={[styles.headerGroupAvatar, { backgroundColor: (conversationData.color ?? Colors.primary) + '20' }]}>
-                <Text style={styles.headerEmoji}>{conversationData.emoji}</Text>
+              <View style={[styles.headerGroupAvatar, { backgroundColor: (headerInfo.color ?? Colors.primary) + '20' }]}>
+                <Text style={styles.headerEmoji}>{headerInfo.emoji}</Text>
               </View>
             )}
             <View>
-              <Text style={styles.headerName}>{conversationData.title}</Text>
-              <Text style={styles.headerSubtitle}>{conversationData.subtitle}</Text>
+              <Text style={styles.headerName}>{headerInfo.title}</Text>
+              <Text style={styles.headerSubtitle}>{headerInfo.subtitle}</Text>
             </View>
           </View>
         </View>
