@@ -16,7 +16,7 @@ import { Image } from 'expo-image';
 import { ArrowLeft, Plus, X, IndianRupee, Check, Receipt } from 'lucide-react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import Colors from '@/constants/colors';
+import { useTheme, type ColorScheme } from '@/providers/ThemeProvider';
 import { useCircles } from '@/providers/CirclesProvider';
 import { useUser } from '@/providers/UserProvider';
 import { Expense } from '@/types';
@@ -40,6 +40,8 @@ export default function ExpensesScreen() {
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState<Expense['category']>('other');
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const circle = getCircleById(circleId ?? '');
   const expenses = getCircleExpenses(circleId ?? '');
@@ -119,7 +121,7 @@ export default function ExpensesScreen() {
       <View style={styles.container}>
         <SafeAreaView edges={['top']}>
           <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-            <ArrowLeft size={22} color={Colors.text} />
+            <ArrowLeft size={22} color={colors.text} />
           </TouchableOpacity>
         </SafeAreaView>
       </View>
@@ -133,11 +135,11 @@ export default function ExpensesScreen() {
       <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
         <View style={styles.header}>
           <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-            <ArrowLeft size={22} color={Colors.text} />
+            <ArrowLeft size={22} color={colors.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Expenses</Text>
           <TouchableOpacity style={styles.addBtn} onPress={() => setShowAddModal(true)}>
-            <Plus size={18} color={Colors.white} />
+            <Plus size={18} color={colors.white} />
           </TouchableOpacity>
         </View>
 
@@ -205,7 +207,7 @@ export default function ExpensesScreen() {
                         style={styles.settleBtn}
                         onPress={() => handleSettle(exp.id)}
                       >
-                        <Check size={12} color={Colors.success} />
+                        <Check size={12} color={colors.success} />
                         <Text style={styles.settleText}>Settle</Text>
                       </TouchableOpacity>
                     )}
@@ -217,7 +219,7 @@ export default function ExpensesScreen() {
               );
             }) : (
               <View style={styles.emptyState}>
-                <Receipt size={32} color={Colors.textTertiary} />
+                <Receipt size={32} color={colors.textTertiary} />
                 <Text style={styles.emptyTitle}>No expenses yet</Text>
                 <Text style={styles.emptySubtitle}>Add your first expense to start tracking</Text>
               </View>
@@ -238,7 +240,7 @@ export default function ExpensesScreen() {
             <View style={styles.modalContent}>
               <View style={styles.modalHeader}>
                 <TouchableOpacity onPress={() => setShowAddModal(false)}>
-                  <X size={22} color={Colors.text} />
+                  <X size={22} color={colors.text} />
                 </TouchableOpacity>
                 <Text style={styles.modalTitle}>Add Expense</Text>
                 <TouchableOpacity onPress={handleAddExpense}>
@@ -254,20 +256,20 @@ export default function ExpensesScreen() {
                     value={title}
                     onChangeText={setTitle}
                     placeholder="e.g. Dinner, Groceries, Uber"
-                    placeholderTextColor={Colors.textTertiary}
+                    placeholderTextColor={colors.textTertiary}
                   />
                 </View>
 
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>Amount (₹)</Text>
                   <View style={styles.amountInputRow}>
-                    <IndianRupee size={16} color={Colors.textTertiary} />
+                    <IndianRupee size={16} color={colors.textTertiary} />
                     <TextInput
                       style={styles.amountInput}
                       value={amount}
                       onChangeText={setAmount}
                       placeholder="0"
-                      placeholderTextColor={Colors.textTertiary}
+                      placeholderTextColor={colors.textTertiary}
                       keyboardType="numeric"
                     />
                   </View>
@@ -320,8 +322,8 @@ export default function ExpensesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+const createStyles = (colors: ColorScheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
   safeArea: { flex: 1 },
   header: {
     flexDirection: 'row',
@@ -330,119 +332,119 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
+    borderBottomColor: colors.borderLight,
   },
   backBtn: {
     width: 40, height: 40, borderRadius: 12,
-    backgroundColor: Colors.surfaceSecondary,
+    backgroundColor: colors.surfaceSecondary,
     alignItems: 'center', justifyContent: 'center',
   },
-  headerTitle: { fontSize: 17, fontWeight: '600' as const, color: Colors.text },
+  headerTitle: { fontSize: 17, fontWeight: '600' as const, color: colors.text },
   addBtn: {
     width: 40, height: 40, borderRadius: 12,
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     alignItems: 'center', justifyContent: 'center',
   },
   scrollContent: { paddingBottom: 40 },
   summaryCard: {
-    alignItems: 'center', backgroundColor: Colors.teal50,
+    alignItems: 'center', backgroundColor: colors.teal50,
     margin: 20, padding: 24, borderRadius: 20,
-    borderWidth: 1, borderColor: Colors.teal100,
+    borderWidth: 1, borderColor: colors.teal100,
   },
   summaryHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
   summaryEmoji: { fontSize: 24 },
-  summaryCircleName: { fontSize: 16, fontWeight: '600' as const, color: Colors.text },
-  totalAmount: { fontSize: 36, fontWeight: '700' as const, color: Colors.primaryDark },
-  totalLabel: { fontSize: 13, color: Colors.textSecondary, marginTop: 4 },
+  summaryCircleName: { fontSize: 16, fontWeight: '600' as const, color: colors.text },
+  totalAmount: { fontSize: 36, fontWeight: '700' as const, color: colors.primaryDark },
+  totalLabel: { fontSize: 13, color: colors.textSecondary, marginTop: 4 },
   balancesSection: { paddingHorizontal: 20, marginBottom: 24 },
   sectionTitle: {
-    fontSize: 13, fontWeight: '600' as const, color: Colors.textSecondary,
+    fontSize: 13, fontWeight: '600' as const, color: colors.textSecondary,
     textTransform: 'uppercase' as const, letterSpacing: 0.5, marginBottom: 10,
   },
   balanceRow: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: Colors.surface, padding: 12, borderRadius: 14, marginBottom: 6,
+    backgroundColor: colors.surface, padding: 12, borderRadius: 14, marginBottom: 6,
   },
   balanceAvatar: { width: 36, height: 36, borderRadius: 18 },
   balanceInfo: { flex: 1, marginLeft: 10 },
-  balanceName: { fontSize: 14, fontWeight: '600' as const, color: Colors.text },
-  balanceAmount: { fontSize: 12, color: Colors.textTertiary, marginTop: 1 },
-  positive: { color: Colors.success },
-  negative: { color: Colors.danger },
+  balanceName: { fontSize: 14, fontWeight: '600' as const, color: colors.text },
+  balanceAmount: { fontSize: 12, color: colors.textTertiary, marginTop: 1 },
+  positive: { color: colors.success },
+  negative: { color: colors.danger },
   expensesSection: { paddingHorizontal: 20 },
   expenseCard: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    backgroundColor: Colors.surface, padding: 14, borderRadius: 14, marginBottom: 8,
+    backgroundColor: colors.surface, padding: 14, borderRadius: 14, marginBottom: 8,
   },
   expenseLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },
   expenseCatBadge: {
     width: 40, height: 40, borderRadius: 12,
-    backgroundColor: Colors.surfaceSecondary,
+    backgroundColor: colors.surfaceSecondary,
     alignItems: 'center', justifyContent: 'center',
   },
   expenseCatEmoji: { fontSize: 20 },
   expenseInfo: { marginLeft: 10, flex: 1 },
-  expenseTitle: { fontSize: 14, fontWeight: '600' as const, color: Colors.text },
-  expenseMeta: { fontSize: 12, color: Colors.textTertiary, marginTop: 2 },
+  expenseTitle: { fontSize: 14, fontWeight: '600' as const, color: colors.text },
+  expenseMeta: { fontSize: 12, color: colors.textTertiary, marginTop: 2 },
   expenseRight: { alignItems: 'flex-end' },
-  expenseAmount: { fontSize: 16, fontWeight: '700' as const, color: Colors.text },
+  expenseAmount: { fontSize: 16, fontWeight: '700' as const, color: colors.text },
   settleBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 3,
     marginTop: 4, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6,
-    backgroundColor: Colors.success + '15',
+    backgroundColor: colors.success + '15',
   },
-  settleText: { fontSize: 11, fontWeight: '500' as const, color: Colors.success },
-  settledText: { fontSize: 11, color: Colors.success, fontWeight: '500' as const, marginTop: 4 },
+  settleText: { fontSize: 11, fontWeight: '500' as const, color: colors.success },
+  settledText: { fontSize: 11, color: colors.success, fontWeight: '500' as const, marginTop: 4 },
   emptyState: { alignItems: 'center', paddingVertical: 40, gap: 8 },
-  emptyTitle: { fontSize: 16, fontWeight: '600' as const, color: Colors.text },
-  emptySubtitle: { fontSize: 13, color: Colors.textSecondary, textAlign: 'center' },
+  emptyTitle: { fontSize: 16, fontWeight: '600' as const, color: colors.text },
+  emptySubtitle: { fontSize: 13, color: colors.textSecondary, textAlign: 'center' },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
   modalContent: {
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
     borderTopLeftRadius: 24, borderTopRightRadius: 24,
     maxHeight: '85%',
   },
   modalHeader: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 20, paddingVertical: 16,
-    borderBottomWidth: 1, borderBottomColor: Colors.borderLight,
+    borderBottomWidth: 1, borderBottomColor: colors.borderLight,
   },
-  modalTitle: { fontSize: 17, fontWeight: '600' as const, color: Colors.text },
-  saveText: { fontSize: 15, fontWeight: '600' as const, color: Colors.primary },
+  modalTitle: { fontSize: 17, fontWeight: '600' as const, color: colors.text },
+  saveText: { fontSize: 15, fontWeight: '600' as const, color: colors.primary },
   modalBody: { padding: 20 },
   inputGroup: { marginBottom: 20 },
   inputLabel: {
-    fontSize: 12, fontWeight: '600' as const, color: Colors.textSecondary,
+    fontSize: 12, fontWeight: '600' as const, color: colors.textSecondary,
     textTransform: 'uppercase' as const, letterSpacing: 0.5, marginBottom: 8,
   },
   textInput: {
-    backgroundColor: Colors.surface, borderRadius: 12, padding: 14,
-    fontSize: 15, color: Colors.text, borderWidth: 1, borderColor: Colors.border,
+    backgroundColor: colors.surface, borderRadius: 12, padding: 14,
+    fontSize: 15, color: colors.text, borderWidth: 1, borderColor: colors.border,
   },
   amountInputRow: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: Colors.surface, borderRadius: 12, paddingHorizontal: 14,
-    borderWidth: 1, borderColor: Colors.border,
+    backgroundColor: colors.surface, borderRadius: 12, paddingHorizontal: 14,
+    borderWidth: 1, borderColor: colors.border,
   },
-  amountInput: { flex: 1, padding: 14, fontSize: 20, fontWeight: '700' as const, color: Colors.text },
+  amountInput: { flex: 1, padding: 14, fontSize: 20, fontWeight: '700' as const, color: colors.text },
   categoryRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   catChip: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10,
-    backgroundColor: Colors.surfaceSecondary, borderWidth: 1, borderColor: 'transparent',
+    backgroundColor: colors.surfaceSecondary, borderWidth: 1, borderColor: 'transparent',
   },
-  catChipActive: { backgroundColor: Colors.teal50, borderColor: Colors.primary },
+  catChipActive: { backgroundColor: colors.teal50, borderColor: colors.primary },
   catEmoji: { fontSize: 16 },
-  catLabel: { fontSize: 13, color: Colors.textSecondary },
-  catLabelActive: { color: Colors.primary, fontWeight: '600' as const },
+  catLabel: { fontSize: 13, color: colors.textSecondary },
+  catLabelActive: { color: colors.primary, fontWeight: '600' as const },
   membersRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   memberChip: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10,
-    backgroundColor: Colors.surfaceSecondary, borderWidth: 1, borderColor: 'transparent',
+    backgroundColor: colors.surfaceSecondary, borderWidth: 1, borderColor: 'transparent',
   },
-  memberChipActive: { backgroundColor: Colors.teal50, borderColor: Colors.primary },
+  memberChipActive: { backgroundColor: colors.teal50, borderColor: colors.primary },
   memberChipAvatar: { width: 24, height: 24, borderRadius: 12 },
-  memberChipName: { fontSize: 13, color: Colors.textSecondary },
-  memberChipNameActive: { color: Colors.primary, fontWeight: '600' as const },
+  memberChipName: { fontSize: 13, color: colors.textSecondary },
+  memberChipNameActive: { color: colors.primary, fontWeight: '600' as const },
 });

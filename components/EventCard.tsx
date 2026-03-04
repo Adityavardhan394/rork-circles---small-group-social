@@ -1,8 +1,8 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Platform, Linking } from 'react-native';
 import { Calendar, MapPin, Clock, Check, HelpCircle, X } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import Colors from '@/constants/colors';
+import { useTheme, type ColorScheme } from '@/providers/ThemeProvider';
 import { CircleEvent } from '@/types';
 
 interface EventCardProps {
@@ -12,6 +12,8 @@ interface EventCardProps {
 }
 
 function EventCardComponent({ event, onRsvp, currentUserId }: EventCardProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const currentRsvp = event.rsvps.yes.includes(currentUserId)
     ? 'yes'
     : event.rsvps.maybe.includes(currentUserId)
@@ -72,12 +74,12 @@ function EventCardComponent({ event, onRsvp, currentUserId }: EventCardProps) {
         ) : null}
         <View style={styles.details}>
           <View style={styles.detailRow}>
-            <Clock size={13} color={Colors.textTertiary} />
+            <Clock size={13} color={colors.textTertiary} />
             <Text style={styles.detailText}>{event.time}</Text>
           </View>
           {event.location ? (
             <View style={styles.detailRow}>
-              <MapPin size={13} color={Colors.textTertiary} />
+              <MapPin size={13} color={colors.textTertiary} />
               <Text style={styles.detailText} numberOfLines={1}>{event.location}</Text>
             </View>
           ) : null}
@@ -87,21 +89,21 @@ function EventCardComponent({ event, onRsvp, currentUserId }: EventCardProps) {
             style={[styles.rsvpBtn, currentRsvp === 'yes' && styles.rsvpBtnYes]}
             onPress={() => handleRsvp('yes')}
           >
-            <Check size={14} color={currentRsvp === 'yes' ? Colors.white : Colors.success} />
+            <Check size={14} color={currentRsvp === 'yes' ? colors.white : colors.success} />
             <Text style={[styles.rsvpText, currentRsvp === 'yes' && styles.rsvpTextActive]}>Going</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.rsvpBtn, currentRsvp === 'maybe' && styles.rsvpBtnMaybe]}
             onPress={() => handleRsvp('maybe')}
           >
-            <HelpCircle size={14} color={currentRsvp === 'maybe' ? Colors.white : Colors.warning} />
+            <HelpCircle size={14} color={currentRsvp === 'maybe' ? colors.white : colors.warning} />
             <Text style={[styles.rsvpText, currentRsvp === 'maybe' && styles.rsvpTextActive]}>Maybe</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.rsvpBtn, currentRsvp === 'no' && styles.rsvpBtnNo]}
             onPress={() => handleRsvp('no')}
           >
-            <X size={14} color={currentRsvp === 'no' ? Colors.white : Colors.danger} />
+            <X size={14} color={currentRsvp === 'no' ? colors.white : colors.danger} />
             <Text style={[styles.rsvpText, currentRsvp === 'no' && styles.rsvpTextActive]}>{'Can\'t'}</Text>
           </TouchableOpacity>
         </View>
@@ -112,7 +114,7 @@ function EventCardComponent({ event, onRsvp, currentUserId }: EventCardProps) {
             </Text>
           )}
           <TouchableOpacity style={styles.calendarBtn} onPress={handleAddToCalendar}>
-            <Calendar size={12} color={Colors.primary} />
+            <Calendar size={12} color={colors.primary} />
             <Text style={styles.calendarBtnText}>Add to Cal</Text>
           </TouchableOpacity>
         </View>
@@ -144,10 +146,10 @@ function formatDay(dateStr: string): string {
 
 export default React.memo(EventCardComponent);
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ColorScheme) => StyleSheet.create({
   card: {
     flexDirection: 'row',
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderRadius: 16,
     marginHorizontal: 16,
     marginBottom: 12,
@@ -162,20 +164,20 @@ const styles = StyleSheet.create({
     width: 50,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.coral50,
+    backgroundColor: colors.coral50,
     borderRadius: 12,
     paddingVertical: 8,
   },
   dateMonth: {
     fontSize: 10,
     fontWeight: '700' as const,
-    color: Colors.accent,
+    color: colors.accent,
     letterSpacing: 1,
   },
   dateDay: {
     fontSize: 22,
     fontWeight: '700' as const,
-    color: Colors.text,
+    color: colors.text,
   },
   content: {
     flex: 1,
@@ -184,12 +186,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 15,
     fontWeight: '600' as const,
-    color: Colors.text,
+    color: colors.text,
     marginBottom: 2,
   },
   description: {
     fontSize: 13,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     marginBottom: 6,
   },
   details: {
@@ -204,7 +206,7 @@ const styles = StyleSheet.create({
   },
   detailText: {
     fontSize: 12,
-    color: Colors.textTertiary,
+    color: colors.textTertiary,
   },
   rsvpRow: {
     flexDirection: 'row',
@@ -218,27 +220,27 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
   },
   rsvpBtnYes: {
-    backgroundColor: Colors.success,
-    borderColor: Colors.success,
+    backgroundColor: colors.success,
+    borderColor: colors.success,
   },
   rsvpBtnMaybe: {
-    backgroundColor: Colors.warning,
-    borderColor: Colors.warning,
+    backgroundColor: colors.warning,
+    borderColor: colors.warning,
   },
   rsvpBtnNo: {
-    backgroundColor: Colors.danger,
-    borderColor: Colors.danger,
+    backgroundColor: colors.danger,
+    borderColor: colors.danger,
   },
   rsvpText: {
     fontSize: 12,
     fontWeight: '500' as const,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
   },
   rsvpTextActive: {
-    color: Colors.white,
+    color: colors.white,
   },
   footerRow: {
     flexDirection: 'row',
@@ -248,7 +250,7 @@ const styles = StyleSheet.create({
   },
   goingText: {
     fontSize: 11,
-    color: Colors.success,
+    color: colors.success,
     fontWeight: '500' as const,
   },
   calendarBtn: {
@@ -258,11 +260,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
-    backgroundColor: Colors.teal50,
+    backgroundColor: colors.teal50,
   },
   calendarBtnText: {
     fontSize: 11,
     fontWeight: '500' as const,
-    color: Colors.primary,
+    color: colors.primary,
   },
 });

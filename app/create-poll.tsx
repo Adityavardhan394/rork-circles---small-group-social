@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -13,7 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { X, Plus, Trash2, ArrowRight } from 'lucide-react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import Colors from '@/constants/colors';
+import { useTheme, type ColorScheme } from '@/providers/ThemeProvider';
 import { useCircles } from '@/providers/CirclesProvider';
 import { useUser } from '@/providers/UserProvider';
 import { POLL_TEMPLATES } from '@/mocks/data';
@@ -29,6 +29,8 @@ export default function CreatePollScreen() {
   const router = useRouter();
   const { circles, addPoll, getCircleById } = useCircles();
   const { user } = useUser();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const circle = getCircleById(selectedCircleId ?? '');
 
@@ -108,7 +110,7 @@ export default function CreatePollScreen() {
         <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
           <View style={styles.header}>
             <TouchableOpacity style={styles.closeBtn} onPress={() => router.back()}>
-              <X size={20} color={Colors.text} />
+              <X size={20} color={colors.text} />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>New Poll</Text>
             <TouchableOpacity
@@ -117,7 +119,7 @@ export default function CreatePollScreen() {
               disabled={!selectedCircleId}
             >
               <Text style={[styles.nextBtnText, !selectedCircleId && styles.nextBtnTextDisabled]}>Next</Text>
-              <ArrowRight size={16} color={!selectedCircleId ? Colors.textTertiary : Colors.white} />
+              <ArrowRight size={16} color={!selectedCircleId ? colors.textTertiary : colors.white} />
             </TouchableOpacity>
           </View>
           <CirclePicker
@@ -138,7 +140,7 @@ export default function CreatePollScreen() {
             style={styles.closeBtn}
             onPress={() => paramCircleId ? router.back() : setStep('pick')}
           >
-            <X size={20} color={Colors.text} />
+            <X size={20} color={colors.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>
             {circle ? `Poll in ${circle.emoji} ${circle.name}` : 'New Poll'}
@@ -174,7 +176,7 @@ export default function CreatePollScreen() {
             <TextInput
               style={styles.questionInput}
               placeholder="Ask something..."
-              placeholderTextColor={Colors.textTertiary}
+              placeholderTextColor={colors.textTertiary}
               value={question}
               onChangeText={setQuestion}
               maxLength={120}
@@ -192,21 +194,21 @@ export default function CreatePollScreen() {
                 <TextInput
                   style={styles.optionInput}
                   placeholder={`Option ${index + 1}`}
-                  placeholderTextColor={Colors.textTertiary}
+                  placeholderTextColor={colors.textTertiary}
                   value={option}
                   onChangeText={(text) => handleOptionChange(index, text)}
                   maxLength={60}
                 />
                 {options.length > 2 && (
                   <TouchableOpacity style={styles.removeBtn} onPress={() => handleRemoveOption(index)}>
-                    <Trash2 size={16} color={Colors.danger} />
+                    <Trash2 size={16} color={colors.danger} />
                   </TouchableOpacity>
                 )}
               </View>
             ))}
             {options.length < 6 && (
               <TouchableOpacity style={styles.addOptionBtn} onPress={handleAddOption}>
-                <Plus size={16} color={Colors.primary} />
+                <Plus size={16} color={colors.primary} />
                 <Text style={styles.addOptionText}>Add option</Text>
               </TouchableOpacity>
             )}
@@ -217,10 +219,10 @@ export default function CreatePollScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ColorScheme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
   safeArea: {
     flex: 1,
@@ -232,20 +234,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
+    borderBottomColor: colors.borderLight,
   },
   closeBtn: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: Colors.surfaceSecondary,
+    backgroundColor: colors.surfaceSecondary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   headerTitle: {
     fontSize: 15,
     fontWeight: '600' as const,
-    color: Colors.text,
+    color: colors.text,
     flex: 1,
     textAlign: 'center',
     marginHorizontal: 8,
@@ -254,38 +256,38 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 10,
   },
   nextBtnDisabled: {
-    backgroundColor: Colors.surfaceSecondary,
+    backgroundColor: colors.surfaceSecondary,
   },
   nextBtnText: {
     fontSize: 14,
     fontWeight: '600' as const,
-    color: Colors.white,
+    color: colors.white,
   },
   nextBtnTextDisabled: {
-    color: Colors.textTertiary,
+    color: colors.textTertiary,
   },
   createBtn: {
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     paddingHorizontal: 18,
     paddingVertical: 8,
     borderRadius: 10,
   },
   createBtnDisabled: {
-    backgroundColor: Colors.surfaceSecondary,
+    backgroundColor: colors.surfaceSecondary,
   },
   createBtnText: {
     fontSize: 14,
     fontWeight: '600' as const,
-    color: Colors.white,
+    color: colors.white,
   },
   createBtnTextDisabled: {
-    color: Colors.textTertiary,
+    color: colors.textTertiary,
   },
   scrollContent: {
     padding: 20,
@@ -297,7 +299,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 13,
     fontWeight: '600' as const,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     textTransform: 'uppercase' as const,
     letterSpacing: 0.5,
     marginBottom: 10,
@@ -309,12 +311,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
   },
   templateEmoji: {
     fontSize: 16,
@@ -322,19 +324,19 @@ const styles = StyleSheet.create({
   templateLabel: {
     fontSize: 13,
     fontWeight: '500' as const,
-    color: Colors.text,
+    color: colors.text,
   },
   inputSection: {
     marginBottom: 24,
   },
   questionInput: {
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderRadius: 14,
     padding: 14,
     fontSize: 16,
-    color: Colors.text,
+    color: colors.text,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
     minHeight: 60,
     textAlignVertical: 'top',
   },
@@ -348,24 +350,24 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: Colors.teal50,
+    backgroundColor: colors.teal50,
     alignItems: 'center',
     justifyContent: 'center',
   },
   optionNumber: {
     fontSize: 12,
     fontWeight: '700' as const,
-    color: Colors.primary,
+    color: colors.primary,
   },
   optionInput: {
     flex: 1,
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderRadius: 12,
     padding: 12,
     fontSize: 14,
-    color: Colors.text,
+    color: colors.text,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
   },
   removeBtn: {
     padding: 6,
@@ -378,13 +380,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: Colors.primary,
+    borderColor: colors.primary,
     borderStyle: 'dashed',
     justifyContent: 'center',
   },
   addOptionText: {
     fontSize: 14,
     fontWeight: '500' as const,
-    color: Colors.primary,
+    color: colors.primary,
   },
 });

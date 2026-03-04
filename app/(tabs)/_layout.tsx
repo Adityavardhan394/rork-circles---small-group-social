@@ -1,11 +1,13 @@
 import { Tabs } from "expo-router";
 import { Home, Search, Bell, User, MessageSquare } from "lucide-react-native";
-import React from "react";
-import Colors from "@/constants/colors";
+import React, { useMemo } from "react";
+import { useTheme, type ColorScheme } from "@/providers/ThemeProvider";
 import { useCircles } from "@/providers/CirclesProvider";
 import { View, Text, StyleSheet } from "react-native";
 
 function NotificationBadge({ count }: { count: number }) {
+  const { colors } = useTheme();
+  const badgeStyles = useMemo(() => createBadgeStyles(colors), [colors]);
   if (count === 0) return null;
   return (
     <View style={badgeStyles.badge}>
@@ -14,12 +16,12 @@ function NotificationBadge({ count }: { count: number }) {
   );
 }
 
-const badgeStyles = StyleSheet.create({
+const createBadgeStyles = (colors: ColorScheme) => StyleSheet.create({
   badge: {
     position: 'absolute',
     top: -4,
     right: -8,
-    backgroundColor: Colors.accent,
+    backgroundColor: colors.accent,
     borderRadius: 8,
     minWidth: 16,
     height: 16,
@@ -30,22 +32,23 @@ const badgeStyles = StyleSheet.create({
   text: {
     fontSize: 9,
     fontWeight: '700' as const,
-    color: Colors.white,
+    color: colors.white,
   },
 });
 
 export default function TabLayout() {
+  const { colors } = useTheme();
   const { unreadCount } = useCircles();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.textTertiary,
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textTertiary,
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: Colors.surface,
-          borderTopColor: Colors.borderLight,
+          backgroundColor: colors.surface,
+          borderTopColor: colors.borderLight,
         },
         tabBarLabelStyle: {
           fontSize: 11,

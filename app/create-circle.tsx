@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -13,7 +13,7 @@ import { X } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { Platform } from 'react-native';
-import Colors from '@/constants/colors';
+import { useTheme, type ColorScheme } from '@/providers/ThemeProvider';
 import { useCircles } from '@/providers/CirclesProvider';
 import { useUser } from '@/providers/UserProvider';
 import { CIRCLE_EMOJIS, CIRCLE_COLORS } from '@/mocks/data';
@@ -27,6 +27,8 @@ export default function CreateCircleScreen() {
   const router = useRouter();
   const { addCircle } = useCircles();
   const { user } = useUser();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const handleCreate = useCallback(() => {
     if (!name.trim()) {
@@ -58,7 +60,7 @@ export default function CreateCircleScreen() {
       <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
         <View style={styles.header}>
           <TouchableOpacity style={styles.closeBtn} onPress={() => router.back()}>
-            <X size={20} color={Colors.text} />
+            <X size={20} color={colors.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>New Huddle</Text>
           <TouchableOpacity
@@ -83,7 +85,7 @@ export default function CreateCircleScreen() {
             <TextInput
               style={styles.input}
               placeholder="e.g. Flatmates, Gym Squad..."
-              placeholderTextColor={Colors.textTertiary}
+              placeholderTextColor={colors.textTertiary}
               value={name}
               onChangeText={setName}
               maxLength={30}
@@ -96,7 +98,7 @@ export default function CreateCircleScreen() {
             <TextInput
               style={[styles.input, styles.textArea]}
               placeholder="What's this huddle about?"
-              placeholderTextColor={Colors.textTertiary}
+              placeholderTextColor={colors.textTertiary}
               value={description}
               onChangeText={setDescription}
               maxLength={100}
@@ -141,10 +143,10 @@ export default function CreateCircleScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ColorScheme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
   safeArea: {
     flex: 1,
@@ -156,37 +158,37 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
+    borderBottomColor: colors.borderLight,
   },
   closeBtn: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: Colors.surfaceSecondary,
+    backgroundColor: colors.surfaceSecondary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   headerTitle: {
     fontSize: 17,
     fontWeight: '600' as const,
-    color: Colors.text,
+    color: colors.text,
   },
   createBtn: {
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     paddingHorizontal: 18,
     paddingVertical: 8,
     borderRadius: 10,
   },
   createBtnDisabled: {
-    backgroundColor: Colors.surfaceSecondary,
+    backgroundColor: colors.surfaceSecondary,
   },
   createBtnText: {
     fontSize: 14,
     fontWeight: '600' as const,
-    color: Colors.white,
+    color: colors.white,
   },
   createBtnTextDisabled: {
-    color: Colors.textTertiary,
+    color: colors.textTertiary,
   },
   scrollContent: {
     padding: 20,
@@ -211,7 +213,7 @@ const styles = StyleSheet.create({
   previewName: {
     fontSize: 20,
     fontWeight: '700' as const,
-    color: Colors.text,
+    color: colors.text,
   },
   inputSection: {
     marginBottom: 24,
@@ -219,19 +221,19 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 13,
     fontWeight: '600' as const,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     textTransform: 'uppercase' as const,
     letterSpacing: 0.5,
     marginBottom: 8,
   },
   input: {
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderRadius: 14,
     padding: 14,
     fontSize: 15,
-    color: Colors.text,
+    color: colors.text,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
   },
   textArea: {
     height: 80,
@@ -246,15 +248,15 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 12,
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
   },
   emojiBtnSelected: {
-    borderColor: Colors.primary,
-    backgroundColor: Colors.teal50,
+    borderColor: colors.primary,
+    backgroundColor: colors.teal50,
     borderWidth: 2,
   },
   emojiText: {
@@ -272,6 +274,6 @@ const styles = StyleSheet.create({
   },
   colorBtnSelected: {
     borderWidth: 3,
-    borderColor: Colors.text,
+    borderColor: colors.text,
   },
 });

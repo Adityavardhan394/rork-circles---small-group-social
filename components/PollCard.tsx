@@ -1,10 +1,10 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Image } from 'expo-image';
 import { BarChart3 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { Platform } from 'react-native';
-import Colors from '@/constants/colors';
+import { useTheme, type ColorScheme } from '@/providers/ThemeProvider';
 import { Poll } from '@/types';
 
 interface PollCardProps {
@@ -14,6 +14,8 @@ interface PollCardProps {
 }
 
 function PollCardComponent({ poll, onVote, currentUserId }: PollCardProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const totalVotes = poll.options.reduce((sum, o) => sum + o.votes.length, 0);
   const userVotedOption = poll.options.find(o => o.votes.includes(currentUserId));
 
@@ -31,7 +33,7 @@ function PollCardComponent({ poll, onVote, currentUserId }: PollCardProps) {
         <View style={styles.headerText}>
           <Text style={styles.authorName}>{poll.author.name}</Text>
           <View style={styles.pollLabel}>
-            <BarChart3 size={12} color={Colors.accent} />
+            <BarChart3 size={12} color={colors.accent} />
             <Text style={styles.pollLabelText}>Poll</Text>
           </View>
         </View>
@@ -62,9 +64,9 @@ function PollCardComponent({ poll, onVote, currentUserId }: PollCardProps) {
 
 export default React.memo(PollCardComponent);
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ColorScheme) => StyleSheet.create({
   card: {
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderRadius: 16,
     marginHorizontal: 16,
     marginBottom: 12,
@@ -91,7 +93,7 @@ const styles = StyleSheet.create({
   authorName: {
     fontSize: 13,
     fontWeight: '600' as const,
-    color: Colors.text,
+    color: colors.text,
   },
   pollLabel: {
     flexDirection: 'row',
@@ -101,13 +103,13 @@ const styles = StyleSheet.create({
   },
   pollLabelText: {
     fontSize: 11,
-    color: Colors.accent,
+    color: colors.accent,
     fontWeight: '500' as const,
   },
   question: {
     fontSize: 16,
     fontWeight: '600' as const,
-    color: Colors.text,
+    color: colors.text,
     marginBottom: 12,
   },
   options: {
@@ -118,47 +120,47 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
     padding: 12,
     overflow: 'hidden',
   },
   optionSelected: {
-    borderColor: Colors.primary,
-    backgroundColor: Colors.teal50,
+    borderColor: colors.primary,
+    backgroundColor: colors.teal50,
   },
   optionFill: {
     position: 'absolute',
     left: 0,
     top: 0,
     bottom: 0,
-    backgroundColor: Colors.surfaceSecondary,
+    backgroundColor: colors.surfaceSecondary,
     borderRadius: 10,
   },
   optionFillSelected: {
-    backgroundColor: Colors.teal100,
+    backgroundColor: colors.teal100,
   },
   optionText: {
     flex: 1,
     fontSize: 14,
-    color: Colors.text,
+    color: colors.text,
     zIndex: 1,
   },
   optionTextSelected: {
     fontWeight: '600' as const,
-    color: Colors.primaryDark,
+    color: colors.primaryDark,
   },
   optionPercent: {
     fontSize: 13,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     fontWeight: '500' as const,
     zIndex: 1,
   },
   optionPercentSelected: {
-    color: Colors.primary,
+    color: colors.primary,
   },
   voteCount: {
     fontSize: 12,
-    color: Colors.textTertiary,
+    color: colors.textTertiary,
     marginTop: 8,
   },
 });

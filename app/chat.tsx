@@ -14,7 +14,7 @@ import { Image } from 'expo-image';
 import { ArrowLeft, Send } from 'lucide-react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import Colors from '@/constants/colors';
+import { useTheme, type ColorScheme } from '@/providers/ThemeProvider';
 import { useMessages } from '@/providers/MessagesProvider';
 import { useCircles } from '@/providers/CirclesProvider';
 import { useUser } from '@/providers/UserProvider';
@@ -36,6 +36,8 @@ export default function ChatScreen() {
   const { getOrCreateDM, getOrCreateGroupChat, sendMessage, conversations } = useMessages();
   const { circles } = useCircles();
   const [text, setText] = useState('');
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const scrollRef = useRef<ScrollView>(null);
 
   const headerInfo = useMemo(() => {
@@ -101,7 +103,7 @@ export default function ChatScreen() {
       <View style={styles.container}>
         <SafeAreaView edges={['top']}>
           <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-            <ArrowLeft size={22} color={Colors.text} />
+            <ArrowLeft size={22} color={colors.text} />
           </TouchableOpacity>
           <View style={styles.emptyCenter}>
             <Text style={styles.emptyText}>Conversation not found</Text>
@@ -116,13 +118,13 @@ export default function ChatScreen() {
       <SafeAreaView edges={['top']} style={styles.safeArea}>
         <View style={styles.header}>
           <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-            <ArrowLeft size={22} color={Colors.text} />
+            <ArrowLeft size={22} color={colors.text} />
           </TouchableOpacity>
           <View style={styles.headerInfo}>
             {headerInfo.avatar ? (
               <Image source={{ uri: headerInfo.avatar }} style={styles.headerAvatar} />
             ) : (
-              <View style={[styles.headerGroupAvatar, { backgroundColor: (headerInfo.color ?? Colors.primary) + '20' }]}>
+              <View style={[styles.headerGroupAvatar, { backgroundColor: (headerInfo.color ?? colors.primary) + '20' }]}>
                 <Text style={styles.headerEmoji}>{headerInfo.emoji}</Text>
               </View>
             )}
@@ -177,7 +179,7 @@ export default function ChatScreen() {
             <TextInput
               style={styles.input}
               placeholder="Type a message..."
-              placeholderTextColor={Colors.textTertiary}
+              placeholderTextColor={colors.textTertiary}
               value={text}
               onChangeText={setText}
               multiline
@@ -188,7 +190,7 @@ export default function ChatScreen() {
               onPress={handleSend}
               disabled={!text.trim()}
             >
-              <Send size={18} color={text.trim() ? Colors.white : Colors.textTertiary} />
+              <Send size={18} color={text.trim() ? colors.white : colors.textTertiary} />
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
@@ -197,10 +199,10 @@ export default function ChatScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ColorScheme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
   safeArea: {
     flex: 1,
@@ -211,14 +213,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
-    backgroundColor: Colors.surface,
+    borderBottomColor: colors.borderLight,
+    backgroundColor: colors.surface,
   },
   backBtn: {
     width: 36,
     height: 36,
     borderRadius: 12,
-    backgroundColor: Colors.surfaceSecondary,
+    backgroundColor: colors.surfaceSecondary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -247,11 +249,11 @@ const styles = StyleSheet.create({
   headerName: {
     fontSize: 16,
     fontWeight: '600' as const,
-    color: Colors.text,
+    color: colors.text,
   },
   headerSubtitle: {
     fontSize: 11,
-    color: Colors.textTertiary,
+    color: colors.textTertiary,
   },
   chatArea: {
     flex: 1,
@@ -273,7 +275,7 @@ const styles = StyleSheet.create({
   },
   emptyChatText: {
     fontSize: 14,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     textAlign: 'center',
   },
   messageBubbleRow: {
@@ -297,11 +299,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
   },
   bubbleMe: {
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     borderBottomRightRadius: 4,
   },
   bubbleOther: {
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderBottomLeftRadius: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -312,20 +314,20 @@ const styles = StyleSheet.create({
   msgSenderName: {
     fontSize: 11,
     fontWeight: '600' as const,
-    color: Colors.primary,
+    color: colors.primary,
     marginBottom: 2,
   },
   bubbleText: {
     fontSize: 15,
-    color: Colors.text,
+    color: colors.text,
     lineHeight: 20,
   },
   bubbleTextMe: {
-    color: Colors.white,
+    color: colors.white,
   },
   bubbleTime: {
     fontSize: 10,
-    color: Colors.textTertiary,
+    color: colors.textTertiary,
     marginTop: 4,
     alignSelf: 'flex-end' as const,
   },
@@ -338,30 +340,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderTopWidth: 1,
-    borderTopColor: Colors.borderLight,
-    backgroundColor: Colors.surface,
+    borderTopColor: colors.borderLight,
+    backgroundColor: colors.surface,
     gap: 8,
   },
   input: {
     flex: 1,
-    backgroundColor: Colors.surfaceSecondary,
+    backgroundColor: colors.surfaceSecondary,
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 10,
     fontSize: 15,
-    color: Colors.text,
+    color: colors.text,
     maxHeight: 100,
   },
   sendBtn: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   sendBtnDisabled: {
-    backgroundColor: Colors.surfaceSecondary,
+    backgroundColor: colors.surfaceSecondary,
   },
   emptyCenter: {
     alignItems: 'center',
@@ -369,6 +371,6 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
   },
 });

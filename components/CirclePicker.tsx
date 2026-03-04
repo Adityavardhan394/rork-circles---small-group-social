@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -7,7 +7,7 @@ import {
   ScrollView,
 } from 'react-native';
 
-import Colors from '@/constants/colors';
+import { useTheme, type ColorScheme } from '@/providers/ThemeProvider';
 import { Circle } from '@/types';
 
 interface CirclePickerProps {
@@ -18,6 +18,8 @@ interface CirclePickerProps {
 }
 
 function CirclePickerItem({ circle, selected, onPress }: { circle: Circle; selected: boolean; onPress: () => void }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <TouchableOpacity
       style={[styles.circleItem, selected && styles.circleItemSelected]}
@@ -48,6 +50,8 @@ function CirclePickerItem({ circle, selected, onPress }: { circle: Circle; selec
 const MemoizedItem = React.memo(CirclePickerItem);
 
 export default function CirclePicker({ circles, selectedCircleId, onSelect, label }: CirclePickerProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const handlePress = useCallback((id: string) => {
     onSelect(id);
   }, [onSelect]);
@@ -74,7 +78,7 @@ export default function CirclePicker({ circles, selectedCircleId, onSelect, labe
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ColorScheme) => StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 8,
@@ -82,13 +86,13 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 20,
     fontWeight: '700' as const,
-    color: Colors.text,
+    color: colors.text,
     paddingHorizontal: 20,
     letterSpacing: -0.3,
   },
   subtitle: {
     fontSize: 13,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     paddingHorizontal: 20,
     marginTop: 4,
     marginBottom: 16,
@@ -104,16 +108,16 @@ const styles = StyleSheet.create({
   circleItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderRadius: 14,
     padding: 14,
     gap: 12,
     borderWidth: 1.5,
-    borderColor: Colors.border,
+    borderColor: colors.border,
   },
   circleItemSelected: {
-    borderColor: Colors.primary,
-    backgroundColor: Colors.teal50,
+    borderColor: colors.primary,
+    backgroundColor: colors.teal50,
   },
   emojiContainer: {
     width: 44,
@@ -131,26 +135,26 @@ const styles = StyleSheet.create({
   circleName: {
     fontSize: 15,
     fontWeight: '600' as const,
-    color: Colors.text,
+    color: colors.text,
   },
   circleNameSelected: {
-    color: Colors.primaryDark,
+    color: colors.primaryDark,
   },
   memberCount: {
     fontSize: 12,
-    color: Colors.textTertiary,
+    color: colors.textTertiary,
     marginTop: 2,
   },
   checkmark: {
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   checkmarkText: {
-    color: Colors.white,
+    color: colors.white,
     fontSize: 14,
     fontWeight: '700' as const,
   },

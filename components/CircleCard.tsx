@@ -1,9 +1,9 @@
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated, Platform } from 'react-native';
 import { Image } from 'expo-image';
 import { ChevronRight } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import Colors from '@/constants/colors';
+import { useTheme, type ColorScheme } from '@/providers/ThemeProvider';
 import { Circle } from '@/types';
 
 interface CircleCardProps {
@@ -13,6 +13,8 @@ interface CircleCardProps {
 }
 
 function CircleCardComponent({ circle, latestActivity, onPress }: CircleCardProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
   const handlePressIn = useCallback(() => {
@@ -76,7 +78,7 @@ function CircleCardComponent({ circle, latestActivity, onPress }: CircleCardProp
             )}
           </View>
         </View>
-        <ChevronRight size={18} color={Colors.textTertiary} />
+        <ChevronRight size={18} color={colors.textTertiary} />
       </TouchableOpacity>
     </Animated.View>
   );
@@ -84,11 +86,11 @@ function CircleCardComponent({ circle, latestActivity, onPress }: CircleCardProp
 
 export default React.memo(CircleCardComponent);
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ColorScheme) => StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 16,
     marginHorizontal: 20,
@@ -116,7 +118,7 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 16,
     fontWeight: '600' as const,
-    color: Colors.text,
+    color: colors.text,
     marginBottom: 4,
   },
   meta: {
@@ -133,7 +135,7 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: 11,
     borderWidth: 1.5,
-    borderColor: Colors.surface,
+    borderColor: colors.surface,
     overflow: 'hidden',
   },
   avatar: {
@@ -141,18 +143,18 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   extraBadge: {
-    backgroundColor: Colors.surfaceSecondary,
+    backgroundColor: colors.surfaceSecondary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   extraText: {
     fontSize: 9,
     fontWeight: '600' as const,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
   },
   activity: {
     fontSize: 12,
-    color: Colors.textTertiary,
+    color: colors.textTertiary,
     flex: 1,
   },
 });

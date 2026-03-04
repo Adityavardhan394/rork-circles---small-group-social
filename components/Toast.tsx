@@ -1,7 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { View, Text, StyleSheet, Animated, Platform } from 'react-native';
 import { Check, AlertTriangle, Info, X } from 'lucide-react-native';
-import Colors from '@/constants/colors';
+import { useTheme, type ColorScheme } from '@/providers/ThemeProvider';
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
@@ -13,14 +13,17 @@ interface ToastProps {
   duration?: number;
 }
 
-const ICON_MAP = {
-  success: { icon: Check, color: Colors.success, bg: '#ECFDF5' },
-  error: { icon: X, color: Colors.danger, bg: '#FEF2F2' },
-  warning: { icon: AlertTriangle, color: Colors.warning, bg: '#FFFBEB' },
-  info: { icon: Info, color: '#2563EB', bg: '#EFF6FF' },
-};
+
 
 function ToastComponent({ visible, message, type = 'success', onHide, duration = 3000 }: ToastProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+  const ICON_MAP = useMemo(() => ({
+    success: { icon: Check, color: colors.success, bg: '#ECFDF5' },
+    error: { icon: X, color: colors.danger, bg: '#FEF2F2' },
+    warning: { icon: AlertTriangle, color: colors.warning, bg: '#FFFBEB' },
+    info: { icon: Info, color: '#2563EB', bg: '#EFF6FF' },
+  }), [colors]);
   const translateY = useRef(new Animated.Value(-100)).current;
   const opacity = useRef(new Animated.Value(0)).current;
 
@@ -66,7 +69,7 @@ function ToastComponent({ visible, message, type = 'success', onHide, duration =
 
 export default React.memo(ToastComponent);
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ColorScheme) => StyleSheet.create({
   container: {
     position: 'absolute',
     top: Platform.OS === 'web' ? 20 : 60,
@@ -95,7 +98,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     fontSize: 14,
     fontWeight: '500' as const,
-    color: Colors.text,
+    color: colors.text,
     lineHeight: 20,
   },
 });

@@ -11,7 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { Search, Edit3 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
-import Colors from '@/constants/colors';
+import { useTheme, type ColorScheme } from '@/providers/ThemeProvider';
 import { useMessages } from '@/providers/MessagesProvider';
 import { useCircles } from '@/providers/CirclesProvider';
 import { useUser } from '@/providers/UserProvider';
@@ -35,6 +35,8 @@ export default function MessagesScreen() {
   const { dmConversations } = useMessages();
   const { circles } = useCircles();
   const [searchText, setSearchText] = useState('');
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const allConnections = useMemo(() => {
     const memberMap = new Map<string, { id: string; name: string; avatar: string }>();
@@ -69,16 +71,16 @@ export default function MessagesScreen() {
         <View style={styles.header}>
           <Text style={styles.title}>Messages</Text>
           <TouchableOpacity style={styles.composeBtn}>
-            <Edit3 size={18} color={Colors.primary} />
+            <Edit3 size={18} color={colors.primary} />
           </TouchableOpacity>
         </View>
 
         <View style={styles.searchBar}>
-          <Search size={16} color={Colors.textTertiary} />
+          <Search size={16} color={colors.textTertiary} />
           <TextInput
             style={styles.searchInput}
             placeholder="Search messages..."
-            placeholderTextColor={Colors.textTertiary}
+            placeholderTextColor={colors.textTertiary}
             value={searchText}
             onChangeText={setSearchText}
           />
@@ -177,10 +179,10 @@ export default function MessagesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ColorScheme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
   safeArea: {
     flex: 1,
@@ -196,21 +198,21 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 26,
     fontWeight: '700' as const,
-    color: Colors.text,
+    color: colors.text,
     letterSpacing: -0.5,
   },
   composeBtn: {
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: Colors.teal50,
+    backgroundColor: colors.teal50,
     alignItems: 'center',
     justifyContent: 'center',
   },
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     marginHorizontal: 20,
     paddingHorizontal: 14,
     paddingVertical: 10,
@@ -221,7 +223,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 14,
-    color: Colors.text,
+    color: colors.text,
   },
   scrollContent: {
     paddingBottom: 32,
@@ -233,7 +235,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 12,
     fontWeight: '600' as const,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     textTransform: 'uppercase' as const,
     letterSpacing: 0.5,
     marginBottom: 10,
@@ -241,7 +243,7 @@ const styles = StyleSheet.create({
   subLabel: {
     fontSize: 11,
     fontWeight: '500' as const,
-    color: Colors.textTertiary,
+    color: colors.textTertiary,
     marginTop: 16,
     marginBottom: 8,
   },
@@ -250,7 +252,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
+    borderBottomColor: colors.borderLight,
   },
   groupAvatar: {
     width: 48,
@@ -279,15 +281,15 @@ const styles = StyleSheet.create({
   chatName: {
     fontSize: 15,
     fontWeight: '600' as const,
-    color: Colors.text,
+    color: colors.text,
   },
   chatTime: {
     fontSize: 11,
-    color: Colors.textTertiary,
+    color: colors.textTertiary,
   },
   chatPreview: {
     fontSize: 13,
-    color: Colors.textTertiary,
+    color: colors.textTertiary,
     marginTop: 2,
   },
   emptyState: {
@@ -301,12 +303,12 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 18,
     fontWeight: '600' as const,
-    color: Colors.text,
+    color: colors.text,
     marginBottom: 6,
   },
   emptySubtitle: {
     fontSize: 14,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     textAlign: 'center',
     paddingHorizontal: 40,
   },

@@ -1,9 +1,9 @@
-import React, { useRef, useCallback, useState } from 'react';
+import React, { useRef, useCallback, useState, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated, Alert, Platform, ScrollView } from 'react-native';
 import { Image } from 'expo-image';
 import { MessageCircle, Pin, Clock, MoreHorizontal, Flag, UserX, Copy } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import Colors from '@/constants/colors';
+import { useTheme, type ColorScheme } from '@/providers/ThemeProvider';
 import { Post } from '@/types';
 import ActionSheet, { ActionSheetOption } from '@/components/ActionSheet';
 
@@ -17,6 +17,8 @@ interface PostCardProps {
 const REACTION_EMOJIS = ['❤️', '😂', '🔥', '👍', '😮', '🙈', '😍', '👏', '💯', '😢', '🎉', '🤔'];
 
 function PostCardComponent({ post, onReact, onPin, currentUserId }: PostCardProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const [showActions, setShowActions] = useState(false);
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
@@ -58,17 +60,17 @@ function PostCardComponent({ post, onReact, onPin, currentUserId }: PostCardProp
   const actionOptions: ActionSheetOption[] = [
     {
       label: post.pinned ? 'Unpin post' : 'Pin to board',
-      icon: <Pin size={18} color={Colors.primary} />,
+      icon: <Pin size={18} color={colors.primary} />,
       onPress: onPin,
     },
     {
       label: 'Report post',
-      icon: <Flag size={18} color={Colors.warning} />,
+      icon: <Flag size={18} color={colors.warning} />,
       onPress: handleReport,
     },
     {
       label: `Block ${post.author.name}`,
-      icon: <UserX size={18} color={Colors.danger} />,
+      icon: <UserX size={18} color={colors.danger} />,
       onPress: handleBlockUser,
       destructive: true,
     },
@@ -84,7 +86,7 @@ function PostCardComponent({ post, onReact, onPin, currentUserId }: PostCardProp
         <View style={styles.headerText}>
           <Text style={styles.authorName}>{post.author.name}</Text>
           <View style={styles.timeRow}>
-            <Clock size={11} color={Colors.textTertiary} />
+            <Clock size={11} color={colors.textTertiary} />
             <Text style={styles.time}>{timeAgo}</Text>
           </View>
         </View>
@@ -96,7 +98,7 @@ function PostCardComponent({ post, onReact, onPin, currentUserId }: PostCardProp
             accessibilityLabel="Unpin post"
             accessibilityRole="button"
           >
-            <Pin size={11} color={Colors.primary} />
+            <Pin size={11} color={colors.primary} />
             <Text style={styles.pinnedText}>Pinned</Text>
           </TouchableOpacity>
         )}
@@ -107,7 +109,7 @@ function PostCardComponent({ post, onReact, onPin, currentUserId }: PostCardProp
           accessibilityRole="button"
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <MoreHorizontal size={18} color={Colors.textTertiary} />
+          <MoreHorizontal size={18} color={colors.textTertiary} />
         </TouchableOpacity>
       </View>
 
@@ -166,7 +168,7 @@ function PostCardComponent({ post, onReact, onPin, currentUserId }: PostCardProp
         <View style={styles.footerRight}>
           {post.comments.length > 0 && (
             <View style={styles.commentBadge} accessibilityLabel={`${post.comments.length} comments`}>
-              <MessageCircle size={13} color={Colors.textTertiary} />
+              <MessageCircle size={13} color={colors.textTertiary} />
               <Text style={styles.commentCount}>{post.comments.length}</Text>
             </View>
           )}
@@ -198,9 +200,9 @@ function getTimeAgo(dateString: string): string {
 
 export default React.memo(PostCardComponent);
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ColorScheme) => StyleSheet.create({
   card: {
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderRadius: 16,
     marginHorizontal: 16,
     marginBottom: 12,
@@ -228,7 +230,7 @@ const styles = StyleSheet.create({
   authorName: {
     fontSize: 14,
     fontWeight: '600' as const,
-    color: Colors.text,
+    color: colors.text,
   },
   timeRow: {
     flexDirection: 'row',
@@ -238,12 +240,12 @@ const styles = StyleSheet.create({
   },
   time: {
     fontSize: 11,
-    color: Colors.textTertiary,
+    color: colors.textTertiary,
   },
   pinnedBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.teal50,
+    backgroundColor: colors.teal50,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 8,
@@ -251,7 +253,7 @@ const styles = StyleSheet.create({
   },
   pinnedText: {
     fontSize: 11,
-    color: Colors.primary,
+    color: colors.primary,
     fontWeight: '500' as const,
   },
   moreBtn: {
@@ -260,7 +262,7 @@ const styles = StyleSheet.create({
   },
   postText: {
     fontSize: 15,
-    color: Colors.text,
+    color: colors.text,
     lineHeight: 22,
     marginBottom: 8,
   },
@@ -288,14 +290,14 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: Colors.surfaceSecondary,
+    backgroundColor: colors.surfaceSecondary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   emojiButtonActive: {
-    backgroundColor: Colors.teal100,
+    backgroundColor: colors.teal100,
     borderWidth: 1.5,
-    borderColor: Colors.primaryLight,
+    borderColor: colors.primaryLight,
   },
   emojiText: {
     fontSize: 18,
@@ -310,33 +312,33 @@ const styles = StyleSheet.create({
   },
   reactionSummary: {
     fontSize: 12,
-    color: Colors.textTertiary,
+    color: colors.textTertiary,
     fontWeight: '500' as const,
   },
   reactionChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surfaceSecondary,
+    backgroundColor: colors.surfaceSecondary,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
     gap: 3,
   },
   reactionChipActive: {
-    backgroundColor: Colors.teal100,
+    backgroundColor: colors.teal100,
     borderWidth: 1,
-    borderColor: Colors.primaryLight,
+    borderColor: colors.primaryLight,
   },
   reactionChipEmoji: {
     fontSize: 14,
   },
   reactionCount: {
     fontSize: 12,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     fontWeight: '500' as const,
   },
   reactionCountActive: {
-    color: Colors.primary,
+    color: colors.primary,
   },
 
   footerRight: {
@@ -351,6 +353,6 @@ const styles = StyleSheet.create({
   },
   commentCount: {
     fontSize: 12,
-    color: Colors.textTertiary,
+    color: colors.textTertiary,
   },
 });

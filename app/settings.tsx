@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -32,17 +32,17 @@ import {
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import Colors from '@/constants/colors';
 import { useUser } from '@/providers/UserProvider';
 import { useCircles } from '@/providers/CirclesProvider';
-import { useTheme } from '@/providers/ThemeProvider';
+import { useTheme, type ColorScheme } from '@/providers/ThemeProvider';
 import { ThemeMode } from '@/types';
 
 export default function SettingsScreen() {
   const router = useRouter();
   const { logout } = useUser();
   const { resetAllData } = useCircles();
-  const { themeMode, setTheme } = useTheme();
+  const { themeMode, setTheme, colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   const [notifNewPost, setNotifNewPost] = useState(true);
@@ -167,7 +167,7 @@ export default function SettingsScreen() {
       <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
         <View style={styles.header}>
           <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-            <ArrowLeft size={22} color={Colors.text} />
+            <ArrowLeft size={22} color={colors.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Settings</Text>
           <View style={styles.headerSpacer} />
@@ -195,7 +195,7 @@ export default function SettingsScreen() {
                       style={[styles.themeOption, themeMode === opt.mode && styles.themeOptionActive]}
                       onPress={() => handleThemeChange(opt.mode)}
                     >
-                      <opt.icon size={16} color={themeMode === opt.mode ? Colors.primary : Colors.textTertiary} />
+                      <opt.icon size={16} color={themeMode === opt.mode ? colors.primary : colors.textTertiary} />
                       <Text style={[styles.themeOptionText, themeMode === opt.mode && styles.themeOptionTextActive]}>
                         {opt.label}
                       </Text>
@@ -286,7 +286,7 @@ export default function SettingsScreen() {
                   <View style={styles.settingContent}>
                     <Text style={[styles.settingLabel, styles.dangerText]}>Log out</Text>
                   </View>
-                  <ChevronRight size={16} color={Colors.textTertiary} />
+                  <ChevronRight size={16} color={colors.textTertiary} />
                 </TouchableOpacity>
               </View>
             </View>
@@ -312,6 +312,8 @@ function SettingRow({
   value: boolean;
   onToggle: (v: boolean) => void;
 }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <View style={styles.settingRow}>
       <View style={[styles.settingIcon, { backgroundColor: iconColor + '12' }]}>
@@ -324,8 +326,8 @@ function SettingRow({
       <Switch
         value={value}
         onValueChange={onToggle}
-        trackColor={{ false: Colors.stone300, true: Colors.primaryLight }}
-        thumbColor={Colors.white}
+        trackColor={{ false: colors.stone300, true: colors.primaryLight }}
+        thumbColor={colors.white}
       />
     </View>
   );
@@ -340,6 +342,8 @@ function ActionRow({
   onPress: () => void;
   danger?: boolean;
 }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <TouchableOpacity style={styles.settingRow} onPress={onPress} activeOpacity={0.7}>
       <View style={[styles.settingIcon, { backgroundColor: iconColor + '12' }]}>
@@ -348,62 +352,62 @@ function ActionRow({
       <View style={styles.settingContent}>
         <Text style={[styles.settingLabel, danger && styles.dangerText]}>{label}</Text>
       </View>
-      <ChevronRight size={16} color={Colors.textTertiary} />
+      <ChevronRight size={16} color={colors.textTertiary} />
     </TouchableOpacity>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+const createStyles = (colors: ColorScheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
   safeArea: { flex: 1 },
   header: {
     flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: 16, paddingVertical: 12,
-    borderBottomWidth: 1, borderBottomColor: Colors.borderLight,
+    borderBottomWidth: 1, borderBottomColor: colors.borderLight,
   },
   backBtn: {
-    width: 40, height: 40, borderRadius: 12, backgroundColor: Colors.surfaceSecondary,
+    width: 40, height: 40, borderRadius: 12, backgroundColor: colors.surfaceSecondary,
     alignItems: 'center', justifyContent: 'center',
   },
   headerTitle: {
-    flex: 1, fontSize: 17, fontWeight: '600' as const, color: Colors.text, textAlign: 'center',
+    flex: 1, fontSize: 17, fontWeight: '600' as const, color: colors.text, textAlign: 'center',
   },
   headerSpacer: { width: 40 },
   scrollContent: { paddingBottom: 40 },
   section: { marginTop: 24, paddingHorizontal: 20 },
   sectionTitle: {
-    fontSize: 13, fontWeight: '600' as const, color: Colors.textSecondary,
+    fontSize: 13, fontWeight: '600' as const, color: colors.textSecondary,
     textTransform: 'uppercase' as const, letterSpacing: 0.5, marginBottom: 8, marginLeft: 4,
   },
   sectionCard: {
-    backgroundColor: Colors.surface, borderRadius: 16, overflow: 'hidden',
+    backgroundColor: colors.surface, borderRadius: 16, overflow: 'hidden',
     shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 6, elevation: 1,
   },
-  divider: { height: 1, backgroundColor: Colors.borderLight, marginLeft: 60 },
+  divider: { height: 1, backgroundColor: colors.borderLight, marginLeft: 60 },
   settingRow: { flexDirection: 'row', alignItems: 'center', padding: 14 },
   settingIcon: {
     width: 34, height: 34, borderRadius: 10, alignItems: 'center', justifyContent: 'center',
   },
   settingContent: { flex: 1, marginLeft: 12 },
-  settingLabel: { fontSize: 15, fontWeight: '500' as const, color: Colors.text },
-  settingDesc: { fontSize: 12, color: Colors.textTertiary, marginTop: 1 },
-  dangerText: { color: Colors.danger },
+  settingLabel: { fontSize: 15, fontWeight: '500' as const, color: colors.text },
+  settingDesc: { fontSize: 12, color: colors.textTertiary, marginTop: 1 },
+  dangerText: { color: colors.danger },
   themeRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingTop: 14, paddingBottom: 8 },
-  themeLabel: { fontSize: 15, fontWeight: '500' as const, color: Colors.text, marginLeft: 12 },
+  themeLabel: { fontSize: 15, fontWeight: '500' as const, color: colors.text, marginLeft: 12 },
   themeOptions: {
     flexDirection: 'row', gap: 8, paddingHorizontal: 14, paddingBottom: 14,
   },
   themeOption: {
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
-    paddingVertical: 10, borderRadius: 10, backgroundColor: Colors.surfaceSecondary,
+    paddingVertical: 10, borderRadius: 10, backgroundColor: colors.surfaceSecondary,
     borderWidth: 1.5, borderColor: 'transparent',
   },
   themeOptionActive: {
-    backgroundColor: Colors.teal50, borderColor: Colors.primary,
+    backgroundColor: colors.teal50, borderColor: colors.primary,
   },
-  themeOptionText: { fontSize: 13, fontWeight: '500' as const, color: Colors.textTertiary },
-  themeOptionTextActive: { color: Colors.primary, fontWeight: '600' as const },
+  themeOptionText: { fontSize: 13, fontWeight: '500' as const, color: colors.textTertiary },
+  themeOptionTextActive: { color: colors.primary, fontWeight: '600' as const },
   aboutSection: { alignItems: 'center', paddingVertical: 32 },
-  aboutText: { fontSize: 13, fontWeight: '600' as const, color: Colors.textTertiary },
-  aboutSubtext: { fontSize: 12, color: Colors.textTertiary, marginTop: 4 },
+  aboutText: { fontSize: 13, fontWeight: '600' as const, color: colors.textTertiary },
+  aboutSubtext: { fontSize: 12, color: colors.textTertiary, marginTop: 4 },
 });

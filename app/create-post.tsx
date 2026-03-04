@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
-import Colors from '@/constants/colors';
+import { useTheme, type ColorScheme } from '@/providers/ThemeProvider';
 import { useCircles } from '@/providers/CirclesProvider';
 import { useUser } from '@/providers/UserProvider';
 
@@ -40,6 +40,8 @@ export default function CreatePostScreen() {
   const router = useRouter();
   const { circles, addPost, getCircleById } = useCircles();
   const { user } = useUser();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const circle = getCircleById(selectedCircleId ?? '');
 
@@ -108,7 +110,7 @@ export default function CreatePostScreen() {
         <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
           <View style={styles.header}>
             <TouchableOpacity style={styles.closeBtn} onPress={() => router.back()}>
-              <X size={20} color={Colors.text} />
+              <X size={20} color={colors.text} />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>New Post</Text>
             <TouchableOpacity
@@ -117,7 +119,7 @@ export default function CreatePostScreen() {
               disabled={!selectedCircleId}
             >
               <Text style={[styles.nextBtnText, !selectedCircleId && styles.nextBtnTextDisabled]}>Next</Text>
-              <ArrowRight size={16} color={!selectedCircleId ? Colors.textTertiary : Colors.white} />
+              <ArrowRight size={16} color={!selectedCircleId ? colors.textTertiary : colors.white} />
             </TouchableOpacity>
           </View>
           <CirclePicker
@@ -138,7 +140,7 @@ export default function CreatePostScreen() {
             style={styles.closeBtn}
             onPress={() => paramCircleId ? router.back() : setStep('pick')}
           >
-            <X size={20} color={Colors.text} />
+            <X size={20} color={colors.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>
             {circle ? `Post to ${circle.emoji} ${circle.name}` : 'New Post'}
@@ -148,7 +150,7 @@ export default function CreatePostScreen() {
             onPress={handlePost}
             disabled={!text.trim() && !imageUri}
           >
-            <Send size={16} color={(!text.trim() && !imageUri) ? Colors.textTertiary : Colors.white} />
+            <Send size={16} color={(!text.trim() && !imageUri) ? colors.textTertiary : colors.white} />
           </TouchableOpacity>
         </View>
 
@@ -172,7 +174,7 @@ export default function CreatePostScreen() {
           <TextInput
             style={styles.textInput}
             placeholder="What's on your mind?"
-            placeholderTextColor={Colors.textTertiary}
+            placeholderTextColor={colors.textTertiary}
             value={text}
             onChangeText={setText}
             multiline
@@ -184,7 +186,7 @@ export default function CreatePostScreen() {
             <View style={styles.imagePreview}>
               <Image source={{ uri: imageUri }} style={styles.previewImage} contentFit="cover" />
               <TouchableOpacity style={styles.removeImage} onPress={() => setImageUri(null)}>
-                <X size={16} color={Colors.white} />
+                <X size={16} color={colors.white} />
               </TouchableOpacity>
             </View>
           )}
@@ -216,7 +218,7 @@ export default function CreatePostScreen() {
 
           <View style={styles.toolbar}>
             <TouchableOpacity style={styles.toolbarBtn} onPress={handlePickImage}>
-              <ImageIcon size={22} color={Colors.primary} />
+              <ImageIcon size={22} color={colors.primary} />
               <Text style={styles.toolbarText}>Photo</Text>
             </TouchableOpacity>
           </View>
@@ -226,10 +228,10 @@ export default function CreatePostScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ColorScheme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
   safeArea: {
     flex: 1,
@@ -241,20 +243,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
+    borderBottomColor: colors.borderLight,
   },
   closeBtn: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: Colors.surfaceSecondary,
+    backgroundColor: colors.surfaceSecondary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   headerTitle: {
     fontSize: 15,
     fontWeight: '600' as const,
-    color: Colors.text,
+    color: colors.text,
     flex: 1,
     textAlign: 'center',
     marginHorizontal: 8,
@@ -263,32 +265,32 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 10,
   },
   nextBtnDisabled: {
-    backgroundColor: Colors.surfaceSecondary,
+    backgroundColor: colors.surfaceSecondary,
   },
   nextBtnText: {
     fontSize: 14,
     fontWeight: '600' as const,
-    color: Colors.white,
+    color: colors.white,
   },
   nextBtnTextDisabled: {
-    color: Colors.textTertiary,
+    color: colors.textTertiary,
   },
   postBtn: {
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   postBtnDisabled: {
-    backgroundColor: Colors.surfaceSecondary,
+    backgroundColor: colors.surfaceSecondary,
   },
   content: {
     flex: 1,
@@ -308,17 +310,17 @@ const styles = StyleSheet.create({
   authorName: {
     fontSize: 14,
     fontWeight: '600' as const,
-    color: Colors.text,
+    color: colors.text,
   },
   expiryNote: {
     fontSize: 11,
-    color: Colors.textTertiary,
+    color: colors.textTertiary,
     marginTop: 1,
   },
   textInput: {
     flex: 1,
     fontSize: 17,
-    color: Colors.text,
+    color: colors.text,
     lineHeight: 24,
   },
   imagePreview: {
@@ -347,7 +349,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: Colors.borderLight,
+    borderTopColor: colors.borderLight,
     gap: 16,
   },
   toolbarBtn: {
@@ -357,12 +359,12 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 14,
     borderRadius: 10,
-    backgroundColor: Colors.teal50,
+    backgroundColor: colors.teal50,
   },
   toolbarText: {
     fontSize: 14,
     fontWeight: '500' as const,
-    color: Colors.primary,
+    color: colors.primary,
   },
   expirySection: {
     marginBottom: 12,
@@ -370,7 +372,7 @@ const styles = StyleSheet.create({
   expirySectionLabel: {
     fontSize: 12,
     fontWeight: '600' as const,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     textTransform: 'uppercase' as const,
     letterSpacing: 0.5,
     marginBottom: 8,
@@ -383,21 +385,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 10,
-    backgroundColor: Colors.surfaceSecondary,
+    backgroundColor: colors.surfaceSecondary,
     borderWidth: 1,
     borderColor: 'transparent',
   },
   expiryOptionActive: {
-    backgroundColor: Colors.teal50,
-    borderColor: Colors.primary,
+    backgroundColor: colors.teal50,
+    borderColor: colors.primary,
   },
   expiryOptionText: {
     fontSize: 13,
     fontWeight: '500' as const,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
   },
   expiryOptionTextActive: {
-    color: Colors.primary,
+    color: colors.primary,
     fontWeight: '600' as const,
   },
 });

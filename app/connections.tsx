@@ -10,7 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { ArrowLeft, Users } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
-import Colors from '@/constants/colors';
+import { useTheme, type ColorScheme } from '@/providers/ThemeProvider';
 import { useCircles } from '@/providers/CirclesProvider';
 import { User } from '@/types';
 
@@ -22,6 +22,8 @@ interface ConnectionWithCircles {
 export default function ConnectionsScreen() {
   const router = useRouter();
   const { circles } = useCircles();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const connections = useMemo<ConnectionWithCircles[]>(() => {
     const memberMap = new Map<string, { user: User; circleNames: string[] }>();
@@ -49,14 +51,14 @@ export default function ConnectionsScreen() {
             accessibilityLabel="Go back"
             accessibilityRole="button"
           >
-            <ArrowLeft size={22} color={Colors.text} />
+            <ArrowLeft size={22} color={colors.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Connections</Text>
           <View style={styles.headerSpacer} />
         </View>
 
         <View style={styles.summaryBar}>
-          <Users size={16} color={Colors.primary} />
+          <Users size={16} color={colors.primary} />
           <Text style={styles.summaryText}>
             {connections.length} people across {circles.length} huddles
           </Text>
@@ -101,10 +103,10 @@ export default function ConnectionsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ColorScheme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
   safeArea: {
     flex: 1,
@@ -115,13 +117,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
+    borderBottomColor: colors.borderLight,
   },
   backBtn: {
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: Colors.surfaceSecondary,
+    backgroundColor: colors.surfaceSecondary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -129,7 +131,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 17,
     fontWeight: '600' as const,
-    color: Colors.text,
+    color: colors.text,
     textAlign: 'center',
   },
   headerSpacer: {
@@ -141,14 +143,14 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingHorizontal: 20,
     paddingVertical: 12,
-    backgroundColor: Colors.teal50,
+    backgroundColor: colors.teal50,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.teal100,
+    borderBottomColor: colors.teal100,
   },
   summaryText: {
     fontSize: 13,
     fontWeight: '500' as const,
-    color: Colors.primary,
+    color: colors.primary,
   },
   scrollContent: {
     paddingVertical: 8,
@@ -160,7 +162,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
+    borderBottomColor: colors.borderLight,
   },
   avatar: {
     width: 44,
@@ -174,15 +176,15 @@ const styles = StyleSheet.create({
   personName: {
     fontSize: 15,
     fontWeight: '600' as const,
-    color: Colors.text,
+    color: colors.text,
   },
   personCircles: {
     fontSize: 12,
-    color: Colors.textTertiary,
+    color: colors.textTertiary,
     marginTop: 2,
   },
   badgeContainer: {
-    backgroundColor: Colors.surfaceSecondary,
+    backgroundColor: colors.surfaceSecondary,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
@@ -190,7 +192,7 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: 11,
     fontWeight: '500' as const,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
   },
   emptyState: {
     alignItems: 'center',
@@ -203,12 +205,12 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 18,
     fontWeight: '600' as const,
-    color: Colors.text,
+    color: colors.text,
     marginBottom: 6,
   },
   emptySubtitle: {
     fontSize: 14,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     textAlign: 'center',
     paddingHorizontal: 40,
   },

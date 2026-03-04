@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { View, Animated, StyleSheet, Image, Dimensions } from 'react-native';
-import Colors from '@/constants/colors';
+import { useTheme, type ColorScheme } from '@/providers/ThemeProvider';
 
 const { width, height } = Dimensions.get('window');
 
@@ -9,6 +9,8 @@ interface SplashScreenProps {
 }
 
 export default function AnimatedSplashScreen({ onFinish }: SplashScreenProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const logoScale = useRef(new Animated.Value(0.3)).current;
   const logoOpacity = useRef(new Animated.Value(0)).current;
   const textOpacity = useRef(new Animated.Value(0)).current;
@@ -148,10 +150,10 @@ export default function AnimatedSplashScreen({ onFinish }: SplashScreenProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ColorScheme) => StyleSheet.create({
   container: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: Colors.primaryDark,
+    backgroundColor: colors.primaryDark,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 999,
@@ -225,11 +227,11 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: Colors.primaryLight,
+    backgroundColor: colors.primaryLight,
   },
   dotMiddle: {
     marginHorizontal: 8,
-    backgroundColor: Colors.accent,
+    backgroundColor: colors.accent,
   },
   footer: {
     position: 'absolute',

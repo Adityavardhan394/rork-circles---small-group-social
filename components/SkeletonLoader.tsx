@@ -1,6 +1,6 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
-import Colors from '@/constants/colors';
+import { useTheme, type ColorScheme } from '@/providers/ThemeProvider';
 
 interface SkeletonProps {
   width?: number | string;
@@ -10,6 +10,7 @@ interface SkeletonProps {
 }
 
 function SkeletonItem({ width = '100%', height = 16, borderRadius = 8, style }: SkeletonProps) {
+  const { colors } = useTheme();
   const pulseAnim = useRef(new Animated.Value(0.3)).current;
 
   useEffect(() => {
@@ -30,7 +31,7 @@ function SkeletonItem({ width = '100%', height = 16, borderRadius = 8, style }: 
           width: width as number,
           height,
           borderRadius,
-          backgroundColor: Colors.stone200,
+          backgroundColor: colors.stone200,
           opacity: pulseAnim,
         },
         style,
@@ -40,12 +41,14 @@ function SkeletonItem({ width = '100%', height = 16, borderRadius = 8, style }: 
 }
 
 export function CircleCardSkeleton() {
+  const { colors } = useTheme();
+  const skStyles = useMemo(() => createSkeletonStyles(colors), [colors]);
   return (
-    <View style={skeletonStyles.circleCard}>
+    <View style={skStyles.circleCard}>
       <SkeletonItem width={48} height={48} borderRadius={14} />
-      <View style={skeletonStyles.circleContent}>
+      <View style={skStyles.circleContent}>
         <SkeletonItem width={140} height={16} />
-        <View style={skeletonStyles.row}>
+        <View style={skStyles.row}>
           <SkeletonItem width={22} height={22} borderRadius={11} />
           <SkeletonItem width={22} height={22} borderRadius={11} style={{ marginLeft: -8 }} />
           <SkeletonItem width={22} height={22} borderRadius={11} style={{ marginLeft: -8 }} />
@@ -57,9 +60,11 @@ export function CircleCardSkeleton() {
 }
 
 export function PostCardSkeleton() {
+  const { colors } = useTheme();
+  const skStyles = useMemo(() => createSkeletonStyles(colors), [colors]);
   return (
-    <View style={skeletonStyles.postCard}>
-      <View style={skeletonStyles.row}>
+    <View style={skStyles.postCard}>
+      <View style={skStyles.row}>
         <SkeletonItem width={36} height={36} borderRadius={18} />
         <View style={{ marginLeft: 10, flex: 1 }}>
           <SkeletonItem width={100} height={14} />
@@ -74,8 +79,10 @@ export function PostCardSkeleton() {
 }
 
 export function NotificationSkeleton() {
+  const { colors } = useTheme();
+  const skStyles = useMemo(() => createSkeletonStyles(colors), [colors]);
   return (
-    <View style={skeletonStyles.notifCard}>
+    <View style={skStyles.notifCard}>
       <SkeletonItem width={40} height={40} borderRadius={20} />
       <View style={{ marginLeft: 12, flex: 1 }}>
         <SkeletonItem width={120} height={12} />
@@ -96,8 +103,10 @@ export function FeedSkeleton() {
 }
 
 export function HomeSkeleton() {
+  const { colors } = useTheme();
+  const skStyles = useMemo(() => createSkeletonStyles(colors), [colors]);
   return (
-    <View style={skeletonStyles.homeContainer}>
+    <View style={skStyles.homeContainer}>
       <CircleCardSkeleton />
       <CircleCardSkeleton />
       <CircleCardSkeleton />
@@ -105,14 +114,14 @@ export function HomeSkeleton() {
   );
 }
 
-const skeletonStyles = StyleSheet.create({
+const createSkeletonStyles = (colors: ColorScheme) => StyleSheet.create({
   homeContainer: {
     paddingTop: 8,
   },
   circleCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 16,
     marginHorizontal: 20,
@@ -128,7 +137,7 @@ const skeletonStyles = StyleSheet.create({
     alignItems: 'center',
   },
   postCard: {
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderRadius: 16,
     marginHorizontal: 16,
     marginBottom: 12,

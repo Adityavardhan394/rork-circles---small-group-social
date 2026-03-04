@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Search, Plus, Hash, ArrowRight } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import Colors from '@/constants/colors';
+import { useTheme, type ColorScheme } from '@/providers/ThemeProvider';
 import { useCircles } from '@/providers/CirclesProvider';
 
 const SUGGESTED_CIRCLES = [
@@ -33,6 +33,8 @@ export default function SearchScreen() {
   const [joinSuccess, setJoinSuccess] = useState<string | null>(null);
   const router = useRouter();
   const { circles } = useCircles();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const handleJoinWithCode = useCallback(() => {
     setJoinError(null);
@@ -88,11 +90,11 @@ export default function SearchScreen() {
 
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
           <View style={styles.searchBar}>
-            <Search size={18} color={Colors.textTertiary} />
+            <Search size={18} color={colors.textTertiary} />
             <TextInput
               style={styles.searchInput}
               placeholder="Search huddle templates..."
-              placeholderTextColor={Colors.textTertiary}
+              placeholderTextColor={colors.textTertiary}
               value={searchText}
               onChangeText={setSearchText}
               accessibilityLabel="Search huddle templates"
@@ -103,11 +105,11 @@ export default function SearchScreen() {
             <Text style={styles.sectionTitle}>Join with invite code</Text>
             <View style={styles.joinRow}>
               <View style={styles.joinInputContainer}>
-                <Hash size={16} color={Colors.textTertiary} />
+                <Hash size={16} color={colors.textTertiary} />
                 <TextInput
                   style={styles.joinInput}
                   placeholder="Enter code..."
-                  placeholderTextColor={Colors.textTertiary}
+                  placeholderTextColor={colors.textTertiary}
                   value={joinCode}
                   onChangeText={setJoinCode}
                   autoCapitalize="characters"
@@ -120,7 +122,7 @@ export default function SearchScreen() {
                 accessibilityLabel="Join huddle with code"
                 accessibilityRole="button"
               >
-                <ArrowRight size={18} color={Colors.white} />
+                <ArrowRight size={18} color={colors.white} />
               </TouchableOpacity>
             </View>
             {joinError && (
@@ -139,13 +141,13 @@ export default function SearchScreen() {
               accessibilityRole="button"
             >
               <View style={styles.createIconContainer}>
-                <Plus size={24} color={Colors.primary} />
+                <Plus size={24} color={colors.primary} />
               </View>
               <View style={styles.createTextContainer}>
                 <Text style={styles.createTitle}>Create a new huddle</Text>
                 <Text style={styles.createDesc}>Start fresh with your own group</Text>
               </View>
-              <ArrowRight size={18} color={Colors.textTertiary} />
+              <ArrowRight size={18} color={colors.textTertiary} />
             </TouchableOpacity>
           </View>
 
@@ -168,7 +170,7 @@ export default function SearchScreen() {
                   <Text style={styles.templateName}>{suggestion.name}</Text>
                   <Text style={styles.templateDesc}>{suggestion.desc}</Text>
                 </View>
-                <ArrowRight size={16} color={Colors.textTertiary} />
+                <ArrowRight size={16} color={colors.textTertiary} />
               </TouchableOpacity>
             ))}
 
@@ -191,10 +193,10 @@ export default function SearchScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ColorScheme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
   safeArea: {
     flex: 1,
@@ -207,7 +209,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 26,
     fontWeight: '700' as const,
-    color: Colors.text,
+    color: colors.text,
     letterSpacing: -0.5,
   },
   scrollContent: {
@@ -216,7 +218,7 @@ const styles = StyleSheet.create({
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     marginHorizontal: 20,
     paddingHorizontal: 14,
     paddingVertical: 12,
@@ -232,7 +234,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 15,
-    color: Colors.text,
+    color: colors.text,
   },
   joinSection: {
     paddingHorizontal: 20,
@@ -241,14 +243,14 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 13,
     fontWeight: '600' as const,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     textTransform: 'uppercase' as const,
     letterSpacing: 0.5,
     marginBottom: 10,
   },
   sectionSubtitle: {
     fontSize: 13,
-    color: Colors.textTertiary,
+    color: colors.textTertiary,
     marginTop: -6,
     marginBottom: 12,
   },
@@ -260,7 +262,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     paddingHorizontal: 14,
     borderRadius: 12,
     gap: 8,
@@ -268,14 +270,14 @@ const styles = StyleSheet.create({
   joinInput: {
     flex: 1,
     fontSize: 15,
-    color: Colors.text,
+    color: colors.text,
     paddingVertical: 12,
   },
   joinBtn: {
     width: 48,
     height: 48,
     borderRadius: 12,
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -286,17 +288,17 @@ const styles = StyleSheet.create({
   createCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.teal50,
+    backgroundColor: colors.teal50,
     padding: 16,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: Colors.teal100,
+    borderColor: colors.teal100,
   },
   createIconContainer: {
     width: 44,
     height: 44,
     borderRadius: 14,
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -307,11 +309,11 @@ const styles = StyleSheet.create({
   createTitle: {
     fontSize: 15,
     fontWeight: '600' as const,
-    color: Colors.text,
+    color: colors.text,
   },
   createDesc: {
     fontSize: 12,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     marginTop: 2,
   },
   templatesSection: {
@@ -320,7 +322,7 @@ const styles = StyleSheet.create({
   templateCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     padding: 14,
     borderRadius: 14,
     marginBottom: 8,
@@ -334,7 +336,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: Colors.surfaceSecondary,
+    backgroundColor: colors.surfaceSecondary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -348,11 +350,11 @@ const styles = StyleSheet.create({
   templateName: {
     fontSize: 14,
     fontWeight: '600' as const,
-    color: Colors.text,
+    color: colors.text,
   },
   templateDesc: {
     fontSize: 12,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     marginTop: 1,
   },
   noResults: {
@@ -365,30 +367,30 @@ const styles = StyleSheet.create({
   },
   noResultsText: {
     fontSize: 14,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     marginBottom: 12,
   },
   noResultsBtn: {
     paddingHorizontal: 20,
     paddingVertical: 10,
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     borderRadius: 12,
   },
   noResultsBtnText: {
     fontSize: 14,
     fontWeight: '600' as const,
-    color: Colors.white,
+    color: colors.white,
   },
   joinErrorText: {
     fontSize: 12,
-    color: Colors.danger,
+    color: colors.danger,
     fontWeight: '500' as const,
     marginTop: 8,
     marginLeft: 4,
   },
   joinSuccessText: {
     fontSize: 12,
-    color: Colors.warning,
+    color: colors.warning,
     fontWeight: '500' as const,
     marginTop: 8,
     marginLeft: 4,

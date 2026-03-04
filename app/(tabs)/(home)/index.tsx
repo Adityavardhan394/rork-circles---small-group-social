@@ -24,7 +24,7 @@ import {
   Users,
 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import Colors from '@/constants/colors';
+import { useTheme, type ColorScheme } from '@/providers/ThemeProvider';
 import { useCircles } from '@/providers/CirclesProvider';
 import { useUser } from '@/providers/UserProvider';
 import CircleCard from '@/components/CircleCard';
@@ -55,6 +55,8 @@ export default function HomeScreen() {
   const hasNavigated = useRef(false);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const animStarted = useRef(false);
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const upcomingEvents = useMemo(() => {
     return events.slice(0, 4).map(event => {
@@ -138,8 +140,8 @@ export default function HomeScreen() {
             <View style={styles.headerLeft}>
               <View style={styles.avatarSkeleton} />
               <View>
-                <View style={{ width: 120, height: 16, backgroundColor: Colors.stone200, borderRadius: 8 }} />
-                <View style={{ width: 80, height: 12, backgroundColor: Colors.stone200, borderRadius: 6, marginTop: 6 }} />
+                <View style={{ width: 120, height: 16, backgroundColor: colors.stone200, borderRadius: 8 }} />
+                <View style={{ width: 80, height: 12, backgroundColor: colors.stone200, borderRadius: 6, marginTop: 6 }} />
               </View>
             </View>
           </View>
@@ -170,8 +172,8 @@ export default function HomeScreen() {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={handleRefresh}
-              tintColor={Colors.primary}
-              colors={[Colors.primary]}
+              tintColor={colors.primary}
+              colors={[colors.primary]}
             />
           }
         >
@@ -197,7 +199,7 @@ export default function HomeScreen() {
                 testID="settings-btn"
                 accessibilityLabel="Settings"
               >
-                <Settings size={20} color={Colors.textSecondary} />
+                <Settings size={20} color={colors.textSecondary} />
               </TouchableOpacity>
             </View>
 
@@ -254,7 +256,7 @@ export default function HomeScreen() {
               <View style={styles.eventsSection}>
                 <View style={styles.sectionHeaderRow}>
                   <View style={styles.sectionHeaderLeft}>
-                    <Calendar size={15} color={Colors.accent} />
+                    <Calendar size={15} color={colors.accent} />
                     <Text style={styles.sectionTitle}>Upcoming</Text>
                   </View>
                 </View>
@@ -280,12 +282,12 @@ export default function HomeScreen() {
                       </View>
                       <Text style={styles.eventTitle} numberOfLines={1}>{event.title}</Text>
                       <View style={styles.eventMeta}>
-                        <Clock size={11} color={Colors.textTertiary} />
+                        <Clock size={11} color={colors.textTertiary} />
                         <Text style={styles.eventMetaText}>{event.date} · {event.time}</Text>
                       </View>
                       {event.location && (
                         <View style={styles.eventMeta}>
-                          <MapPin size={11} color={Colors.textTertiary} />
+                          <MapPin size={11} color={colors.textTertiary} />
                           <Text style={styles.eventMetaText} numberOfLines={1}>{event.location}</Text>
                         </View>
                       )}
@@ -300,7 +302,7 @@ export default function HomeScreen() {
               <View style={styles.circlesSection}>
                 <View style={styles.sectionHeaderRow}>
                   <View style={styles.sectionHeaderLeft}>
-                    <Sparkles size={15} color={Colors.primary} />
+                    <Sparkles size={15} color={colors.primary} />
                     <Text style={styles.sectionTitle}>Your Huddles</Text>
                   </View>
                   <TouchableOpacity
@@ -308,7 +310,7 @@ export default function HomeScreen() {
                     onPress={() => handleQuickAction('/create-circle')}
                     activeOpacity={0.7}
                   >
-                    <Plus size={14} color={Colors.primary} />
+                    <Plus size={14} color={colors.primary} />
                     <Text style={styles.newCircleChipText}>New</Text>
                   </TouchableOpacity>
                 </View>
@@ -337,10 +339,10 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ColorScheme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
   safeArea: {
     flex: 1,
@@ -370,7 +372,7 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 25,
     borderWidth: 2.5,
-    borderColor: Colors.primary,
+    borderColor: colors.primary,
     padding: 2,
     position: 'relative' as const,
   },
@@ -386,19 +388,19 @@ const styles = StyleSheet.create({
     width: 14,
     height: 14,
     borderRadius: 7,
-    backgroundColor: Colors.success,
+    backgroundColor: colors.success,
     borderWidth: 2.5,
-    borderColor: Colors.background,
+    borderColor: colors.background,
   },
   greetingSmall: {
     fontSize: 13,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     fontWeight: '500' as const,
   },
   userName: {
     fontSize: 20,
     fontWeight: '700' as const,
-    color: Colors.text,
+    color: colors.text,
     letterSpacing: -0.3,
     maxWidth: 200,
   },
@@ -406,7 +408,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: Colors.surfaceSecondary,
+    backgroundColor: colors.surfaceSecondary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -414,13 +416,13 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: Colors.stone200,
+    backgroundColor: colors.stone200,
   },
   statsStrip: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     marginHorizontal: 20,
     marginTop: 12,
     borderRadius: 16,
@@ -439,18 +441,18 @@ const styles = StyleSheet.create({
   statNumber: {
     fontSize: 18,
     fontWeight: '700' as const,
-    color: Colors.text,
+    color: colors.text,
   },
   statLabel: {
     fontSize: 11,
-    color: Colors.textTertiary,
+    color: colors.textTertiary,
     marginTop: 2,
     fontWeight: '500' as const,
   },
   statDivider: {
     width: 1,
     height: 24,
-    backgroundColor: Colors.borderLight,
+    backgroundColor: colors.borderLight,
   },
   quickActionsSection: {
     paddingHorizontal: 20,
@@ -459,7 +461,7 @@ const styles = StyleSheet.create({
   sectionLabel: {
     fontSize: 13,
     fontWeight: '600' as const,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     textTransform: 'uppercase' as const,
     letterSpacing: 0.5,
     marginBottom: 12,
@@ -483,7 +485,7 @@ const styles = StyleSheet.create({
   quickActionLabel: {
     fontSize: 11,
     fontWeight: '600' as const,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
   },
   eventsSection: {
     marginTop: 24,
@@ -503,7 +505,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 13,
     fontWeight: '600' as const,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     textTransform: 'uppercase' as const,
     letterSpacing: 0.5,
   },
@@ -513,7 +515,7 @@ const styles = StyleSheet.create({
   },
   eventCard: {
     width: 180,
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 14,
     shadowColor: '#000',
@@ -532,7 +534,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
   },
   eventRsvpBadge: {
-    backgroundColor: Colors.teal50,
+    backgroundColor: colors.teal50,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 8,
@@ -540,12 +542,12 @@ const styles = StyleSheet.create({
   eventRsvpText: {
     fontSize: 10,
     fontWeight: '600' as const,
-    color: Colors.primary,
+    color: colors.primary,
   },
   eventTitle: {
     fontSize: 15,
     fontWeight: '600' as const,
-    color: Colors.text,
+    color: colors.text,
     marginBottom: 6,
   },
   eventMeta: {
@@ -556,12 +558,12 @@ const styles = StyleSheet.create({
   },
   eventMetaText: {
     fontSize: 11,
-    color: Colors.textTertiary,
+    color: colors.textTertiary,
     flex: 1,
   },
   eventCircleName: {
     fontSize: 10,
-    color: Colors.primary,
+    color: colors.primary,
     fontWeight: '600' as const,
     marginTop: 6,
   },
@@ -572,7 +574,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: Colors.teal50,
+    backgroundColor: colors.teal50,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 10,
@@ -580,6 +582,6 @@ const styles = StyleSheet.create({
   newCircleChipText: {
     fontSize: 12,
     fontWeight: '600' as const,
-    color: Colors.primary,
+    color: colors.primary,
   },
 });

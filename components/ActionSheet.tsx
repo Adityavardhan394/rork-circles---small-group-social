@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,7 @@ import {
   Platform,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import Colors from '@/constants/colors';
+import { useTheme, type ColorScheme } from '@/providers/ThemeProvider';
 
 export interface ActionSheetOption {
   label: string;
@@ -27,6 +27,8 @@ interface ActionSheetProps {
 }
 
 function ActionSheetComponent({ visible, onClose, title, options }: ActionSheetProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const slideAnim = useRef(new Animated.Value(300)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -92,21 +94,21 @@ function ActionSheetComponent({ visible, onClose, title, options }: ActionSheetP
 
 export default React.memo(ActionSheetComponent);
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ColorScheme) => StyleSheet.create({
   overlay: {
     flex: 1,
     justifyContent: 'flex-end',
   },
   overlayBg: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: Colors.overlay,
+    backgroundColor: colors.overlay,
   },
   sheet: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingTop: 8,
@@ -116,7 +118,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 13,
     fontWeight: '600' as const,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     textTransform: 'uppercase' as const,
     letterSpacing: 0.5,
     textAlign: 'center',
@@ -129,7 +131,7 @@ const styles = StyleSheet.create({
   },
   optionBorder: {
     borderTopWidth: 1,
-    borderTopColor: Colors.borderLight,
+    borderTopColor: colors.borderLight,
   },
   optionIcon: {
     marginRight: 14,
@@ -137,14 +139,14 @@ const styles = StyleSheet.create({
   optionLabel: {
     fontSize: 16,
     fontWeight: '500' as const,
-    color: Colors.text,
+    color: colors.text,
   },
   optionDestructive: {
-    color: Colors.danger,
+    color: colors.danger,
   },
   cancelBtn: {
     marginTop: 8,
-    backgroundColor: Colors.surfaceSecondary,
+    backgroundColor: colors.surfaceSecondary,
     borderRadius: 14,
     paddingVertical: 14,
     alignItems: 'center',
@@ -152,6 +154,6 @@ const styles = StyleSheet.create({
   cancelText: {
     fontSize: 16,
     fontWeight: '600' as const,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
   },
 });

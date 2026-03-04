@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -13,7 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { X, Calendar, Clock, MapPin, ArrowRight } from 'lucide-react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import Colors from '@/constants/colors';
+import { useTheme, type ColorScheme } from '@/providers/ThemeProvider';
 import { useCircles } from '@/providers/CirclesProvider';
 import { useUser } from '@/providers/UserProvider';
 
@@ -32,6 +32,8 @@ export default function CreateEventScreen() {
   const router = useRouter();
   const { circles, addEvent, getCircleById } = useCircles();
   const { user } = useUser();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const circle = getCircleById(selectedCircleId ?? '');
 
@@ -101,7 +103,7 @@ export default function CreateEventScreen() {
         <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
           <View style={styles.header}>
             <TouchableOpacity style={styles.closeBtn} onPress={() => router.back()}>
-              <X size={20} color={Colors.text} />
+              <X size={20} color={colors.text} />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>New Event</Text>
             <TouchableOpacity
@@ -110,7 +112,7 @@ export default function CreateEventScreen() {
               disabled={!selectedCircleId}
             >
               <Text style={[styles.nextBtnText, !selectedCircleId && styles.nextBtnTextDisabled]}>Next</Text>
-              <ArrowRight size={16} color={!selectedCircleId ? Colors.textTertiary : Colors.white} />
+              <ArrowRight size={16} color={!selectedCircleId ? colors.textTertiary : colors.white} />
             </TouchableOpacity>
           </View>
           <CirclePicker
@@ -131,7 +133,7 @@ export default function CreateEventScreen() {
             style={styles.closeBtn}
             onPress={() => paramCircleId ? router.back() : setStep('pick')}
           >
-            <X size={20} color={Colors.text} />
+            <X size={20} color={colors.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>
             {circle ? `Event in ${circle.emoji} ${circle.name}` : 'New Event'}
@@ -151,7 +153,7 @@ export default function CreateEventScreen() {
             <TextInput
               style={styles.input}
               placeholder="e.g. House Party, Movie Night..."
-              placeholderTextColor={Colors.textTertiary}
+              placeholderTextColor={colors.textTertiary}
               value={title}
               onChangeText={setTitle}
               maxLength={50}
@@ -164,7 +166,7 @@ export default function CreateEventScreen() {
             <TextInput
               style={[styles.input, styles.textArea]}
               placeholder="What's the plan?"
-              placeholderTextColor={Colors.textTertiary}
+              placeholderTextColor={colors.textTertiary}
               value={description}
               onChangeText={setDescription}
               maxLength={200}
@@ -174,13 +176,13 @@ export default function CreateEventScreen() {
 
           <View style={styles.inputSection}>
             <View style={styles.labelRow}>
-              <Calendar size={14} color={Colors.textSecondary} />
+              <Calendar size={14} color={colors.textSecondary} />
               <Text style={styles.label}>Date</Text>
             </View>
             <TextInput
               style={styles.input}
               placeholder="YYYY-MM-DD"
-              placeholderTextColor={Colors.textTertiary}
+              placeholderTextColor={colors.textTertiary}
               value={date}
               onChangeText={setDate}
             />
@@ -201,13 +203,13 @@ export default function CreateEventScreen() {
 
           <View style={styles.inputSection}>
             <View style={styles.labelRow}>
-              <Clock size={14} color={Colors.textSecondary} />
+              <Clock size={14} color={colors.textSecondary} />
               <Text style={styles.label}>Time</Text>
             </View>
             <TextInput
               style={styles.input}
               placeholder="e.g. 7:00 PM"
-              placeholderTextColor={Colors.textTertiary}
+              placeholderTextColor={colors.textTertiary}
               value={time}
               onChangeText={setTime}
             />
@@ -228,13 +230,13 @@ export default function CreateEventScreen() {
 
           <View style={styles.inputSection}>
             <View style={styles.labelRow}>
-              <MapPin size={14} color={Colors.textSecondary} />
+              <MapPin size={14} color={colors.textSecondary} />
               <Text style={styles.label}>Location (optional)</Text>
             </View>
             <TextInput
               style={styles.input}
               placeholder="Where is it?"
-              placeholderTextColor={Colors.textTertiary}
+              placeholderTextColor={colors.textTertiary}
               value={location}
               onChangeText={setLocation}
               maxLength={100}
@@ -260,10 +262,10 @@ function getNextSaturday(): string {
   return d.toISOString().split('T')[0];
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ColorScheme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
   safeArea: {
     flex: 1,
@@ -275,20 +277,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
+    borderBottomColor: colors.borderLight,
   },
   closeBtn: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: Colors.surfaceSecondary,
+    backgroundColor: colors.surfaceSecondary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   headerTitle: {
     fontSize: 15,
     fontWeight: '600' as const,
-    color: Colors.text,
+    color: colors.text,
     flex: 1,
     textAlign: 'center',
     marginHorizontal: 8,
@@ -297,38 +299,38 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 10,
   },
   nextBtnDisabled: {
-    backgroundColor: Colors.surfaceSecondary,
+    backgroundColor: colors.surfaceSecondary,
   },
   nextBtnText: {
     fontSize: 14,
     fontWeight: '600' as const,
-    color: Colors.white,
+    color: colors.white,
   },
   nextBtnTextDisabled: {
-    color: Colors.textTertiary,
+    color: colors.textTertiary,
   },
   createBtn: {
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     paddingHorizontal: 18,
     paddingVertical: 8,
     borderRadius: 10,
   },
   createBtnDisabled: {
-    backgroundColor: Colors.surfaceSecondary,
+    backgroundColor: colors.surfaceSecondary,
   },
   createBtnText: {
     fontSize: 14,
     fontWeight: '600' as const,
-    color: Colors.white,
+    color: colors.white,
   },
   createBtnTextDisabled: {
-    color: Colors.textTertiary,
+    color: colors.textTertiary,
   },
   scrollContent: {
     padding: 20,
@@ -340,7 +342,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 13,
     fontWeight: '600' as const,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     textTransform: 'uppercase' as const,
     letterSpacing: 0.5,
     marginBottom: 8,
@@ -352,13 +354,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   input: {
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderRadius: 14,
     padding: 14,
     fontSize: 15,
-    color: Colors.text,
+    color: colors.text,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
   },
   textArea: {
     height: 80,
@@ -373,20 +375,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 10,
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
   },
   quickChipActive: {
-    backgroundColor: Colors.teal50,
-    borderColor: Colors.primary,
+    backgroundColor: colors.teal50,
+    borderColor: colors.primary,
   },
   quickChipText: {
     fontSize: 13,
     fontWeight: '500' as const,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
   },
   quickChipTextActive: {
-    color: Colors.primary,
+    color: colors.primary,
   },
 });

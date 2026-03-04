@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,7 @@ import { Image } from 'expo-image';
 import { X, Crown, Copy, Share2, UserPlus, MoreHorizontal, Flag, UserX } from 'lucide-react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import Colors from '@/constants/colors';
+import { useTheme, type ColorScheme } from '@/providers/ThemeProvider';
 import { useCircles } from '@/providers/CirclesProvider';
 import ActionSheet, { ActionSheetOption } from '@/components/ActionSheet';
 
@@ -24,6 +24,8 @@ export default function MembersScreen() {
   const { getCircleById } = useCircles();
   const [actionSheetVisible, setActionSheetVisible] = useState(false);
   const [selectedMemberName, setSelectedMemberName] = useState('');
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const circle = getCircleById(id ?? '');
 
@@ -85,12 +87,12 @@ export default function MembersScreen() {
   const memberActionOptions: ActionSheetOption[] = [
     {
       label: `Report ${selectedMemberName}`,
-      icon: <Flag size={18} color={Colors.warning} />,
+      icon: <Flag size={18} color={colors.warning} />,
       onPress: handleReportMember,
     },
     {
       label: `Block ${selectedMemberName}`,
-      icon: <UserX size={18} color={Colors.danger} />,
+      icon: <UserX size={18} color={colors.danger} />,
       onPress: handleBlockMember,
       destructive: true,
     },
@@ -106,7 +108,7 @@ export default function MembersScreen() {
             accessibilityLabel="Close"
             accessibilityRole="button"
           >
-            <X size={20} color={Colors.text} />
+            <X size={20} color={colors.text} />
           </TouchableOpacity>
         </SafeAreaView>
       </View>
@@ -123,7 +125,7 @@ export default function MembersScreen() {
             accessibilityLabel="Close"
             accessibilityRole="button"
           >
-            <X size={20} color={Colors.text} />
+            <X size={20} color={colors.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle} accessibilityRole="header">Members</Text>
           <View style={styles.headerRight} />
@@ -144,7 +146,7 @@ export default function MembersScreen() {
                   accessibilityLabel="Copy invite code"
                   accessibilityRole="button"
                 >
-                  <Copy size={18} color={Colors.primary} />
+                  <Copy size={18} color={colors.primary} />
                   <Text style={styles.inviteActionText}>Copy</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -153,7 +155,7 @@ export default function MembersScreen() {
                   accessibilityLabel="Share invite link"
                   accessibilityRole="button"
                 >
-                  <Share2 size={18} color={Colors.primary} />
+                  <Share2 size={18} color={colors.primary} />
                   <Text style={styles.inviteActionText}>Share</Text>
                 </TouchableOpacity>
               </View>
@@ -177,7 +179,7 @@ export default function MembersScreen() {
                     <Text style={styles.memberName}>{member.name}</Text>
                     {isAdmin && (
                       <View style={styles.adminBadge}>
-                        <Crown size={10} color={Colors.accent} />
+                        <Crown size={10} color={colors.accent} />
                         <Text style={styles.adminText}>Admin</Text>
                       </View>
                     )}
@@ -189,7 +191,7 @@ export default function MembersScreen() {
                     accessibilityRole="button"
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                   >
-                    <MoreHorizontal size={18} color={Colors.textTertiary} />
+                    <MoreHorizontal size={18} color={colors.textTertiary} />
                   </TouchableOpacity>
                 </View>
               );
@@ -202,7 +204,7 @@ export default function MembersScreen() {
             accessibilityLabel="Invite more people"
             accessibilityRole="button"
           >
-            <UserPlus size={20} color={Colors.primary} />
+            <UserPlus size={20} color={colors.primary} />
             <Text style={styles.addMemberText}>Invite more people</Text>
           </TouchableOpacity>
         </ScrollView>
@@ -218,10 +220,10 @@ export default function MembersScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ColorScheme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
   safeArea: {
     flex: 1,
@@ -233,20 +235,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
+    borderBottomColor: colors.borderLight,
   },
   closeBtn: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: Colors.surfaceSecondary,
+    backgroundColor: colors.surfaceSecondary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   headerTitle: {
     fontSize: 17,
     fontWeight: '600' as const,
-    color: Colors.text,
+    color: colors.text,
   },
   headerRight: {
     width: 36,
@@ -261,17 +263,17 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 13,
     fontWeight: '600' as const,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     textTransform: 'uppercase' as const,
     letterSpacing: 0.5,
     marginBottom: 10,
   },
   inviteCard: {
-    backgroundColor: Colors.teal50,
+    backgroundColor: colors.teal50,
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: Colors.teal100,
+    borderColor: colors.teal100,
   },
   codeContainer: {
     alignItems: 'center',
@@ -279,13 +281,13 @@ const styles = StyleSheet.create({
   },
   codeLabel: {
     fontSize: 12,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     marginBottom: 4,
   },
   code: {
     fontSize: 28,
     fontWeight: '700' as const,
-    color: Colors.primaryDark,
+    color: colors.primaryDark,
     letterSpacing: 3,
   },
   inviteActions: {
@@ -298,14 +300,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     paddingVertical: 10,
     borderRadius: 10,
   },
   inviteActionText: {
     fontSize: 14,
     fontWeight: '500' as const,
-    color: Colors.primary,
+    color: colors.primary,
   },
   membersSection: {
     marginBottom: 24,
@@ -313,7 +315,7 @@ const styles = StyleSheet.create({
   memberRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     padding: 12,
     borderRadius: 14,
     marginBottom: 6,
@@ -330,7 +332,7 @@ const styles = StyleSheet.create({
   memberName: {
     fontSize: 15,
     fontWeight: '600' as const,
-    color: Colors.text,
+    color: colors.text,
   },
   adminBadge: {
     flexDirection: 'row',
@@ -341,7 +343,7 @@ const styles = StyleSheet.create({
   adminText: {
     fontSize: 11,
     fontWeight: '500' as const,
-    color: Colors.accent,
+    color: colors.accent,
   },
   memberMoreBtn: {
     padding: 6,
@@ -354,12 +356,12 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 14,
     borderWidth: 1.5,
-    borderColor: Colors.primary,
+    borderColor: colors.primary,
     borderStyle: 'dashed',
   },
   addMemberText: {
     fontSize: 14,
     fontWeight: '600' as const,
-    color: Colors.primary,
+    color: colors.primary,
   },
 });

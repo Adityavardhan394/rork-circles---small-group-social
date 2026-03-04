@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,7 @@ import { ArrowRight, Camera } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import Colors from '@/constants/colors';
+import { useTheme, type ColorScheme } from '@/providers/ThemeProvider';
 import { useUser } from '@/providers/UserProvider';
 
 const AVATAR_OPTIONS = [
@@ -32,6 +32,8 @@ export default function OnboardingScreen() {
   const [selectedAvatar, setSelectedAvatar] = useState(AVATAR_OPTIONS[0]);
   const [customAvatar, setCustomAvatar] = useState<string | null>(null);
   const { completeOnboarding } = useUser();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
@@ -85,7 +87,7 @@ export default function OnboardingScreen() {
             <TextInput
               style={styles.nameInput}
               placeholder="Your name"
-              placeholderTextColor={Colors.textTertiary}
+              placeholderTextColor={colors.textTertiary}
               value={name}
               onChangeText={setName}
               maxLength={20}
@@ -97,7 +99,7 @@ export default function OnboardingScreen() {
             <Text style={styles.label}>Pick an avatar</Text>
             <View style={styles.avatarGrid}>
               <TouchableOpacity style={styles.cameraBtn} onPress={handlePickImage}>
-                <Camera size={22} color={Colors.primary} />
+                <Camera size={22} color={colors.primary} />
               </TouchableOpacity>
               {AVATAR_OPTIONS.map((avatar, i) => (
                 <TouchableOpacity
@@ -126,7 +128,7 @@ export default function OnboardingScreen() {
               <Text style={[styles.continueBtnText, !name.trim() && styles.continueBtnTextDisabled]}>
                 Get Started
               </Text>
-              <ArrowRight size={18} color={!name.trim() ? Colors.textTertiary : Colors.white} />
+              <ArrowRight size={18} color={!name.trim() ? colors.textTertiary : colors.white} />
             </TouchableOpacity>
           </View>
         </Animated.View>
@@ -135,10 +137,10 @@ export default function OnboardingScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ColorScheme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
   safeArea: {
     flex: 1,
@@ -159,13 +161,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 30,
     fontWeight: '800' as const,
-    color: Colors.text,
+    color: colors.text,
     letterSpacing: -0.5,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 15,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 22,
     marginTop: 8,
@@ -176,20 +178,20 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 13,
     fontWeight: '600' as const,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     textTransform: 'uppercase' as const,
     letterSpacing: 0.5,
     marginBottom: 10,
   },
   nameInput: {
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 16,
     fontSize: 18,
-    color: Colors.text,
+    color: colors.text,
     fontWeight: '500' as const,
     borderWidth: 1.5,
-    borderColor: Colors.border,
+    borderColor: colors.border,
     textAlign: 'center',
   },
   avatarGrid: {
@@ -202,9 +204,9 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 18,
-    backgroundColor: Colors.teal50,
+    backgroundColor: colors.teal50,
     borderWidth: 1.5,
-    borderColor: Colors.primary,
+    borderColor: colors.primary,
     borderStyle: 'dashed',
     alignItems: 'center',
     justifyContent: 'center',
@@ -218,7 +220,7 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   avatarOptionSelected: {
-    borderColor: Colors.primary,
+    borderColor: colors.primary,
   },
   avatarImage: {
     width: '100%',
@@ -232,26 +234,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     paddingVertical: 16,
     borderRadius: 16,
-    shadowColor: Colors.primary,
+    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 4,
   },
   continueBtnDisabled: {
-    backgroundColor: Colors.surfaceSecondary,
+    backgroundColor: colors.surfaceSecondary,
     shadowOpacity: 0,
     elevation: 0,
   },
   continueBtnText: {
     fontSize: 16,
     fontWeight: '700' as const,
-    color: Colors.white,
+    color: colors.white,
   },
   continueBtnTextDisabled: {
-    color: Colors.textTertiary,
+    color: colors.textTertiary,
   },
 });

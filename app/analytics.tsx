@@ -10,13 +10,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { ArrowLeft, TrendingUp, MessageCircle, BarChart3, Calendar, Users } from 'lucide-react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import Colors from '@/constants/colors';
+import { useTheme, type ColorScheme } from '@/providers/ThemeProvider';
 import { useCircles } from '@/providers/CirclesProvider';
 
 export default function AnalyticsScreen() {
   const { circleId } = useLocalSearchParams<{ circleId: string }>();
   const router = useRouter();
   const { getCircleById, getCirclePosts, getCirclePolls, getCircleEvents } = useCircles();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const circle = getCircleById(circleId ?? '');
   const posts = getCirclePosts(circleId ?? '');
@@ -54,7 +56,7 @@ export default function AnalyticsScreen() {
       <View style={styles.container}>
         <SafeAreaView edges={['top']}>
           <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-            <ArrowLeft size={22} color={Colors.text} />
+            <ArrowLeft size={22} color={colors.text} />
           </TouchableOpacity>
         </SafeAreaView>
       </View>
@@ -66,7 +68,7 @@ export default function AnalyticsScreen() {
       <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
         <View style={styles.header}>
           <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-            <ArrowLeft size={22} color={Colors.text} />
+            <ArrowLeft size={22} color={colors.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Analytics</Text>
           <View style={{ width: 40 }} />
@@ -111,7 +113,7 @@ export default function AnalyticsScreen() {
 
           <View style={styles.engagementCard}>
             <View style={styles.engagementRow}>
-              <TrendingUp size={16} color={Colors.primary} />
+              <TrendingUp size={16} color={colors.primary} />
               <Text style={styles.engagementTitle}>Engagement</Text>
             </View>
             <View style={styles.engagementStats}>
@@ -158,30 +160,30 @@ export default function AnalyticsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+const createStyles = (colors: ColorScheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
   safeArea: { flex: 1 },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 16, paddingVertical: 12,
-    borderBottomWidth: 1, borderBottomColor: Colors.borderLight,
+    borderBottomWidth: 1, borderBottomColor: colors.borderLight,
   },
   backBtn: {
     width: 40, height: 40, borderRadius: 12,
-    backgroundColor: Colors.surfaceSecondary,
+    backgroundColor: colors.surfaceSecondary,
     alignItems: 'center', justifyContent: 'center',
   },
-  headerTitle: { fontSize: 17, fontWeight: '600' as const, color: Colors.text },
+  headerTitle: { fontSize: 17, fontWeight: '600' as const, color: colors.text },
   scrollContent: { paddingBottom: 40 },
   circleHeader: { alignItems: 'center', paddingVertical: 20 },
   emoji: { fontSize: 40, marginBottom: 8 },
-  circleName: { fontSize: 22, fontWeight: '700' as const, color: Colors.text },
+  circleName: { fontSize: 22, fontWeight: '700' as const, color: colors.text },
   statsGrid: {
     flexDirection: 'row', flexWrap: 'wrap', gap: 10,
     paddingHorizontal: 20, marginBottom: 20,
   },
   statCard: {
-    flex: 1, minWidth: '45%', backgroundColor: Colors.surface,
+    flex: 1, minWidth: '45%', backgroundColor: colors.surface,
     borderRadius: 16, padding: 16, alignItems: 'center',
     shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04, shadowRadius: 4, elevation: 1,
@@ -190,37 +192,37 @@ const styles = StyleSheet.create({
     width: 40, height: 40, borderRadius: 12,
     alignItems: 'center', justifyContent: 'center', marginBottom: 8,
   },
-  statValue: { fontSize: 24, fontWeight: '700' as const, color: Colors.text },
-  statLabel: { fontSize: 12, color: Colors.textTertiary, marginTop: 2 },
+  statValue: { fontSize: 24, fontWeight: '700' as const, color: colors.text },
+  statLabel: { fontSize: 12, color: colors.textTertiary, marginTop: 2 },
   engagementCard: {
-    backgroundColor: Colors.surface, marginHorizontal: 20,
+    backgroundColor: colors.surface, marginHorizontal: 20,
     borderRadius: 16, padding: 16, marginBottom: 24,
   },
   engagementRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 12 },
-  engagementTitle: { fontSize: 15, fontWeight: '600' as const, color: Colors.text },
+  engagementTitle: { fontSize: 15, fontWeight: '600' as const, color: colors.text },
   engagementStats: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around',
   },
   engagementStat: { alignItems: 'center', flex: 1 },
-  engagementValue: { fontSize: 20, fontWeight: '700' as const, color: Colors.primaryDark },
-  engagementLabel: { fontSize: 11, color: Colors.textTertiary, marginTop: 2 },
-  engDivider: { width: 1, height: 28, backgroundColor: Colors.borderLight },
+  engagementValue: { fontSize: 20, fontWeight: '700' as const, color: colors.primaryDark },
+  engagementLabel: { fontSize: 11, color: colors.textTertiary, marginTop: 2 },
+  engDivider: { width: 1, height: 28, backgroundColor: colors.borderLight },
   leaderboardSection: { paddingHorizontal: 20 },
   sectionTitle: {
-    fontSize: 13, fontWeight: '600' as const, color: Colors.textSecondary,
+    fontSize: 13, fontWeight: '600' as const, color: colors.textSecondary,
     textTransform: 'uppercase' as const, letterSpacing: 0.5, marginBottom: 10,
   },
   leaderRow: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: Colors.surface, padding: 12, borderRadius: 14, marginBottom: 6,
+    backgroundColor: colors.surface, padding: 12, borderRadius: 14, marginBottom: 6,
   },
-  leaderRank: { fontSize: 14, fontWeight: '700' as const, color: Colors.textTertiary, width: 28 },
+  leaderRank: { fontSize: 14, fontWeight: '700' as const, color: colors.textTertiary, width: 28 },
   leaderAvatar: { width: 36, height: 36, borderRadius: 18 },
   leaderInfo: { flex: 1, marginLeft: 10 },
-  leaderName: { fontSize: 14, fontWeight: '600' as const, color: Colors.text },
-  leaderStats: { fontSize: 11, color: Colors.textTertiary, marginTop: 2 },
+  leaderName: { fontSize: 14, fontWeight: '600' as const, color: colors.text },
+  leaderStats: { fontSize: 11, color: colors.textTertiary, marginTop: 2 },
   leaderScore: {
-    backgroundColor: Colors.teal50, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8,
+    backgroundColor: colors.teal50, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8,
   },
-  leaderScoreText: { fontSize: 14, fontWeight: '700' as const, color: Colors.primary },
+  leaderScoreText: { fontSize: 14, fontWeight: '700' as const, color: colors.primary },
 });

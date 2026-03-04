@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useEffect, useState } from 'react';
+import React, { useCallback, useRef, useEffect, useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { CheckCheck } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
-import Colors from '@/constants/colors';
+import { useTheme, type ColorScheme } from '@/providers/ThemeProvider';
 import { useCircles } from '@/providers/CirclesProvider';
 import EmptyState from '@/components/EmptyState';
 import { NotificationSkeleton } from '@/components/SkeletonLoader';
@@ -22,6 +22,8 @@ export default function NotificationsScreen() {
   const router = useRouter();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const [refreshing, setRefreshing] = useState(false);
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   useEffect(() => {
     Animated.timing(fadeAnim, { toValue: 1, duration: 400, useNativeDriver: true }).start();
@@ -62,7 +64,7 @@ export default function NotificationsScreen() {
               accessibilityLabel="Mark all as read"
               accessibilityRole="button"
             >
-              <CheckCheck size={16} color={Colors.primary} />
+              <CheckCheck size={16} color={colors.primary} />
               <Text style={styles.markAllText}>Read all</Text>
             </TouchableOpacity>
           )}
@@ -75,8 +77,8 @@ export default function NotificationsScreen() {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={handleRefresh}
-              tintColor={Colors.primary}
-              colors={[Colors.primary]}
+              tintColor={colors.primary}
+              colors={[colors.primary]}
             />
           }
         >
@@ -125,10 +127,10 @@ export default function NotificationsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ColorScheme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
   safeArea: {
     flex: 1,
@@ -144,7 +146,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 26,
     fontWeight: '700' as const,
-    color: Colors.text,
+    color: colors.text,
     letterSpacing: -0.5,
   },
   markAllBtn: {
@@ -154,12 +156,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 10,
-    backgroundColor: Colors.teal50,
+    backgroundColor: colors.teal50,
   },
   markAllText: {
     fontSize: 13,
     fontWeight: '500' as const,
-    color: Colors.primary,
+    color: colors.primary,
   },
   scrollContent: {
     paddingBottom: 24,
@@ -169,10 +171,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
+    borderBottomColor: colors.borderLight,
   },
   notifCardUnread: {
-    backgroundColor: Colors.teal50,
+    backgroundColor: colors.teal50,
   },
   notifLeft: {
     position: 'relative',
@@ -189,9 +191,9 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: Colors.accent,
+    backgroundColor: colors.accent,
     borderWidth: 2,
-    borderColor: Colors.teal50,
+    borderColor: colors.teal50,
   },
   notifContent: {
     flex: 1,
@@ -206,19 +208,19 @@ const styles = StyleSheet.create({
   notifCircle: {
     fontSize: 12,
     fontWeight: '500' as const,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
   },
   notifTime: {
     fontSize: 11,
-    color: Colors.textTertiary,
+    color: colors.textTertiary,
   },
   notifBody: {
     fontSize: 14,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     lineHeight: 20,
   },
   notifBodyUnread: {
-    color: Colors.text,
+    color: colors.text,
     fontWeight: '500' as const,
   },
 });

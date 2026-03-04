@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Link2, StickyNote, CheckSquare, ImageIcon, Square, CheckSquare2, DollarSign, ListChecks } from 'lucide-react-native';
-import Colors from '@/constants/colors';
+import { useTheme, type ColorScheme } from '@/providers/ThemeProvider';
 import { BoardItem } from '@/types';
 
 interface BoardItemCardProps {
@@ -28,6 +28,8 @@ const TYPE_COLORS: Record<string, string> = {
 };
 
 function BoardItemCardComponent({ item, onToggleTodo }: BoardItemCardProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const Icon = TYPE_ICONS[item.type];
   const color = TYPE_COLORS[item.type];
 
@@ -60,10 +62,10 @@ function BoardItemCardComponent({ item, onToggleTodo }: BoardItemCardProps) {
 
 export default React.memo(BoardItemCardComponent);
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ColorScheme) => StyleSheet.create({
   card: {
     flexDirection: 'row',
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderRadius: 12,
     marginHorizontal: 16,
     marginBottom: 8,
@@ -89,16 +91,16 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 14,
     fontWeight: '600' as const,
-    color: Colors.text,
+    color: colors.text,
     marginBottom: 2,
   },
   titleCompleted: {
     textDecorationLine: 'line-through',
-    color: Colors.textTertiary,
+    color: colors.textTertiary,
   },
   contentText: {
     fontSize: 12,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     lineHeight: 16,
   },
 });

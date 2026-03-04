@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useEffect, useState } from 'react';
+import React, { useCallback, useRef, useEffect, useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -17,7 +17,7 @@ import { Image } from 'expo-image';
 import { Settings, ChevronRight, Shield, Bell, CircleHelp, LogOut, Edit3, X, Camera } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
-import Colors from '@/constants/colors';
+import { useTheme, type ColorScheme } from '@/providers/ThemeProvider';
 import { useUser } from '@/providers/UserProvider';
 import { useCircles } from '@/providers/CirclesProvider';
 
@@ -37,6 +37,8 @@ export default function ProfileScreen() {
   const [editName, setEditName] = useState(user?.name ?? '');
   const [editBio, setEditBio] = useState(user?.bio ?? '');
   const [editAvatar, setEditAvatar] = useState(user?.avatar ?? '');
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   useEffect(() => {
     Animated.timing(fadeAnim, { toValue: 1, duration: 400, useNativeDriver: true }).start();
@@ -111,7 +113,7 @@ export default function ProfileScreen() {
             accessibilityLabel="Open settings"
             accessibilityRole="button"
           >
-            <Settings size={20} color={Colors.text} />
+            <Settings size={20} color={colors.text} />
           </TouchableOpacity>
         </View>
 
@@ -130,7 +132,7 @@ export default function ProfileScreen() {
                   accessibilityLabel="Edit profile"
                   accessibilityRole="button"
                 >
-                  <Edit3 size={12} color={Colors.white} />
+                  <Edit3 size={12} color={colors.white} />
                 </TouchableOpacity>
               </View>
               <Text style={styles.name}>{user?.name || 'Your Name'}</Text>
@@ -140,7 +142,7 @@ export default function ProfileScreen() {
                 </TouchableOpacity>
               )}
               <TouchableOpacity style={styles.editProfileBtn} onPress={handleOpenEditModal}>
-                <Edit3 size={14} color={Colors.primary} />
+                <Edit3 size={14} color={colors.primary} />
                 <Text style={styles.editProfileBtnText}>Edit Profile</Text>
               </TouchableOpacity>
               <View style={styles.statsRow}>
@@ -174,7 +176,7 @@ export default function ProfileScreen() {
                     <Text style={styles.circleName}>{circle.name}</Text>
                     <Text style={styles.circleMemberCount}>{circle.members.length} members</Text>
                   </View>
-                  <ChevronRight size={16} color={Colors.textTertiary} />
+                  <ChevronRight size={16} color={colors.textTertiary} />
                 </TouchableOpacity>
               ))}
             </View>
@@ -194,7 +196,7 @@ export default function ProfileScreen() {
                     <item.icon size={18} color={item.color} />
                   </View>
                   <Text style={styles.menuLabel}>{item.label}</Text>
-                  <ChevronRight size={16} color={Colors.textTertiary} />
+                  <ChevronRight size={16} color={colors.textTertiary} />
                 </TouchableOpacity>
               ))}
             </View>
@@ -205,7 +207,7 @@ export default function ProfileScreen() {
               accessibilityLabel="Log out"
               accessibilityRole="button"
             >
-              <LogOut size={18} color={Colors.danger} />
+              <LogOut size={18} color={colors.danger} />
               <Text style={styles.logoutText}>Log out</Text>
             </TouchableOpacity>
 
@@ -226,7 +228,7 @@ export default function ProfileScreen() {
             <View style={styles.modalContent}>
               <View style={styles.modalHeader}>
                 <TouchableOpacity onPress={() => setShowEditModal(false)}>
-                  <X size={22} color={Colors.text} />
+                  <X size={22} color={colors.text} />
                 </TouchableOpacity>
                 <Text style={styles.modalTitle}>Edit Profile</Text>
                 <TouchableOpacity onPress={handleSaveProfile}>
@@ -241,7 +243,7 @@ export default function ProfileScreen() {
                     style={styles.modalAvatar}
                   />
                   <View style={styles.modalAvatarOverlay}>
-                    <Camera size={20} color={Colors.white} />
+                    <Camera size={20} color={colors.white} />
                   </View>
                 </TouchableOpacity>
 
@@ -252,7 +254,7 @@ export default function ProfileScreen() {
                     value={editName}
                     onChangeText={setEditName}
                     placeholder="Your name"
-                    placeholderTextColor={Colors.textTertiary}
+                    placeholderTextColor={colors.textTertiary}
                     maxLength={30}
                   />
                 </View>
@@ -264,7 +266,7 @@ export default function ProfileScreen() {
                     value={editBio}
                     onChangeText={setEditBio}
                     placeholder="Tell people about yourself..."
-                    placeholderTextColor={Colors.textTertiary}
+                    placeholderTextColor={colors.textTertiary}
                     multiline
                     maxLength={120}
                   />
@@ -279,10 +281,10 @@ export default function ProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ColorScheme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
   safeArea: {
     flex: 1,
@@ -298,14 +300,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 26,
     fontWeight: '700' as const,
-    color: Colors.text,
+    color: colors.text,
     letterSpacing: -0.5,
   },
   settingsBtn: {
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: Colors.surfaceSecondary,
+    backgroundColor: colors.surfaceSecondary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -314,7 +316,7 @@ const styles = StyleSheet.create({
   },
   profileCard: {
     alignItems: 'center',
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     marginHorizontal: 20,
     padding: 24,
     borderRadius: 20,
@@ -341,20 +343,20 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 10,
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: Colors.surface,
+    borderColor: colors.surface,
   },
   name: {
     fontSize: 20,
     fontWeight: '700' as const,
-    color: Colors.text,
+    color: colors.text,
   },
   bio: {
     fontSize: 13,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     marginTop: 4,
     textAlign: 'center',
   },
@@ -370,17 +372,17 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 20,
     fontWeight: '700' as const,
-    color: Colors.text,
+    color: colors.text,
   },
   statLabel: {
     fontSize: 12,
-    color: Colors.textTertiary,
+    color: colors.textTertiary,
     marginTop: 2,
   },
   statDivider: {
     width: 1,
     height: 24,
-    backgroundColor: Colors.border,
+    backgroundColor: colors.border,
   },
   circlesSection: {
     paddingHorizontal: 20,
@@ -389,7 +391,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 13,
     fontWeight: '600' as const,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     textTransform: 'uppercase' as const,
     letterSpacing: 0.5,
     marginBottom: 10,
@@ -397,7 +399,7 @@ const styles = StyleSheet.create({
   circleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     padding: 12,
     borderRadius: 14,
     marginBottom: 6,
@@ -419,11 +421,11 @@ const styles = StyleSheet.create({
   circleName: {
     fontSize: 14,
     fontWeight: '600' as const,
-    color: Colors.text,
+    color: colors.text,
   },
   circleMemberCount: {
     fontSize: 12,
-    color: Colors.textTertiary,
+    color: colors.textTertiary,
     marginTop: 1,
   },
   menuSection: {
@@ -433,7 +435,7 @@ const styles = StyleSheet.create({
   menuRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     padding: 14,
     borderRadius: 14,
     marginBottom: 6,
@@ -449,7 +451,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     fontWeight: '500' as const,
-    color: Colors.text,
+    color: colors.text,
     marginLeft: 12,
   },
   logoutBtn: {
@@ -460,24 +462,24 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     paddingVertical: 14,
     borderRadius: 14,
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: Colors.danger + '20',
+    borderColor: colors.danger + '20',
   },
   logoutText: {
     fontSize: 14,
     fontWeight: '600' as const,
-    color: Colors.danger,
+    color: colors.danger,
   },
   version: {
     textAlign: 'center',
     fontSize: 12,
-    color: Colors.textTertiary,
+    color: colors.textTertiary,
     marginTop: 20,
   },
   addBioText: {
     fontSize: 13,
-    color: Colors.primary,
+    color: colors.primary,
     fontWeight: '500' as const,
     marginTop: 4,
   },
@@ -489,14 +491,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 10,
-    backgroundColor: Colors.teal50,
+    backgroundColor: colors.teal50,
     borderWidth: 1,
-    borderColor: Colors.teal100,
+    borderColor: colors.teal100,
   },
   editProfileBtnText: {
     fontSize: 13,
     fontWeight: '600' as const,
-    color: Colors.primary,
+    color: colors.primary,
   },
   modalOverlay: {
     flex: 1,
@@ -504,7 +506,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingBottom: 40,
@@ -516,17 +518,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
+    borderBottomColor: colors.borderLight,
   },
   modalTitle: {
     fontSize: 17,
     fontWeight: '600' as const,
-    color: Colors.text,
+    color: colors.text,
   },
   saveBtn: {
     fontSize: 15,
     fontWeight: '600' as const,
-    color: Colors.primary,
+    color: colors.primary,
   },
   modalBody: {
     padding: 20,
@@ -548,11 +550,11 @@ const styles = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 17,
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 3,
-    borderColor: Colors.background,
+    borderColor: colors.background,
   },
   inputGroup: {
     width: '100%',
@@ -561,19 +563,19 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 12,
     fontWeight: '600' as const,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     textTransform: 'uppercase' as const,
     letterSpacing: 0.5,
     marginBottom: 6,
   },
   textInput: {
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderRadius: 12,
     padding: 14,
     fontSize: 15,
-    color: Colors.text,
+    color: colors.text,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
   },
   bioInput: {
     height: 80,
@@ -581,7 +583,7 @@ const styles = StyleSheet.create({
   },
   charCount: {
     fontSize: 11,
-    color: Colors.textTertiary,
+    color: colors.textTertiary,
     textAlign: 'right' as const,
     marginTop: 4,
   },
