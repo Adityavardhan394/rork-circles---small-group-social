@@ -16,7 +16,7 @@ import * as Haptics from 'expo-haptics';
 import Colors from '@/constants/colors';
 import { useCircles } from '@/providers/CirclesProvider';
 import { useUser } from '@/providers/UserProvider';
-import { CURRENT_USER } from '@/mocks/data';
+
 import { CircleEvent } from '@/types';
 import CirclePicker from '@/components/CirclePicker';
 
@@ -54,13 +54,13 @@ export default function CreateEventScreen() {
     const newEvent: CircleEvent = {
       id: `event-${Date.now()}`,
       circleId: selectedCircleId,
-      author: user ?? CURRENT_USER,
+      author: user!,
       title: title.trim(),
       description: description.trim() || undefined,
       date: date.trim(),
       time: time.trim() || 'TBD',
       location: location.trim() || undefined,
-      rsvps: { yes: [user?.id ?? 'user-1'], maybe: [], no: [] },
+      rsvps: { yes: user ? [user.id] : [], maybe: [], no: [] },
       createdAt: new Date().toISOString(),
     };
     addEvent(newEvent);

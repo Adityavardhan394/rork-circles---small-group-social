@@ -6,6 +6,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { UserProvider } from "@/providers/UserProvider";
 import { CirclesProvider } from "@/providers/CirclesProvider";
 import AnimatedSplashScreen from "@/components/SplashScreen";
+import { trpc, trpcClient } from "@/lib/trpc";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -63,15 +64,17 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <GestureHandlerRootView>
-        <UserProvider>
-          <CirclesProvider>
-            <RootLayoutNav />
-            {showSplash && <AnimatedSplashScreen onFinish={handleSplashFinish} />}
-          </CirclesProvider>
-        </UserProvider>
-      </GestureHandlerRootView>
-    </QueryClientProvider>
+    <trpc.Provider client={trpcClient} queryClient={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <GestureHandlerRootView>
+          <UserProvider>
+            <CirclesProvider>
+              <RootLayoutNav />
+              {showSplash && <AnimatedSplashScreen onFinish={handleSplashFinish} />}
+            </CirclesProvider>
+          </UserProvider>
+        </GestureHandlerRootView>
+      </QueryClientProvider>
+    </trpc.Provider>
   );
 }

@@ -18,7 +18,7 @@ import * as Haptics from 'expo-haptics';
 import Colors from '@/constants/colors';
 import { useCircles } from '@/providers/CirclesProvider';
 import { useUser } from '@/providers/UserProvider';
-import { CURRENT_USER } from '@/mocks/data';
+
 import { Post } from '@/types';
 import CirclePicker from '@/components/CirclePicker';
 
@@ -74,7 +74,7 @@ export default function CreatePostScreen() {
     const newPost: Post = {
       id: `post-${Date.now()}`,
       circleId: selectedCircleId,
-      author: user ?? CURRENT_USER,
+      author: user!,
       text: text.trim() || undefined,
       mediaUrls: imageUri ? [imageUri] : [],
       reactions: {},
@@ -158,11 +158,11 @@ export default function CreatePostScreen() {
         >
           <View style={styles.authorRow}>
             <Image
-              source={{ uri: user?.avatar || CURRENT_USER.avatar }}
+              source={{ uri: user?.avatar }}
               style={styles.avatar}
             />
             <View>
-              <Text style={styles.authorName}>{user?.name || CURRENT_USER.name}</Text>
+              <Text style={styles.authorName}>{user?.name ?? 'You'}</Text>
               <Text style={styles.expiryNote}>
                 {selectedExpiry > 0 ? `Expires in ${selectedExpiry >= 168 ? '7 days' : `${selectedExpiry}h`}` : 'No expiry'}
               </Text>

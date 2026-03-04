@@ -35,6 +35,7 @@ import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import Colors from '@/constants/colors';
 import { useUser } from '@/providers/UserProvider';
+import { useCircles } from '@/providers/CirclesProvider';
 import { LogOut } from 'lucide-react-native';
 
 interface SettingToggle {
@@ -49,6 +50,7 @@ interface SettingToggle {
 export default function SettingsScreen() {
   const router = useRouter();
   const { user, logout } = useUser();
+  const { resetAllData } = useCircles();
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   const [notifNewPost, setNotifNewPost] = useState(true);
@@ -334,6 +336,7 @@ export default function SettingsScreen() {
                           text: 'Log out',
                           style: 'destructive',
                           onPress: () => {
+                            resetAllData();
                             logout();
                             router.replace('/onboarding');
                           },

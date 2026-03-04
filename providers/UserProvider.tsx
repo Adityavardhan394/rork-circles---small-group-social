@@ -3,9 +3,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import createContextHook from '@nkzw/create-context-hook';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { User } from '@/types';
-import { CURRENT_USER } from '@/mocks/data';
 
-const USER_STORAGE_KEY = 'circles_user';
+const USER_STORAGE_KEY = 'huddle_user';
+const ONBOARDED_KEY = 'huddle_onboarded';
 
 export const [UserProvider, useUser] = createContextHook(() => {
   const [user, setUser] = useState<User | null>(null);
@@ -26,7 +26,7 @@ export const [UserProvider, useUser] = createContextHook(() => {
   const onboardedQuery = useQuery({
     queryKey: ['onboarded'],
     queryFn: async () => {
-      const val = await AsyncStorage.getItem('circles_onboarded');
+      const val = await AsyncStorage.getItem(ONBOARDED_KEY);
       return val === 'true';
     },
   });
@@ -46,7 +46,7 @@ export const [UserProvider, useUser] = createContextHook(() => {
   const saveUserMutation = useMutation({
     mutationFn: async (newUser: User) => {
       await AsyncStorage.setItem(USER_STORAGE_KEY, JSON.stringify(newUser));
-      await AsyncStorage.setItem('circles_onboarded', 'true');
+      await AsyncStorage.setItem(ONBOARDED_KEY, 'true');
       return newUser;
     },
     onSuccess: (newUser) => {
@@ -57,37 +57,50 @@ export const [UserProvider, useUser] = createContextHook(() => {
     },
   });
 
+  const { mutate: saveUser } = saveUserMutation;
+
   const updateUser = useCallback((newUser: User) => {
-    saveUserMutation.mutate(newUser);
-  }, [saveUserMutation]);
+    saveUser(newUser);
+  }, [saveUser]);
 
   const completeOnboarding = useCallback((name: string, avatar: string) => {
     const newUser: User = {
-      ...CURRENT_USER,
+      id: `user-${Date.now()}`,
       name,
       avatar,
+      bio: '',
       createdAt: new Date().toISOString(),
     };
-    saveUserMutation.mutate(newUser);
-  }, [saveUserMutation]);
+    saveUser(newUser);
+    console.log('[UserProvider] Onboarding completed for:', name);
+  }, [saveUser]);
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
       await AsyncStorage.removeItem(USER_STORAGE_KEY);
-      await AsyncStorage.removeItem('circles_onboarded');
+      await AsyncStorage.removeItem(ONBOARDED_KEY);
+      await AsyncStorage.removeItem('huddle_circles');
+      await AsyncStorage.removeItem('huddle_posts');
+      await AsyncStorage.removeItem('huddle_polls');
+      await AsyncStorage.removeItem('huddle_events');
+      await AsyncStorage.removeItem('huddle_board');
+      await AsyncStorage.removeItem('huddle_notifications');
     },
     onSuccess: () => {
       setUser(null);
       setOnboarded(false);
       queryClient.invalidateQueries({ queryKey: ['user'] });
       queryClient.invalidateQueries({ queryKey: ['onboarded'] });
-      console.log('User logged out successfully');
+      queryClient.clear();
+      console.log('[UserProvider] User logged out and all data cleared');
     },
   });
 
+  const { mutate: doLogout } = logoutMutation;
+
   const logout = useCallback(() => {
-    logoutMutation.mutate();
-  }, [logoutMutation]);
+    doLogout();
+  }, [doLogout]);
 
   const isLoading = userQuery.isLoading || onboardedQuery.isLoading;
 

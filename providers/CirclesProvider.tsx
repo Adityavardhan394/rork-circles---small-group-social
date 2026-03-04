@@ -1,131 +1,282 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import createContextHook from '@nkzw/create-context-hook';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Circle, Post, Poll, CircleEvent, BoardItem, Notification } from '@/types';
-import {
-  MOCK_CIRCLES,
-  MOCK_POSTS,
-  MOCK_POLLS,
-  MOCK_EVENTS,
-  MOCK_BOARD_ITEMS,
-  MOCK_NOTIFICATIONS,
-} from '@/mocks/data';
+import { trpc } from '@/lib/trpc';
+import { useUser } from '@/providers/UserProvider';
 
 const STORAGE_KEYS = {
-  circles: 'circles_data',
-  posts: 'circles_posts',
-  polls: 'circles_polls',
-  events: 'circles_events',
-  board: 'circles_board',
-  notifications: 'circles_notifications',
+  circles: 'huddle_circles',
+  posts: 'huddle_posts',
+  polls: 'huddle_polls',
+  events: 'huddle_events',
+  board: 'huddle_board',
+  notifications: 'huddle_notifications',
 };
 
 export const [CirclesProvider, useCircles] = createContextHook(() => {
-  const [circles, setCircles] = useState<Circle[]>(MOCK_CIRCLES);
-  const [posts, setPosts] = useState<Post[]>(MOCK_POSTS);
-  const [polls, setPolls] = useState<Poll[]>(MOCK_POLLS);
-  const [events, setEvents] = useState<CircleEvent[]>(MOCK_EVENTS);
-  const [boardItems, setBoardItems] = useState<BoardItem[]>(MOCK_BOARD_ITEMS);
-  const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS);
-  const queryClient = useQueryClient();
+  const [circles, setCircles] = useState<Circle[]>([]);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [polls, setPolls] = useState<Poll[]>([]);
+  const [events, setEvents] = useState<CircleEvent[]>([]);
+  const [boardItems, setBoardItems] = useState<BoardItem[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [dataLoaded, setDataLoaded] = useState<boolean>(false);
+  const { user } = useUser();
+  const userId = user?.id ?? '';
 
-  const dataQuery = useQuery({
-    queryKey: ['circlesData'],
+  const circlesQuery = trpc.circles.list.useQuery(
+    { userId },
+    { enabled: !!userId, retry: 1, staleTime: 5000 }
+  );
+  const postsQuery = trpc.posts.list.useQuery(
+    { userId },
+    { enabled: !!userId, retry: 1, staleTime: 5000 }
+  );
+  const pollsQuery = trpc.polls.list.useQuery(
+    { userId },
+    { enabled: !!userId, retry: 1, staleTime: 5000 }
+  );
+  const eventsQuery = trpc.events.list.useQuery(
+    { userId },
+    { enabled: !!userId, retry: 1, staleTime: 5000 }
+  );
+  const boardQuery = trpc.board.list.useQuery(
+    { userId },
+    { enabled: !!userId, retry: 1, staleTime: 5000 }
+  );
+  const notifsQuery = trpc.notifications.list.useQuery(
+    { userId },
+    { enabled: !!userId, retry: 1, staleTime: 5000 }
+  );
+
+  const localDataQuery = useQuery({
+    queryKey: ['localCirclesData'],
     queryFn: async () => {
-      const [storedCircles, storedPosts, storedPolls, storedEvents, storedBoard, storedNotifs] =
-        await Promise.all([
-          AsyncStorage.getItem(STORAGE_KEYS.circles),
-          AsyncStorage.getItem(STORAGE_KEYS.posts),
-          AsyncStorage.getItem(STORAGE_KEYS.polls),
-          AsyncStorage.getItem(STORAGE_KEYS.events),
-          AsyncStorage.getItem(STORAGE_KEYS.board),
-          AsyncStorage.getItem(STORAGE_KEYS.notifications),
-        ]);
+      const [sc, sp, spl, se, sb, sn] = await Promise.all([
+        AsyncStorage.getItem(STORAGE_KEYS.circles),
+        AsyncStorage.getItem(STORAGE_KEYS.posts),
+        AsyncStorage.getItem(STORAGE_KEYS.polls),
+        AsyncStorage.getItem(STORAGE_KEYS.events),
+        AsyncStorage.getItem(STORAGE_KEYS.board),
+        AsyncStorage.getItem(STORAGE_KEYS.notifications),
+      ]);
       return {
-        circles: storedCircles ? JSON.parse(storedCircles) : null,
-        posts: storedPosts ? JSON.parse(storedPosts) : null,
-        polls: storedPolls ? JSON.parse(storedPolls) : null,
-        events: storedEvents ? JSON.parse(storedEvents) : null,
-        board: storedBoard ? JSON.parse(storedBoard) : null,
-        notifications: storedNotifs ? JSON.parse(storedNotifs) : null,
+        circles: sc ? JSON.parse(sc) : [],
+        posts: sp ? JSON.parse(sp) : [],
+        polls: spl ? JSON.parse(spl) : [],
+        events: se ? JSON.parse(se) : [],
+        board: sb ? JSON.parse(sb) : [],
+        notifications: sn ? JSON.parse(sn) : [],
       };
     },
   });
 
   useEffect(() => {
-    if (dataQuery.data) {
-      if (dataQuery.data.circles) setCircles(dataQuery.data.circles);
-      if (dataQuery.data.posts) setPosts(dataQuery.data.posts);
-      if (dataQuery.data.polls) setPolls(dataQuery.data.polls);
-      if (dataQuery.data.events) setEvents(dataQuery.data.events);
-      if (dataQuery.data.board) setBoardItems(dataQuery.data.board);
-      if (dataQuery.data.notifications) setNotifications(dataQuery.data.notifications);
+    if (localDataQuery.data && !dataLoaded) {
+      setCircles(localDataQuery.data.circles);
+      setPosts(localDataQuery.data.posts);
+      setPolls(localDataQuery.data.polls);
+      setEvents(localDataQuery.data.events);
+      setBoardItems(localDataQuery.data.board);
+      setNotifications(localDataQuery.data.notifications);
+      setDataLoaded(true);
+      console.log('[CirclesProvider] Loaded local data');
     }
-  }, [dataQuery.data]);
+  }, [localDataQuery.data, dataLoaded]);
 
-  const persistMutation = useMutation({
-    mutationFn: async (data: { key: string; value: unknown }) => {
-      await AsyncStorage.setItem(data.key, JSON.stringify(data.value));
-    },
-  });
+  useEffect(() => {
+    if (circlesQuery.data && userId) {
+      const backendCircles = circlesQuery.data as Circle[];
+      if (backendCircles.length > 0 || circles.length === 0) {
+        setCircles(backendCircles);
+        AsyncStorage.setItem(STORAGE_KEYS.circles, JSON.stringify(backendCircles));
+        console.log('[CirclesProvider] Synced circles from backend:', backendCircles.length);
+      }
+    }
+  }, [circlesQuery.data, userId]);
+
+  useEffect(() => {
+    if (postsQuery.data && userId) {
+      const backendPosts = postsQuery.data as Post[];
+      if (backendPosts.length > 0 || posts.length === 0) {
+        setPosts(backendPosts);
+        AsyncStorage.setItem(STORAGE_KEYS.posts, JSON.stringify(backendPosts));
+      }
+    }
+  }, [postsQuery.data, userId]);
+
+  useEffect(() => {
+    if (pollsQuery.data && userId) {
+      const backendPolls = pollsQuery.data as Poll[];
+      if (backendPolls.length > 0 || polls.length === 0) {
+        setPolls(backendPolls);
+        AsyncStorage.setItem(STORAGE_KEYS.polls, JSON.stringify(backendPolls));
+      }
+    }
+  }, [pollsQuery.data, userId]);
+
+  useEffect(() => {
+    if (eventsQuery.data && userId) {
+      const backendEvents = eventsQuery.data as CircleEvent[];
+      if (backendEvents.length > 0 || events.length === 0) {
+        setEvents(backendEvents);
+        AsyncStorage.setItem(STORAGE_KEYS.events, JSON.stringify(backendEvents));
+      }
+    }
+  }, [eventsQuery.data, userId]);
+
+  useEffect(() => {
+    if (boardQuery.data && userId) {
+      const backendBoard = boardQuery.data as BoardItem[];
+      if (backendBoard.length > 0 || boardItems.length === 0) {
+        setBoardItems(backendBoard);
+        AsyncStorage.setItem(STORAGE_KEYS.board, JSON.stringify(backendBoard));
+      }
+    }
+  }, [boardQuery.data, userId]);
+
+  useEffect(() => {
+    if (notifsQuery.data && userId) {
+      const backendNotifs = notifsQuery.data as Notification[];
+      if (backendNotifs.length > 0 || notifications.length === 0) {
+        setNotifications(backendNotifs);
+        AsyncStorage.setItem(STORAGE_KEYS.notifications, JSON.stringify(backendNotifs));
+      }
+    }
+  }, [notifsQuery.data, userId]);
+
+  const createCircleMutation = trpc.circles.create.useMutation();
+  const createPostMutation = trpc.posts.create.useMutation();
+  const toggleReactionMutation = trpc.posts.toggleReaction.useMutation();
+  const togglePinMutation = trpc.posts.togglePin.useMutation();
+  const createPollMutation = trpc.polls.create.useMutation();
+  const votePollMutation = trpc.polls.vote.useMutation();
+  const createEventMutation = trpc.events.create.useMutation();
+  const rsvpEventMutation = trpc.events.rsvp.useMutation();
+  const createBoardItemMutation = trpc.board.create.useMutation();
+  const toggleBoardTodoMutation = trpc.board.toggleTodo.useMutation();
+  const markNotifReadMutation = trpc.notifications.markRead.useMutation();
+  const markAllNotifReadMutation = trpc.notifications.markAllRead.useMutation();
+  const createNotifMutation = trpc.notifications.create.useMutation();
+
+  const persistLocal = useCallback((key: string, value: unknown) => {
+    AsyncStorage.setItem(key, JSON.stringify(value));
+  }, []);
 
   const addCircle = useCallback((circle: Circle) => {
     setCircles(prev => {
       const updated = [circle, ...prev];
-      persistMutation.mutate({ key: STORAGE_KEYS.circles, value: updated });
+      persistLocal(STORAGE_KEYS.circles, updated);
       return updated;
     });
-  }, [persistMutation]);
+    if (userId) {
+      createCircleMutation.mutate(
+        { userId, circle },
+        {
+          onSuccess: () => console.log('[Backend] Circle created:', circle.name),
+          onError: (err) => console.log('[Backend] Circle create error:', err.message),
+        }
+      );
+    }
+  }, [userId, createCircleMutation, persistLocal]);
 
   const addPost = useCallback((post: Post) => {
     setPosts(prev => {
       const updated = [post, ...prev];
-      persistMutation.mutate({ key: STORAGE_KEYS.posts, value: updated });
+      persistLocal(STORAGE_KEYS.posts, updated);
       return updated;
     });
-  }, [persistMutation]);
+    if (userId) {
+      createPostMutation.mutate(
+        { userId, post },
+        {
+          onSuccess: () => console.log('[Backend] Post created'),
+          onError: (err) => console.log('[Backend] Post create error:', err.message),
+        }
+      );
 
-  const toggleReaction = useCallback((postId: string, emoji: string, userId: string) => {
+      const circle = circles.find(c => c.id === post.circleId);
+      if (circle) {
+        const notif: Notification = {
+          id: `notif-${Date.now()}`,
+          type: 'post',
+          circleId: post.circleId,
+          circleName: circle.name,
+          circleEmoji: circle.emoji,
+          title: 'New post',
+          body: `${post.author.name} posted in ${circle.name}`,
+          read: true,
+          createdAt: new Date().toISOString(),
+          actorName: post.author.name,
+          actorAvatar: post.author.avatar,
+        };
+        setNotifications(prev => {
+          const updated = [notif, ...prev];
+          persistLocal(STORAGE_KEYS.notifications, updated);
+          return updated;
+        });
+        createNotifMutation.mutate({ userId, notification: notif });
+      }
+    }
+  }, [userId, createPostMutation, createNotifMutation, persistLocal, circles]);
+
+  const toggleReaction = useCallback((postId: string, emoji: string, reactUserId: string) => {
     setPosts(prev => {
       const updated = prev.map(p => {
         if (p.id !== postId) return p;
         const currentVotes = p.reactions[emoji] || [];
-        const hasVoted = currentVotes.includes(userId);
+        const hasVoted = currentVotes.includes(reactUserId);
         return {
           ...p,
           reactions: {
             ...p.reactions,
             [emoji]: hasVoted
-              ? currentVotes.filter(id => id !== userId)
-              : [...currentVotes, userId],
+              ? currentVotes.filter(id => id !== reactUserId)
+              : [...currentVotes, reactUserId],
           },
         };
       });
-      persistMutation.mutate({ key: STORAGE_KEYS.posts, value: updated });
+      persistLocal(STORAGE_KEYS.posts, updated);
       return updated;
     });
-  }, [persistMutation]);
+    if (userId) {
+      toggleReactionMutation.mutate({ userId, postId, emoji, reactUserId });
+    }
+  }, [userId, toggleReactionMutation, persistLocal]);
 
   const togglePin = useCallback((postId: string) => {
     setPosts(prev => {
       const updated = prev.map(p =>
         p.id === postId ? { ...p, pinned: !p.pinned } : p
       );
-      persistMutation.mutate({ key: STORAGE_KEYS.posts, value: updated });
+      persistLocal(STORAGE_KEYS.posts, updated);
       return updated;
     });
-  }, [persistMutation]);
+    if (userId) {
+      togglePinMutation.mutate({ userId, postId });
+    }
+  }, [userId, togglePinMutation, persistLocal]);
 
   const addPoll = useCallback((poll: Poll) => {
     setPolls(prev => {
       const updated = [poll, ...prev];
-      persistMutation.mutate({ key: STORAGE_KEYS.polls, value: updated });
+      persistLocal(STORAGE_KEYS.polls, updated);
       return updated;
     });
-  }, [persistMutation]);
+    if (userId) {
+      createPollMutation.mutate(
+        { userId, poll },
+        {
+          onSuccess: () => console.log('[Backend] Poll created'),
+          onError: (err) => console.log('[Backend] Poll create error:', err.message),
+        }
+      );
+    }
+  }, [userId, createPollMutation, persistLocal]);
 
-  const votePoll = useCallback((pollId: string, optionId: string, userId: string) => {
+  const votePoll = useCallback((pollId: string, optionId: string, voterId: string) => {
     setPolls(prev => {
       const updated = prev.map(p => {
         if (p.id !== pollId) return p;
@@ -134,75 +285,121 @@ export const [CirclesProvider, useCircles] = createContextHook(() => {
           options: p.options.map(o => ({
             ...o,
             votes: o.id === optionId
-              ? o.votes.includes(userId) ? o.votes.filter(id => id !== userId) : [...o.votes, userId]
-              : o.votes.filter(id => id !== userId),
+              ? o.votes.includes(voterId) ? o.votes.filter(id => id !== voterId) : [...o.votes, voterId]
+              : o.votes.filter(id => id !== voterId),
           })),
         };
       });
-      persistMutation.mutate({ key: STORAGE_KEYS.polls, value: updated });
+      persistLocal(STORAGE_KEYS.polls, updated);
       return updated;
     });
-  }, [persistMutation]);
+    if (userId) {
+      votePollMutation.mutate({ userId, pollId, optionId, voterId });
+    }
+  }, [userId, votePollMutation, persistLocal]);
 
   const addEvent = useCallback((event: CircleEvent) => {
     setEvents(prev => {
       const updated = [event, ...prev];
-      persistMutation.mutate({ key: STORAGE_KEYS.events, value: updated });
+      persistLocal(STORAGE_KEYS.events, updated);
       return updated;
     });
-  }, [persistMutation]);
+    if (userId) {
+      createEventMutation.mutate(
+        { userId, event },
+        {
+          onSuccess: () => console.log('[Backend] Event created'),
+          onError: (err) => console.log('[Backend] Event create error:', err.message),
+        }
+      );
+    }
+  }, [userId, createEventMutation, persistLocal]);
 
-  const rsvpEvent = useCallback((eventId: string, userId: string, status: 'yes' | 'maybe' | 'no') => {
+  const rsvpEvent = useCallback((eventId: string, attendeeId: string, status: 'yes' | 'maybe' | 'no') => {
     setEvents(prev => {
       const updated = prev.map(e => {
         if (e.id !== eventId) return e;
         const rsvps = { ...e.rsvps };
-        rsvps.yes = rsvps.yes.filter(id => id !== userId);
-        rsvps.maybe = rsvps.maybe.filter(id => id !== userId);
-        rsvps.no = rsvps.no.filter(id => id !== userId);
-        rsvps[status].push(userId);
+        rsvps.yes = rsvps.yes.filter(id => id !== attendeeId);
+        rsvps.maybe = rsvps.maybe.filter(id => id !== attendeeId);
+        rsvps.no = rsvps.no.filter(id => id !== attendeeId);
+        rsvps[status].push(attendeeId);
         return { ...e, rsvps };
       });
-      persistMutation.mutate({ key: STORAGE_KEYS.events, value: updated });
+      persistLocal(STORAGE_KEYS.events, updated);
       return updated;
     });
-  }, [persistMutation]);
+    if (userId) {
+      rsvpEventMutation.mutate({ userId, eventId, attendeeId, status });
+    }
+  }, [userId, rsvpEventMutation, persistLocal]);
 
   const addBoardItem = useCallback((item: BoardItem) => {
     setBoardItems(prev => {
       const updated = [item, ...prev];
-      persistMutation.mutate({ key: STORAGE_KEYS.board, value: updated });
+      persistLocal(STORAGE_KEYS.board, updated);
       return updated;
     });
-  }, [persistMutation]);
+    if (userId) {
+      createBoardItemMutation.mutate(
+        { userId, item },
+        {
+          onSuccess: () => console.log('[Backend] Board item created'),
+          onError: (err) => console.log('[Backend] Board item create error:', err.message),
+        }
+      );
+    }
+  }, [userId, createBoardItemMutation, persistLocal]);
 
   const toggleBoardTodo = useCallback((itemId: string) => {
     setBoardItems(prev => {
       const updated = prev.map(i =>
         i.id === itemId ? { ...i, completed: !i.completed } : i
       );
-      persistMutation.mutate({ key: STORAGE_KEYS.board, value: updated });
+      persistLocal(STORAGE_KEYS.board, updated);
       return updated;
     });
-  }, [persistMutation]);
+    if (userId) {
+      toggleBoardTodoMutation.mutate({ userId, itemId });
+    }
+  }, [userId, toggleBoardTodoMutation, persistLocal]);
 
   const markNotificationRead = useCallback((notifId: string) => {
     setNotifications(prev => {
       const updated = prev.map(n =>
         n.id === notifId ? { ...n, read: true } : n
       );
-      persistMutation.mutate({ key: STORAGE_KEYS.notifications, value: updated });
+      persistLocal(STORAGE_KEYS.notifications, updated);
       return updated;
     });
-  }, [persistMutation]);
+    if (userId) {
+      markNotifReadMutation.mutate({ userId, notifId });
+    }
+  }, [userId, markNotifReadMutation, persistLocal]);
 
   const markAllNotificationsRead = useCallback(() => {
     setNotifications(prev => {
       const updated = prev.map(n => ({ ...n, read: true }));
-      persistMutation.mutate({ key: STORAGE_KEYS.notifications, value: updated });
+      persistLocal(STORAGE_KEYS.notifications, updated);
       return updated;
     });
-  }, [persistMutation]);
+    if (userId) {
+      markAllNotifReadMutation.mutate({ userId });
+    }
+  }, [userId, markAllNotifReadMutation, persistLocal]);
+
+  const resetAllData = useCallback(async () => {
+    setCircles([]);
+    setPosts([]);
+    setPolls([]);
+    setEvents([]);
+    setBoardItems([]);
+    setNotifications([]);
+    await Promise.all(
+      Object.values(STORAGE_KEYS).map(key => AsyncStorage.removeItem(key))
+    );
+    console.log('[CirclesProvider] All data reset');
+  }, []);
 
   const unreadCount = useMemo(() => notifications.filter(n => !n.read).length, [notifications]);
 
@@ -246,11 +443,12 @@ export const [CirclesProvider, useCircles] = createContextHook(() => {
     toggleBoardTodo,
     markNotificationRead,
     markAllNotificationsRead,
+    resetAllData,
     getCirclePosts,
     getCirclePolls,
     getCircleEvents,
     getCircleBoardItems,
     getCircleById,
-    isLoading: dataQuery.isLoading,
+    isLoading: localDataQuery.isLoading,
   };
 });

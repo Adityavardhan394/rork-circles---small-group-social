@@ -16,7 +16,7 @@ import { Platform } from 'react-native';
 import Colors from '@/constants/colors';
 import { useCircles } from '@/providers/CirclesProvider';
 import { useUser } from '@/providers/UserProvider';
-import { CIRCLE_EMOJIS, CIRCLE_COLORS, CURRENT_USER } from '@/mocks/data';
+import { CIRCLE_EMOJIS, CIRCLE_COLORS } from '@/mocks/data';
 import { Circle } from '@/types';
 
 export default function CreateCircleScreen() {
@@ -42,8 +42,8 @@ export default function CreateCircleScreen() {
       name: name.trim(),
       emoji: selectedEmoji,
       color: selectedColor,
-      members: [user ?? CURRENT_USER],
-      admins: [user?.id ?? 'user-1'],
+      members: user ? [user] : [],
+      admins: user ? [user.id] : [],
       inviteCode,
       createdAt: new Date().toISOString(),
       lastActivity: 'Just created',

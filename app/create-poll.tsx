@@ -16,7 +16,7 @@ import * as Haptics from 'expo-haptics';
 import Colors from '@/constants/colors';
 import { useCircles } from '@/providers/CirclesProvider';
 import { useUser } from '@/providers/UserProvider';
-import { CURRENT_USER, POLL_TEMPLATES } from '@/mocks/data';
+import { POLL_TEMPLATES } from '@/mocks/data';
 import { Poll } from '@/types';
 import CirclePicker from '@/components/CirclePicker';
 
@@ -72,7 +72,7 @@ export default function CreatePollScreen() {
     const newPoll: Poll = {
       id: `poll-${Date.now()}`,
       circleId: selectedCircleId,
-      author: user ?? CURRENT_USER,
+      author: user!,
       question: question.trim(),
       options: validOptions.map((text, i) => ({
         id: `opt-${Date.now()}-${i}`,
