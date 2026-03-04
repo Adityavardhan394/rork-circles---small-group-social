@@ -37,7 +37,7 @@ const TAB_COUNT = 4;
 const TAB_WIDTH = (SCREEN_WIDTH - 40) / TAB_COUNT;
 
 export default function CircleDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, tab } = useLocalSearchParams<{ id: string; tab?: string }>();
   const router = useRouter();
   const { user } = useUser();
   const {
@@ -55,7 +55,8 @@ export default function CircleDetailScreen() {
     isLoading,
   } = useCircles();
 
-  const [activeTab, setActiveTab] = useState<TabType>('feed');
+  const initialTab = (tab === 'plans' || tab === 'board' || tab === 'media') ? tab : 'feed';
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab);
   const [refreshing, setRefreshing] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [showSearch, setShowSearch] = useState(false);
@@ -105,6 +106,13 @@ export default function CircleDetailScreen() {
 
   useEffect(() => {
     Animated.timing(fadeAnim, { toValue: 1, duration: 400, useNativeDriver: true }).start();
+  }, []);
+
+  useEffect(() => {
+    if (initialTab !== 'feed') {
+      const tabIndex = initialTab === 'plans' ? 1 : initialTab === 'board' ? 2 : 3;
+      tabIndicatorAnim.setValue(tabIndex);
+    }
   }, []);
 
   const handleTabChange = useCallback((tab: TabType) => {

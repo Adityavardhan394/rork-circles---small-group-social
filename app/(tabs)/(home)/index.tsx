@@ -268,7 +268,7 @@ export default function HomeScreen() {
                       key={event.id}
                       style={styles.eventCard}
                       activeOpacity={0.8}
-                      onPress={() => handleCirclePress(event.circleId)}
+                      onPress={() => router.push(`/circle/${event.circleId}?tab=plans`)}
                     >
                       <View style={styles.eventCardTop}>
                         <Text style={styles.eventEmoji}>{event.circleEmoji}</Text>
