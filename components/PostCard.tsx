@@ -89,10 +89,16 @@ function PostCardComponent({ post, onReact, onPin, currentUserId }: PostCardProp
           </View>
         </View>
         {post.pinned && (
-          <View style={styles.pinnedBadge}>
+          <TouchableOpacity
+            style={styles.pinnedBadge}
+            onPress={onPin}
+            activeOpacity={0.7}
+            accessibilityLabel="Unpin post"
+            accessibilityRole="button"
+          >
             <Pin size={11} color={Colors.primary} />
             <Text style={styles.pinnedText}>Pinned</Text>
-          </View>
+          </TouchableOpacity>
         )}
         <TouchableOpacity
           style={styles.moreBtn}

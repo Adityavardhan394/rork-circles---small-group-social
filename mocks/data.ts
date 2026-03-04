@@ -1,12 +1,38 @@
 import { User, Circle, Post, Poll, CircleEvent, BoardItem, Notification } from '@/types';
 
+function daysAgo(days: number, hours = 0): string {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  d.setHours(d.getHours() - hours);
+  return d.toISOString();
+}
+
+function daysFromNow(days: number, hours = 0): string {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  d.setHours(d.getHours() + hours);
+  return d.toISOString();
+}
+
+function hoursAgo(hours: number): string {
+  const d = new Date();
+  d.setHours(d.getHours() - hours);
+  return d.toISOString();
+}
+
+function minutesAgo(mins: number): string {
+  const d = new Date();
+  d.setMinutes(d.getMinutes() - mins);
+  return d.toISOString();
+}
+
 export const CURRENT_USER: User = {
   id: 'user-1',
   name: 'Aditya',
   avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face',
   phone: '+91 98765 43210',
   bio: 'Building cool stuff in Hyderabad',
-  createdAt: '2024-01-15T10:00:00Z',
+  createdAt: daysAgo(60),
 };
 
 export const MOCK_USERS: User[] = [
@@ -15,31 +41,31 @@ export const MOCK_USERS: User[] = [
     id: 'user-2',
     name: 'Priya',
     avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop&crop=face',
-    createdAt: '2024-01-16T10:00:00Z',
+    createdAt: daysAgo(58),
   },
   {
     id: 'user-3',
     name: 'Rahul',
     avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop&crop=face',
-    createdAt: '2024-01-17T10:00:00Z',
+    createdAt: daysAgo(55),
   },
   {
     id: 'user-4',
     name: 'Sneha',
     avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face',
-    createdAt: '2024-01-18T10:00:00Z',
+    createdAt: daysAgo(52),
   },
   {
     id: 'user-5',
     name: 'Vikram',
     avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&crop=face',
-    createdAt: '2024-01-19T10:00:00Z',
+    createdAt: daysAgo(50),
   },
   {
     id: 'user-6',
     name: 'Ananya',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&h=200&fit=crop&crop=face',
-    createdAt: '2024-01-20T10:00:00Z',
+    createdAt: daysAgo(48),
   },
 ];
 
@@ -56,7 +82,7 @@ export const MOCK_CIRCLES: Circle[] = [
     members: [MOCK_USERS[0], MOCK_USERS[1], MOCK_USERS[2], MOCK_USERS[3]],
     admins: ['user-1'],
     inviteCode: 'FLAT2024',
-    createdAt: '2024-02-01T10:00:00Z',
+    createdAt: daysAgo(45),
     lastActivity: '2 min ago',
     description: 'Hitech City flatmates — rent, groceries, chaos',
   },
@@ -68,7 +94,7 @@ export const MOCK_CIRCLES: Circle[] = [
     members: [MOCK_USERS[0], MOCK_USERS[2], MOCK_USERS[4]],
     admins: ['user-1', 'user-3'],
     inviteCode: 'GYM6AM',
-    createdAt: '2024-02-05T06:00:00Z',
+    createdAt: daysAgo(40),
     lastActivity: '15 min ago',
     description: 'Early risers only. No excuses.',
   },
@@ -80,7 +106,7 @@ export const MOCK_CIRCLES: Circle[] = [
     members: [MOCK_USERS[0], MOCK_USERS[1], MOCK_USERS[3], MOCK_USERS[4], MOCK_USERS[5]],
     admins: ['user-1'],
     inviteCode: 'JNTU23',
-    createdAt: '2024-01-10T10:00:00Z',
+    createdAt: daysAgo(50),
     lastActivity: '1 hr ago',
     description: 'JNTU CSE 2023 — placements, parties, memories',
   },
@@ -92,7 +118,7 @@ export const MOCK_CIRCLES: Circle[] = [
     members: [MOCK_USERS[0], MOCK_USERS[2], MOCK_USERS[4]],
     admins: ['user-1'],
     inviteCode: 'STARTBRO',
-    createdAt: '2024-03-01T10:00:00Z',
+    createdAt: daysAgo(30),
     lastActivity: '3 hrs ago',
     description: 'T-Hub hustlers building the next big thing',
   },
@@ -104,7 +130,7 @@ export const MOCK_CIRCLES: Circle[] = [
     members: [MOCK_USERS[0], MOCK_USERS[1], MOCK_USERS[5]],
     admins: ['user-2'],
     inviteCode: 'FOODHYD',
-    createdAt: '2024-02-15T10:00:00Z',
+    createdAt: daysAgo(35),
     lastActivity: '5 hrs ago',
     description: 'Best biryani spots and chai discoveries',
   },
@@ -119,10 +145,10 @@ export const MOCK_POSTS: Post[] = [
     mediaUrls: [],
     reactions: { '😂': ['user-1', 'user-3'], '🙈': ['user-4'] },
     comments: [
-      { id: 'c1', userId: 'user-3', userName: 'Rahul', userAvatar: MOCK_USERS[2].avatar, text: 'Not me 👀', createdAt: '2024-03-15T11:00:00Z' },
+      { id: 'c1', userId: 'user-3', userName: 'Rahul', userAvatar: MOCK_USERS[2].avatar, text: 'Not me 👀', createdAt: minutesAgo(25) },
     ],
-    createdAt: '2024-03-15T10:30:00Z',
-    expiresAt: '2024-03-18T10:30:00Z',
+    createdAt: minutesAgo(30),
+    expiresAt: daysFromNow(3),
     pinned: false,
   },
   {
@@ -133,8 +159,8 @@ export const MOCK_POSTS: Post[] = [
     mediaUrls: [],
     reactions: { '👍': ['user-2', 'user-3', 'user-4'] },
     comments: [],
-    createdAt: '2024-03-14T18:00:00Z',
-    expiresAt: '2024-03-17T18:00:00Z',
+    createdAt: hoursAgo(4),
+    expiresAt: daysFromNow(3),
     pinned: true,
   },
   {
@@ -145,10 +171,10 @@ export const MOCK_POSTS: Post[] = [
     mediaUrls: ['https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&h=400&fit=crop'],
     reactions: { '🔥': ['user-1', 'user-5'], '💪': ['user-1'] },
     comments: [
-      { id: 'c2', userId: 'user-1', userName: 'Aditya', userAvatar: MOCK_USERS[0].avatar, text: 'Beast mode! 🦍', createdAt: '2024-03-15T07:00:00Z' },
+      { id: 'c2', userId: 'user-1', userName: 'Aditya', userAvatar: MOCK_USERS[0].avatar, text: 'Beast mode! 🦍', createdAt: hoursAgo(2) },
     ],
-    createdAt: '2024-03-15T06:45:00Z',
-    expiresAt: '2024-03-18T06:45:00Z',
+    createdAt: hoursAgo(3),
+    expiresAt: daysFromNow(3),
     pinned: false,
   },
   {
@@ -159,10 +185,10 @@ export const MOCK_POSTS: Post[] = [
     mediaUrls: [],
     reactions: { '📝': ['user-1'] },
     comments: [
-      { id: 'c3', userId: 'user-4', userName: 'Sneha', userAvatar: MOCK_USERS[3].avatar, text: 'Sending on WhatsApp', createdAt: '2024-03-15T09:00:00Z' },
+      { id: 'c3', userId: 'user-4', userName: 'Sneha', userAvatar: MOCK_USERS[3].avatar, text: 'Sending on WhatsApp', createdAt: hoursAgo(1) },
     ],
-    createdAt: '2024-03-15T08:30:00Z',
-    expiresAt: '2024-03-18T08:30:00Z',
+    createdAt: hoursAgo(2),
+    expiresAt: daysFromNow(3),
     pinned: false,
   },
   {
@@ -173,8 +199,8 @@ export const MOCK_POSTS: Post[] = [
     mediaUrls: ['https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=600&h=400&fit=crop'],
     reactions: { '🤤': ['user-1', 'user-6'], '❤️': ['user-1'] },
     comments: [],
-    createdAt: '2024-03-14T13:00:00Z',
-    expiresAt: '2024-03-17T13:00:00Z',
+    createdAt: hoursAgo(6),
+    expiresAt: daysFromNow(3),
     pinned: false,
   },
 ];
@@ -190,8 +216,8 @@ export const MOCK_POLLS: Poll[] = [
       { id: 'o2', text: 'Deadpool 3 🗡️', votes: ['user-2'] },
       { id: 'o3', text: 'Skip this week 😴', votes: ['user-4'] },
     ],
-    createdAt: '2024-03-14T20:00:00Z',
-    expiresAt: '2024-03-16T20:00:00Z',
+    createdAt: hoursAgo(2),
+    expiresAt: daysFromNow(1),
     closed: false,
   },
   {
@@ -204,9 +230,9 @@ export const MOCK_POLLS: Poll[] = [
       { id: 'o5', text: '7:00 AM 🌤️', votes: ['user-3'] },
       { id: 'o6', text: 'Rest day 💤', votes: [] },
     ],
-    createdAt: '2024-03-15T21:00:00Z',
-    expiresAt: '2024-03-16T05:00:00Z',
-    closed: false,
+    createdAt: daysAgo(3),
+    expiresAt: daysAgo(2),
+    closed: true,
   },
 ];
 
@@ -217,11 +243,11 @@ export const MOCK_EVENTS: CircleEvent[] = [
     author: MOCK_USERS[0],
     title: 'House Party 🎉',
     description: 'BYOB! Bringing the speakers.',
-    date: '2024-03-23',
+    date: daysFromNow(5).split('T')[0],
     time: '8:00 PM',
     location: 'Our flat, Hitech City',
     rsvps: { yes: ['user-1', 'user-2'], maybe: ['user-3'], no: [] },
-    createdAt: '2024-03-15T10:00:00Z',
+    createdAt: daysAgo(2),
   },
   {
     id: 'event-2',
@@ -229,11 +255,11 @@ export const MOCK_EVENTS: CircleEvent[] = [
     author: MOCK_USERS[3],
     title: 'Batch Reunion Dinner',
     description: 'Let\'s catch up at Paradise Biryani',
-    date: '2024-03-30',
+    date: daysFromNow(12).split('T')[0],
     time: '7:30 PM',
     location: 'Paradise, Secunderabad',
     rsvps: { yes: ['user-1', 'user-4', 'user-6'], maybe: ['user-2'], no: ['user-5'] },
-    createdAt: '2024-03-14T15:00:00Z',
+    createdAt: daysAgo(3),
   },
   {
     id: 'event-3',
@@ -241,11 +267,11 @@ export const MOCK_EVENTS: CircleEvent[] = [
     author: MOCK_USERS[2],
     title: 'Sunday Long Run',
     description: '10K around KBR Park',
-    date: '2024-03-24',
+    date: daysFromNow(3).split('T')[0],
     time: '5:30 AM',
     location: 'KBR Park, Jubilee Hills',
     rsvps: { yes: ['user-3', 'user-5'], maybe: ['user-1'], no: [] },
-    createdAt: '2024-03-15T12:00:00Z',
+    createdAt: daysAgo(1),
   },
 ];
 
@@ -258,7 +284,7 @@ export const MOCK_BOARD_ITEMS: BoardItem[] = [
     type: 'link',
     content: 'Google Sheets link for March rent',
     url: 'https://sheets.google.com',
-    createdAt: '2024-03-01T10:00:00Z',
+    createdAt: daysAgo(14),
   },
   {
     id: 'board-2',
@@ -267,7 +293,7 @@ export const MOCK_BOARD_ITEMS: BoardItem[] = [
     title: 'WiFi Password',
     type: 'note',
     content: 'Router: ACT_5G\nPassword: flatmates2024',
-    createdAt: '2024-02-15T10:00:00Z',
+    createdAt: daysAgo(30),
   },
   {
     id: 'board-3',
@@ -277,7 +303,7 @@ export const MOCK_BOARD_ITEMS: BoardItem[] = [
     type: 'todo',
     content: 'Milk, eggs, bread, coffee',
     completed: false,
-    createdAt: '2024-03-15T08:00:00Z',
+    createdAt: hoursAgo(5),
   },
   {
     id: 'board-4',
@@ -287,7 +313,7 @@ export const MOCK_BOARD_ITEMS: BoardItem[] = [
     type: 'link',
     content: 'Shared drive with all interview prep material',
     url: 'https://drive.google.com',
-    createdAt: '2024-03-10T10:00:00Z',
+    createdAt: daysAgo(5),
   },
 ];
 
@@ -301,7 +327,7 @@ export const MOCK_NOTIFICATIONS: Notification[] = [
     title: 'New post',
     body: 'Priya shared a photo in Flatmates HYD',
     read: false,
-    createdAt: '2024-03-15T10:30:00Z',
+    createdAt: minutesAgo(30),
     actorName: 'Priya',
     actorAvatar: MOCK_USERS[1].avatar,
   },
@@ -314,7 +340,7 @@ export const MOCK_NOTIFICATIONS: Notification[] = [
     title: 'Reaction',
     body: 'Rahul reacted 🔥 to your post',
     read: false,
-    createdAt: '2024-03-15T07:00:00Z',
+    createdAt: hoursAgo(3),
     actorName: 'Rahul',
     actorAvatar: MOCK_USERS[2].avatar,
   },
@@ -327,7 +353,7 @@ export const MOCK_NOTIFICATIONS: Notification[] = [
     title: 'New event',
     body: 'Sneha created "Batch Reunion Dinner" on Mar 30',
     read: true,
-    createdAt: '2024-03-14T15:00:00Z',
+    createdAt: daysAgo(1),
     actorName: 'Sneha',
     actorAvatar: MOCK_USERS[3].avatar,
   },
@@ -340,7 +366,7 @@ export const MOCK_NOTIFICATIONS: Notification[] = [
     title: 'New poll',
     body: 'Vikram asks: "Gym timing tomorrow?"',
     read: true,
-    createdAt: '2024-03-15T21:00:00Z',
+    createdAt: hoursAgo(1),
     actorName: 'Vikram',
     actorAvatar: MOCK_USERS[4].avatar,
   },
@@ -353,7 +379,7 @@ export const MOCK_NOTIFICATIONS: Notification[] = [
     title: 'Comment',
     body: 'Rahul commented "Not me 👀" on your post',
     read: true,
-    createdAt: '2024-03-15T11:00:00Z',
+    createdAt: hoursAgo(5),
     actorName: 'Rahul',
     actorAvatar: MOCK_USERS[2].avatar,
   },

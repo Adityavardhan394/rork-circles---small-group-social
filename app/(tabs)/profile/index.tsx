@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useEffect } from 'react';
+import React, { useCallback, useRef, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -7,10 +7,15 @@ import {
   TouchableOpacity,
   Alert,
   Animated,
+  TextInput,
+  Modal,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { Settings, ChevronRight, Shield, Bell, Palette, CircleHelp, LogOut, Edit3 } from 'lucide-react-native';
+import { Settings, ChevronRight, Shield, Bell, CircleHelp, LogOut, Edit3, X, Camera } from 'lucide-react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import Colors from '@/constants/colors';
 import { useUser } from '@/providers/UserProvider';
@@ -24,10 +29,14 @@ const MENU_ITEMS = [
 ];
 
 export default function ProfileScreen() {
-  const { user, logout } = useUser();
+  const { user, logout, updateUser } = useUser();
   const { circles } = useCircles();
   const router = useRouter();
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editName, setEditName] = useState(user?.name ?? '');
+  const [editBio, setEditBio] = useState(user?.bio ?? '');
+  const [editAvatar, setEditAvatar] = useState(user?.avatar ?? '');
 
   useEffect(() => {
     Animated.timing(fadeAnim, { toValue: 1, duration: 400, useNativeDriver: true }).start();
@@ -54,6 +63,40 @@ export default function ProfileScreen() {
       Alert.alert(label, 'This feature is coming soon!');
     }
   }, [router]);
+
+  const handleOpenEditModal = useCallback(() => {
+    setEditName(user?.name ?? '');
+    setEditBio(user?.bio ?? '');
+    setEditAvatar(user?.avatar ?? '');
+    setShowEditModal(true);
+  }, [user]);
+
+  const handlePickAvatar = useCallback(async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+    if (!result.canceled && result.assets[0]) {
+      setEditAvatar(result.assets[0].uri);
+    }
+  }, []);
+
+  const handleSaveProfile = useCallback(() => {
+    if (!editName.trim()) {
+      Alert.alert('Name required', 'Please enter your name.');
+      return;
+    }
+    if (!user) return;
+    updateUser({
+      ...user,
+      name: editName.trim(),
+      bio: editBio.trim() || undefined,
+      avatar: editAvatar,
+    });
+    setShowEditModal(false);
+  }, [editName, editBio, editAvatar, user, updateUser]);
 
   const connectionCount = new Set(circles.flatMap(c => c.members.map(m => m.id))).size;
 
@@ -83,14 +126,23 @@ export default function ProfileScreen() {
                 />
                 <TouchableOpacity
                   style={styles.editAvatarBtn}
-                  accessibilityLabel="Edit profile photo"
+                  onPress={handleOpenEditModal}
+                  accessibilityLabel="Edit profile"
                   accessibilityRole="button"
                 >
                   <Edit3 size={12} color={Colors.white} />
                 </TouchableOpacity>
               </View>
               <Text style={styles.name}>{user?.name || 'Your Name'}</Text>
-              {user?.bio ? <Text style={styles.bio}>{user.bio}</Text> : null}
+              {user?.bio ? <Text style={styles.bio}>{user.bio}</Text> : (
+                <TouchableOpacity onPress={handleOpenEditModal}>
+                  <Text style={styles.addBioText}>+ Add a bio</Text>
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity style={styles.editProfileBtn} onPress={handleOpenEditModal}>
+                <Edit3 size={14} color={Colors.primary} />
+                <Text style={styles.editProfileBtnText}>Edit Profile</Text>
+              </TouchableOpacity>
               <View style={styles.statsRow}>
                 <View style={styles.stat} accessibilityLabel={`${circles.length} circles`}>
                   <Text style={styles.statValue}>{circles.length}</Text>
@@ -160,6 +212,68 @@ export default function ProfileScreen() {
             <Text style={styles.version}>Huddle v1.0.0</Text>
           </Animated.View>
         </ScrollView>
+
+        <Modal
+          visible={showEditModal}
+          animationType="slide"
+          transparent
+          onRequestClose={() => setShowEditModal(false)}
+        >
+          <KeyboardAvoidingView
+            style={styles.modalOverlay}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          >
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <TouchableOpacity onPress={() => setShowEditModal(false)}>
+                  <X size={22} color={Colors.text} />
+                </TouchableOpacity>
+                <Text style={styles.modalTitle}>Edit Profile</Text>
+                <TouchableOpacity onPress={handleSaveProfile}>
+                  <Text style={styles.saveBtn}>Save</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.modalBody}>
+                <TouchableOpacity style={styles.modalAvatarContainer} onPress={handlePickAvatar}>
+                  <Image
+                    source={{ uri: editAvatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face' }}
+                    style={styles.modalAvatar}
+                  />
+                  <View style={styles.modalAvatarOverlay}>
+                    <Camera size={20} color={Colors.white} />
+                  </View>
+                </TouchableOpacity>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Name</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    value={editName}
+                    onChangeText={setEditName}
+                    placeholder="Your name"
+                    placeholderTextColor={Colors.textTertiary}
+                    maxLength={30}
+                  />
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Bio</Text>
+                  <TextInput
+                    style={[styles.textInput, styles.bioInput]}
+                    value={editBio}
+                    onChangeText={setEditBio}
+                    placeholder="Tell people about yourself..."
+                    placeholderTextColor={Colors.textTertiary}
+                    multiline
+                    maxLength={120}
+                  />
+                  <Text style={styles.charCount}>{editBio.length}/120</Text>
+                </View>
+              </View>
+            </View>
+          </KeyboardAvoidingView>
+        </Modal>
       </SafeAreaView>
     </View>
   );
@@ -360,5 +474,115 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.textTertiary,
     marginTop: 20,
+  },
+  addBioText: {
+    fontSize: 13,
+    color: Colors.primary,
+    fontWeight: '500' as const,
+    marginTop: 4,
+  },
+  editProfileBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 10,
+    backgroundColor: Colors.teal50,
+    borderWidth: 1,
+    borderColor: Colors.teal100,
+  },
+  editProfileBtnText: {
+    fontSize: 13,
+    fontWeight: '600' as const,
+    color: Colors.primary,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: Colors.background,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingBottom: 40,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderLight,
+  },
+  modalTitle: {
+    fontSize: 17,
+    fontWeight: '600' as const,
+    color: Colors.text,
+  },
+  saveBtn: {
+    fontSize: 15,
+    fontWeight: '600' as const,
+    color: Colors.primary,
+  },
+  modalBody: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  modalAvatarContainer: {
+    position: 'relative' as const,
+    marginBottom: 24,
+  },
+  modalAvatar: {
+    width: 100,
+    height: 100,
+    borderRadius: 36,
+  },
+  modalAvatarOverlay: {
+    position: 'absolute' as const,
+    bottom: 0,
+    right: 0,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: Colors.background,
+  },
+  inputGroup: {
+    width: '100%',
+    marginBottom: 16,
+  },
+  inputLabel: {
+    fontSize: 12,
+    fontWeight: '600' as const,
+    color: Colors.textSecondary,
+    textTransform: 'uppercase' as const,
+    letterSpacing: 0.5,
+    marginBottom: 6,
+  },
+  textInput: {
+    backgroundColor: Colors.surface,
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 15,
+    color: Colors.text,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  bioInput: {
+    height: 80,
+    textAlignVertical: 'top' as const,
+  },
+  charCount: {
+    fontSize: 11,
+    color: Colors.textTertiary,
+    textAlign: 'right' as const,
+    marginTop: 4,
   },
 });

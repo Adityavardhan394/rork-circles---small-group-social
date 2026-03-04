@@ -22,11 +22,20 @@ import { CURRENT_USER } from '@/mocks/data';
 import { Post } from '@/types';
 import CirclePicker from '@/components/CirclePicker';
 
+const EXPIRY_OPTIONS = [
+  { label: '24h', hours: 24 },
+  { label: '48h', hours: 48 },
+  { label: '72h', hours: 72 },
+  { label: '7d', hours: 168 },
+  { label: 'Never', hours: 0 },
+] as const;
+
 export default function CreatePostScreen() {
   const { circleId: paramCircleId } = useLocalSearchParams<{ circleId: string }>();
   const [selectedCircleId, setSelectedCircleId] = useState<string | null>(paramCircleId ?? null);
   const [text, setText] = useState('');
   const [imageUri, setImageUri] = useState<string | null>(null);
+  const [selectedExpiry, setSelectedExpiry] = useState<number>(72);
   const [step, setStep] = useState<'pick' | 'compose'>(paramCircleId ? 'compose' : 'pick');
   const router = useRouter();
   const { circles, addPost, getCircleById } = useCircles();
@@ -59,7 +68,9 @@ export default function CreatePostScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
     const now = new Date();
-    const expires = new Date(now.getTime() + 72 * 60 * 60 * 1000);
+    const expires = selectedExpiry > 0
+      ? new Date(now.getTime() + selectedExpiry * 60 * 60 * 1000)
+      : new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
     const newPost: Post = {
       id: `post-${Date.now()}`,
       circleId: selectedCircleId,
@@ -74,7 +85,7 @@ export default function CreatePostScreen() {
     };
     addPost(newPost);
     router.back();
-  }, [text, imageUri, selectedCircleId, addPost, user, router]);
+  }, [text, imageUri, selectedCircleId, selectedExpiry, addPost, user, router]);
 
   const handleSelectCircle = useCallback((id: string) => {
     setSelectedCircleId(id);
@@ -152,7 +163,9 @@ export default function CreatePostScreen() {
             />
             <View>
               <Text style={styles.authorName}>{user?.name || CURRENT_USER.name}</Text>
-              <Text style={styles.expiryNote}>Expires in 72 hours</Text>
+              <Text style={styles.expiryNote}>
+                {selectedExpiry > 0 ? `Expires in ${selectedExpiry >= 168 ? '7 days' : `${selectedExpiry}h`}` : 'No expiry'}
+              </Text>
             </View>
           </View>
 
@@ -175,6 +188,31 @@ export default function CreatePostScreen() {
               </TouchableOpacity>
             </View>
           )}
+
+          <View style={styles.expirySection}>
+            <Text style={styles.expirySectionLabel}>Expires in</Text>
+            <View style={styles.expiryOptionsRow}>
+              {EXPIRY_OPTIONS.map((opt) => (
+                <TouchableOpacity
+                  key={opt.hours}
+                  style={[
+                    styles.expiryOption,
+                    selectedExpiry === opt.hours && styles.expiryOptionActive,
+                  ]}
+                  onPress={() => setSelectedExpiry(opt.hours)}
+                >
+                  <Text
+                    style={[
+                      styles.expiryOptionText,
+                      selectedExpiry === opt.hours && styles.expiryOptionTextActive,
+                    ]}
+                  >
+                    {opt.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
 
           <View style={styles.toolbar}>
             <TouchableOpacity style={styles.toolbarBtn} onPress={handlePickImage}>
@@ -325,5 +363,41 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500' as const,
     color: Colors.primary,
+  },
+  expirySection: {
+    marginBottom: 12,
+  },
+  expirySectionLabel: {
+    fontSize: 12,
+    fontWeight: '600' as const,
+    color: Colors.textSecondary,
+    textTransform: 'uppercase' as const,
+    letterSpacing: 0.5,
+    marginBottom: 8,
+  },
+  expiryOptionsRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  expiryOption: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 10,
+    backgroundColor: Colors.surfaceSecondary,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  expiryOptionActive: {
+    backgroundColor: Colors.teal50,
+    borderColor: Colors.primary,
+  },
+  expiryOptionText: {
+    fontSize: 13,
+    fontWeight: '500' as const,
+    color: Colors.textSecondary,
+  },
+  expiryOptionTextActive: {
+    color: Colors.primary,
+    fontWeight: '600' as const,
   },
 });

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -6,14 +6,12 @@ import {
   TextInput,
   ScrollView,
   TouchableOpacity,
-  Alert,
-  Animated,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Search, Plus, Hash, ArrowRight } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { Platform } from 'react-native';
 import Colors from '@/constants/colors';
 import { useCircles } from '@/providers/CirclesProvider';
 
@@ -31,12 +29,20 @@ const SUGGESTED_CIRCLES = [
 export default function SearchScreen() {
   const [searchText, setSearchText] = useState('');
   const [joinCode, setJoinCode] = useState('');
+  const [joinError, setJoinError] = useState<string | null>(null);
+  const [joinSuccess, setJoinSuccess] = useState<string | null>(null);
   const router = useRouter();
   const { circles } = useCircles();
 
   const handleJoinWithCode = useCallback(() => {
+    setJoinError(null);
+    setJoinSuccess(null);
     if (!joinCode.trim()) {
-      Alert.alert('Enter a code', 'Please enter an invite code to join a huddle.');
+      setJoinError('Please enter an invite code');
+      return;
+    }
+    if (joinCode.trim().length < 3) {
+      setJoinError('Code must be at least 3 characters');
       return;
     }
     if (Platform.OS !== 'web') {
@@ -44,10 +50,20 @@ export default function SearchScreen() {
     }
     const found = circles.find(c => c.inviteCode.toLowerCase() === joinCode.trim().toLowerCase());
     if (found) {
-      Alert.alert('Already a member!', `You're already in ${found.name}`);
+      setJoinSuccess(`You're already in ${found.name}`);
+      if (Platform.OS !== 'web') {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      }
     } else {
-      Alert.alert('Huddle not found', 'No huddle found with that invite code. Check the code and try again.');
+      setJoinError('No huddle found with that code. Check and try again.');
+      if (Platform.OS !== 'web') {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      }
     }
+    setTimeout(() => {
+      setJoinError(null);
+      setJoinSuccess(null);
+    }, 4000);
     setJoinCode('');
   }, [joinCode, circles]);
 
@@ -107,6 +123,12 @@ export default function SearchScreen() {
                 <ArrowRight size={18} color={Colors.white} />
               </TouchableOpacity>
             </View>
+            {joinError && (
+              <Text style={styles.joinErrorText}>{joinError}</Text>
+            )}
+            {joinSuccess && (
+              <Text style={styles.joinSuccessText}>{joinSuccess}</Text>
+            )}
           </View>
 
           <View style={styles.createSection}>
@@ -153,7 +175,7 @@ export default function SearchScreen() {
             {filteredSuggestions.length === 0 && searchText.length > 0 && (
               <View style={styles.noResults}>
                 <Text style={styles.noResultsEmoji}>🔍</Text>
-                <Text style={styles.noResultsText}>No templates matching "{searchText}"</Text>
+                <Text style={styles.noResultsText}>No templates matching &ldquo;{searchText}&rdquo;</Text>
                 <TouchableOpacity
                   style={styles.noResultsBtn}
                   onPress={() => router.push('/create-circle')}
@@ -356,5 +378,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600' as const,
     color: Colors.white,
+  },
+  joinErrorText: {
+    fontSize: 12,
+    color: Colors.danger,
+    fontWeight: '500' as const,
+    marginTop: 8,
+    marginLeft: 4,
+  },
+  joinSuccessText: {
+    fontSize: 12,
+    color: Colors.warning,
+    fontWeight: '500' as const,
+    marginTop: 8,
+    marginLeft: 4,
   },
 });

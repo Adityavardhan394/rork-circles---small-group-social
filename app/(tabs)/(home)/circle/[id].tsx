@@ -11,7 +11,7 @@ import {
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { ArrowLeft, Users, Plus, Send, Pin, Calendar, BarChart3, Clipboard, Settings } from 'lucide-react-native';
+import { ArrowLeft, Users, Send, Calendar, BarChart3, Clipboard } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import { useCircles } from '@/providers/CirclesProvider';
 import { useUser } from '@/providers/UserProvider';
@@ -49,9 +49,13 @@ export default function CircleDetailScreen() {
 
   const circle = getCircleById(id ?? '');
   const posts = getCirclePosts(id ?? '');
-  const polls = getCirclePolls(id ?? '');
+  const allPolls = getCirclePolls(id ?? '');
   const events = getCircleEvents(id ?? '');
   const boardItems = getCircleBoardItems(id ?? '');
+
+  const now = new Date();
+  const activePolls = allPolls.filter(p => !p.closed && new Date(p.expiresAt) > now);
+  const pastPolls = allPolls.filter(p => p.closed || new Date(p.expiresAt) <= now);
 
   useEffect(() => {
     Animated.timing(fadeAnim, { toValue: 1, duration: 400, useNativeDriver: true }).start();
@@ -208,7 +212,7 @@ export default function CircleDetailScreen() {
 
               {isLoading ? (
                 <FeedSkeleton />
-              ) : posts.length === 0 && polls.length === 0 ? (
+              ) : posts.length === 0 && allPolls.length === 0 ? (
                 <EmptyState
                   emoji="💬"
                   title="No posts yet"
@@ -255,10 +259,24 @@ export default function CircleDetailScreen() {
                 </TouchableOpacity>
               </View>
 
-              {polls.length > 0 && (
+              {activePolls.length > 0 && (
                 <View style={styles.subsection}>
                   <Text style={styles.subsectionTitle}>Active Polls</Text>
-                  {polls.map(poll => (
+                  {activePolls.map(poll => (
+                    <PollCard
+                      key={poll.id}
+                      poll={poll}
+                      onVote={(optionId) => handleVotePoll(poll.id, optionId)}
+                      currentUserId={user?.id ?? 'user-1'}
+                    />
+                  ))}
+                </View>
+              )}
+
+              {pastPolls.length > 0 && (
+                <View style={styles.subsection}>
+                  <Text style={styles.subsectionTitle}>Past Polls</Text>
+                  {pastPolls.map(poll => (
                     <PollCard
                       key={poll.id}
                       poll={poll}
@@ -283,7 +301,7 @@ export default function CircleDetailScreen() {
                 </View>
               )}
 
-              {polls.length === 0 && events.length === 0 && (
+              {activePolls.length === 0 && pastPolls.length === 0 && events.length === 0 && (
                 <EmptyState
                   emoji="📋"
                   title="No plans yet"

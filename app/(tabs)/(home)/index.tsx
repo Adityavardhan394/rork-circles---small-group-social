@@ -126,6 +126,10 @@ export default function HomeScreen() {
     router.push('/settings');
   }, [router]);
 
+  const handleConnectionsPress = useCallback(() => {
+    router.push('/connections');
+  }, [router]);
+
   if (isLoading) {
     return (
       <View style={styles.container}>
@@ -204,13 +208,13 @@ export default function HomeScreen() {
                   <Text style={styles.statLabel}>Huddles</Text>
                 </View>
                 <View style={styles.statDivider} />
-                <View style={styles.statItem}>
+                <TouchableOpacity style={styles.statItem} onPress={handleConnectionsPress} activeOpacity={0.7}>
                   <Text style={styles.statNumber}>{totalMembers}</Text>
                   <Text style={styles.statLabel}>People</Text>
-                </View>
+                </TouchableOpacity>
                 <View style={styles.statDivider} />
                 <View style={styles.statItem}>
-                  <Text style={styles.statNumber}>{events.length}</Text>
+                  <Text style={styles.statNumber}>{upcomingEvents.length}</Text>
                   <Text style={styles.statLabel}>Events</Text>
                 </View>
                 <View style={styles.statDivider} />
