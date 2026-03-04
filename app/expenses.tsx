@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { ArrowLeft, Plus, X, DollarSign, Check, Receipt } from 'lucide-react-native';
+import { ArrowLeft, Plus, X, IndianRupee, Check, Receipt } from 'lucide-react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import Colors from '@/constants/colors';
@@ -261,7 +261,7 @@ export default function ExpensesScreen() {
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>Amount (₹)</Text>
                   <View style={styles.amountInputRow}>
-                    <DollarSign size={16} color={Colors.textTertiary} />
+                    <IndianRupee size={16} color={Colors.textTertiary} />
                     <TextInput
                       style={styles.amountInput}
                       value={amount}
