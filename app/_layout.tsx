@@ -1,0 +1,73 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import React, { useEffect, useState, useCallback } from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { UserProvider } from "@/providers/UserProvider";
+import { CirclesProvider } from "@/providers/CirclesProvider";
+import AnimatedSplashScreen from "@/components/SplashScreen";
+
+SplashScreen.preventAutoHideAsync();
+
+const queryClient = new QueryClient();
+
+function RootLayoutNav() {
+  return (
+    <Stack screenOptions={{ headerBackTitle: "Back" }}>
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="create-circle"
+        options={{ presentation: "modal", headerShown: false }}
+      />
+      <Stack.Screen
+        name="create-post"
+        options={{ presentation: "modal", headerShown: false }}
+      />
+      <Stack.Screen
+        name="create-poll"
+        options={{ presentation: "modal", headerShown: false }}
+      />
+      <Stack.Screen
+        name="create-event"
+        options={{ presentation: "modal", headerShown: false }}
+      />
+      <Stack.Screen
+        name="members/[id]"
+        options={{ presentation: "modal", headerShown: false }}
+      />
+      <Stack.Screen
+        name="settings"
+        options={{ presentation: "modal", headerShown: false }}
+      />
+      <Stack.Screen
+        name="onboarding"
+        options={{ presentation: "fullScreenModal", headerShown: false }}
+      />
+    </Stack>
+  );
+}
+
+export default function RootLayout() {
+  const [showSplash, setShowSplash] = useState<boolean>(true);
+
+  useEffect(() => {
+    SplashScreen.hideAsync();
+  }, []);
+
+  const handleSplashFinish = useCallback(() => {
+    setShowSplash(false);
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <GestureHandlerRootView>
+        <UserProvider>
+          <CirclesProvider>
+            <RootLayoutNav />
+            {showSplash && <AnimatedSplashScreen onFinish={handleSplashFinish} />}
+          </CirclesProvider>
+        </UserProvider>
+      </GestureHandlerRootView>
+    </QueryClientProvider>
+  );
+}
