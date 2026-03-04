@@ -1,8 +1,7 @@
 import React, { useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Platform, Linking } from 'react-native';
 import { Calendar, MapPin, Clock, Check, HelpCircle, X } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import { Platform } from 'react-native';
 import Colors from '@/constants/colors';
 import { CircleEvent } from '@/types';
 
@@ -28,7 +27,37 @@ function EventCardComponent({ event, onRsvp, currentUserId }: EventCardProps) {
     onRsvp(status);
   }, [onRsvp]);
 
+  const handleAddToCalendar = useCallback(() => {
+    const startDate = new Date(`${event.date}T${convertTo24Hour(event.time)}`);
+    const endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000);
+
+    const title = encodeURIComponent(event.title);
+    const details = encodeURIComponent(event.description ?? '');
+    const location = encodeURIComponent(event.location ?? '');
+    const startISO = startDate.toISOString().replace(/-|:|\.\d{3}/g, '');
+    const endISO = endDate.toISOString().replace(/-|:|\.\d{3}/g, '');
+
+    const googleCalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startISO}/${endISO}&details=${details}&location=${location}`;
+
+    Alert.alert(
+      'Add to Calendar',
+      'Open Google Calendar to add this event?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Open Calendar',
+          onPress: () => {
+            Linking.openURL(googleCalUrl).catch(() => {
+              Alert.alert('Error', 'Could not open calendar. Please add the event manually.');
+            });
+          },
+        },
+      ]
+    );
+  }, [event]);
+
   const totalGoing = event.rsvps.yes.length;
+  const totalMaybe = event.rsvps.maybe.length;
 
   return (
     <View style={styles.card}>
@@ -73,15 +102,34 @@ function EventCardComponent({ event, onRsvp, currentUserId }: EventCardProps) {
             onPress={() => handleRsvp('no')}
           >
             <X size={14} color={currentRsvp === 'no' ? Colors.white : Colors.danger} />
-            <Text style={[styles.rsvpText, currentRsvp === 'no' && styles.rsvpTextActive]}>Can't</Text>
+            <Text style={[styles.rsvpText, currentRsvp === 'no' && styles.rsvpTextActive]}>{'Can\'t'}</Text>
           </TouchableOpacity>
         </View>
-        {totalGoing > 0 && (
-          <Text style={styles.goingText}>{totalGoing} going</Text>
-        )}
+        <View style={styles.footerRow}>
+          {totalGoing > 0 && (
+            <Text style={styles.goingText}>
+              {totalGoing} going{totalMaybe > 0 ? ` · ${totalMaybe} maybe` : ''}
+            </Text>
+          )}
+          <TouchableOpacity style={styles.calendarBtn} onPress={handleAddToCalendar}>
+            <Calendar size={12} color={Colors.primary} />
+            <Text style={styles.calendarBtnText}>Add to Cal</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
+}
+
+function convertTo24Hour(timeStr: string): string {
+  const match = timeStr.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+  if (!match) return '12:00:00';
+  let hours = parseInt(match[1], 10);
+  const mins = match[2];
+  const period = match[3].toUpperCase();
+  if (period === 'PM' && hours !== 12) hours += 12;
+  if (period === 'AM' && hours === 12) hours = 0;
+  return `${hours.toString().padStart(2, '0')}:${mins}:00`;
 }
 
 function formatMonth(dateStr: string): string {
@@ -192,10 +240,29 @@ const styles = StyleSheet.create({
   rsvpTextActive: {
     color: Colors.white,
   },
+  footerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 8,
+  },
   goingText: {
     fontSize: 11,
     color: Colors.success,
     fontWeight: '500' as const,
-    marginTop: 6,
+  },
+  calendarBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    backgroundColor: Colors.teal50,
+  },
+  calendarBtnText: {
+    fontSize: 11,
+    fontWeight: '500' as const,
+    color: Colors.primary,
   },
 });

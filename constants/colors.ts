@@ -1,4 +1,4 @@
-const Colors = {
+export const LightColors = {
   primary: '#0F766E',
   primaryLight: '#14B8A6',
   primaryDark: '#134E4A',
@@ -31,5 +31,41 @@ const Colors = {
   stone800: '#292524',
   stone900: '#1C1917',
 };
+
+export const DarkColors = {
+  primary: '#14B8A6',
+  primaryLight: '#2DD4BF',
+  primaryDark: '#0F766E',
+  accent: '#FB923C',
+  accentLight: '#FDBA74',
+  background: '#0C0A09',
+  surface: '#1C1917',
+  surfaceSecondary: '#292524',
+  text: '#FAFAF9',
+  textSecondary: '#A8A29E',
+  textTertiary: '#78716C',
+  border: '#44403C',
+  borderLight: '#292524',
+  danger: '#F87171',
+  success: '#34D399',
+  warning: '#FBBF24',
+  overlay: 'rgba(0,0,0,0.7)',
+  white: '#FFFFFF',
+  black: '#000000',
+  teal50: '#042F2E',
+  teal100: '#0D3D38',
+  coral50: '#431407',
+  stone100: '#292524',
+  stone200: '#44403C',
+  stone300: '#57534E',
+  stone400: '#78716C',
+  stone500: '#A8A29E',
+  stone600: '#D6D3D1',
+  stone700: '#E7E5E4',
+  stone800: '#F5F5F4',
+  stone900: '#FAFAF9',
+};
+
+const Colors = LightColors;
 
 export default Colors;

@@ -8,7 +8,6 @@ import {
   Switch,
   Alert,
   Animated,
-  Linking,
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -22,35 +21,28 @@ import {
   Trash2,
   Download,
   FileText,
-  MessageSquareWarning,
   ChevronRight,
   Moon,
-  Globe,
-  Info,
+  Sun,
+  Smartphone,
   Lock,
   UserX,
   Flag,
+  LogOut,
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import Colors from '@/constants/colors';
 import { useUser } from '@/providers/UserProvider';
 import { useCircles } from '@/providers/CirclesProvider';
-import { LogOut } from 'lucide-react-native';
-
-interface SettingToggle {
-  key: string;
-  label: string;
-  description: string;
-  icon: React.ComponentType<{ size: number; color: string }>;
-  iconColor: string;
-  value: boolean;
-}
+import { useTheme } from '@/providers/ThemeProvider';
+import { ThemeMode } from '@/types';
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const { user, logout } = useUser();
+  const { logout } = useUser();
   const { resetAllData } = useCircles();
+  const { themeMode, setTheme } = useTheme();
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   const [notifNewPost, setNotifNewPost] = useState(true);
@@ -72,6 +64,13 @@ export default function SettingsScreen() {
     setter(newValue);
   }, []);
 
+  const handleThemeChange = useCallback((mode: ThemeMode) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setTheme(mode);
+  }, [setTheme]);
+
   const handleDeleteAccount = useCallback(() => {
     Alert.alert(
       'Delete Account',
@@ -84,14 +83,13 @@ export default function SettingsScreen() {
           onPress: () => {
             Alert.alert(
               'Are you absolutely sure?',
-              'Type your name to confirm deletion. All your data will be permanently removed.',
+              'All your data will be permanently removed.',
               [
                 { text: 'Cancel', style: 'cancel' },
                 {
                   text: 'Yes, Delete Everything',
                   style: 'destructive',
                   onPress: () => {
-                    console.log('Account deletion requested for user:', user?.id);
                     Alert.alert('Request Submitted', 'Your account deletion request has been submitted. It will be processed within 48 hours.');
                   },
                 },
@@ -101,24 +99,23 @@ export default function SettingsScreen() {
         },
       ]
     );
-  }, [user]);
+  }, []);
 
   const handleExportData = useCallback(() => {
     Alert.alert(
       'Export Your Data',
-      'We\'ll prepare a download of all your data including posts, media, and huddle information. You\'ll receive a notification when it\'s ready.',
+      'We\'ll prepare a download of all your data including posts, media, and huddle information.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Request Export',
           onPress: () => {
-            console.log('Data export requested for user:', user?.id);
             Alert.alert('Export Requested', 'Your data export is being prepared. This may take a few minutes.');
           },
         },
       ]
     );
-  }, [user]);
+  }, []);
 
   const handleBlockedUsers = useCallback(() => {
     Alert.alert('Blocked Users', 'You haven\'t blocked anyone yet.');
@@ -146,10 +143,6 @@ export default function SettingsScreen() {
       '- Name and profile photo\n' +
       '- Posts, polls, and events you create\n' +
       '- Huddle membership information\n\n' +
-      'How We Use It:\n' +
-      '- To provide the Huddle experience\n' +
-      '- To send relevant notifications\n' +
-      '- To improve our service\n\n' +
       'We never sell your data to third parties.\n' +
       'You can export or delete your data at any time.',
       [{ text: 'Close' }]
@@ -163,8 +156,7 @@ export default function SettingsScreen() {
       '- Follow our Community Guidelines\n' +
       '- Not use the app for illegal activities\n' +
       '- Be responsible for content you post\n' +
-      '- Respect intellectual property rights\n' +
-      '- Accept that we may moderate content\n\n' +
+      '- Respect intellectual property rights\n\n' +
       'We reserve the right to suspend accounts that violate these terms.',
       [{ text: 'Close' }]
     );
@@ -174,151 +166,93 @@ export default function SettingsScreen() {
     <View style={styles.container}>
       <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
         <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backBtn}
-            onPress={() => router.back()}
-            accessibilityLabel="Go back"
-            accessibilityRole="button"
-          >
+          <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
             <ArrowLeft size={22} color={Colors.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Settings</Text>
           <View style={styles.headerSpacer} />
         </View>
 
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
-        >
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
           <Animated.View style={{ opacity: fadeAnim }}>
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Appearance</Text>
+              <View style={styles.sectionCard}>
+                <View style={styles.themeRow}>
+                  <View style={[styles.settingIcon, { backgroundColor: '#7C3AED12' }]}>
+                    <Moon size={17} color="#7C3AED" />
+                  </View>
+                  <Text style={styles.themeLabel}>Theme</Text>
+                </View>
+                <View style={styles.themeOptions}>
+                  {([
+                    { mode: 'light' as ThemeMode, label: 'Light', icon: Sun, color: '#F59E0B' },
+                    { mode: 'dark' as ThemeMode, label: 'Dark', icon: Moon, color: '#7C3AED' },
+                    { mode: 'system' as ThemeMode, label: 'System', icon: Smartphone, color: '#2563EB' },
+                  ]).map(opt => (
+                    <TouchableOpacity
+                      key={opt.mode}
+                      style={[styles.themeOption, themeMode === opt.mode && styles.themeOptionActive]}
+                      onPress={() => handleThemeChange(opt.mode)}
+                    >
+                      <opt.icon size={16} color={themeMode === opt.mode ? Colors.primary : Colors.textTertiary} />
+                      <Text style={[styles.themeOptionText, themeMode === opt.mode && styles.themeOptionTextActive]}>
+                        {opt.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            </View>
+
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Notifications</Text>
               <View style={styles.sectionCard}>
-                <SettingRow
-                  icon={Bell}
-                  iconColor="#2563EB"
-                  label="New posts"
-                  description="When someone posts in your huddles"
-                  value={notifNewPost}
-                  onToggle={(v) => handleToggle(setNotifNewPost, v)}
-                />
+                <SettingRow icon={Bell} iconColor="#2563EB" label="New posts" description="When someone posts in your huddles" value={notifNewPost} onToggle={(v) => handleToggle(setNotifNewPost, v)} />
                 <View style={styles.divider} />
-                <SettingRow
-                  icon={Bell}
-                  iconColor="#7C3AED"
-                  label="Polls"
-                  description="When a new poll is created"
-                  value={notifPolls}
-                  onToggle={(v) => handleToggle(setNotifPolls, v)}
-                />
+                <SettingRow icon={Bell} iconColor="#7C3AED" label="Polls" description="When a new poll is created" value={notifPolls} onToggle={(v) => handleToggle(setNotifPolls, v)} />
                 <View style={styles.divider} />
-                <SettingRow
-                  icon={Bell}
-                  iconColor="#059669"
-                  label="Events & reminders"
-                  description="Event invites and upcoming reminders"
-                  value={notifEvents}
-                  onToggle={(v) => handleToggle(setNotifEvents, v)}
-                />
+                <SettingRow icon={Bell} iconColor="#059669" label="Events & reminders" description="Event invites and upcoming reminders" value={notifEvents} onToggle={(v) => handleToggle(setNotifEvents, v)} />
                 <View style={styles.divider} />
-                <SettingRow
-                  icon={BellOff}
-                  iconColor="#D97706"
-                  label="Reactions"
-                  description="When someone reacts to your posts"
-                  value={notifReactions}
-                  onToggle={(v) => handleToggle(setNotifReactions, v)}
-                />
+                <SettingRow icon={BellOff} iconColor="#D97706" label="Reactions" description="When someone reacts to your posts" value={notifReactions} onToggle={(v) => handleToggle(setNotifReactions, v)} />
               </View>
             </View>
 
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Privacy</Text>
               <View style={styles.sectionCard}>
-                <SettingRow
-                  icon={Eye}
-                  iconColor="#059669"
-                  label="Online status"
-                  description="Show when you're active"
-                  value={showOnlineStatus}
-                  onToggle={(v) => handleToggle(setShowOnlineStatus, v)}
-                />
+                <SettingRow icon={Eye} iconColor="#059669" label="Online status" description="Show when you're active" value={showOnlineStatus} onToggle={(v) => handleToggle(setShowOnlineStatus, v)} />
                 <View style={styles.divider} />
-                <SettingRow
-                  icon={EyeOff}
-                  iconColor="#2563EB"
-                  label="Read receipts"
-                  description="Let others know you've seen their posts"
-                  value={showReadReceipts}
-                  onToggle={(v) => handleToggle(setShowReadReceipts, v)}
-                />
+                <SettingRow icon={EyeOff} iconColor="#2563EB" label="Read receipts" description="Let others know you've seen their posts" value={showReadReceipts} onToggle={(v) => handleToggle(setShowReadReceipts, v)} />
                 <View style={styles.divider} />
-                <SettingRow
-                  icon={Lock}
-                  iconColor="#7C3AED"
-                  label="Ephemeral by default"
-                  description="Posts auto-expire after 72 hours"
-                  value={ephemeralDefault}
-                  onToggle={(v) => handleToggle(setEphemeralDefault, v)}
-                />
+                <SettingRow icon={Lock} iconColor="#7C3AED" label="Ephemeral by default" description="Posts auto-expire after 72 hours" value={ephemeralDefault} onToggle={(v) => handleToggle(setEphemeralDefault, v)} />
               </View>
             </View>
 
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Safety</Text>
               <View style={styles.sectionCard}>
-                <ActionRow
-                  icon={UserX}
-                  iconColor="#EF4444"
-                  label="Blocked users"
-                  onPress={handleBlockedUsers}
-                />
+                <ActionRow icon={UserX} iconColor="#EF4444" label="Blocked users" onPress={handleBlockedUsers} />
                 <View style={styles.divider} />
-                <ActionRow
-                  icon={Flag}
-                  iconColor="#D97706"
-                  label="Community guidelines"
-                  onPress={handleCommunityGuidelines}
-                />
+                <ActionRow icon={Flag} iconColor="#D97706" label="Community guidelines" onPress={handleCommunityGuidelines} />
               </View>
             </View>
 
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Legal</Text>
               <View style={styles.sectionCard}>
-                <ActionRow
-                  icon={Shield}
-                  iconColor="#059669"
-                  label="Privacy policy"
-                  onPress={handlePrivacyPolicy}
-                />
+                <ActionRow icon={Shield} iconColor="#059669" label="Privacy policy" onPress={handlePrivacyPolicy} />
                 <View style={styles.divider} />
-                <ActionRow
-                  icon={FileText}
-                  iconColor="#2563EB"
-                  label="Terms of service"
-                  onPress={handleTerms}
-                />
+                <ActionRow icon={FileText} iconColor="#2563EB" label="Terms of service" onPress={handleTerms} />
               </View>
             </View>
 
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Your Data</Text>
               <View style={styles.sectionCard}>
-                <ActionRow
-                  icon={Download}
-                  iconColor="#0F766E"
-                  label="Export your data"
-                  onPress={handleExportData}
-                />
+                <ActionRow icon={Download} iconColor="#0F766E" label="Export your data" onPress={handleExportData} />
                 <View style={styles.divider} />
-                <ActionRow
-                  icon={Trash2}
-                  iconColor="#EF4444"
-                  label="Delete account"
-                  onPress={handleDeleteAccount}
-                  danger
-                />
+                <ActionRow icon={Trash2} iconColor="#EF4444" label="Delete account" onPress={handleDeleteAccount} danger />
               </View>
             </View>
 
@@ -345,8 +279,6 @@ export default function SettingsScreen() {
                     );
                   }}
                   activeOpacity={0.7}
-                  accessibilityLabel="Log out"
-                  accessibilityRole="button"
                 >
                   <View style={[styles.settingIcon, { backgroundColor: '#EF444412' }]}>
                     <LogOut size={17} color="#EF4444" />
@@ -371,12 +303,7 @@ export default function SettingsScreen() {
 }
 
 function SettingRow({
-  icon: Icon,
-  iconColor,
-  label,
-  description,
-  value,
-  onToggle,
+  icon: Icon, iconColor, label, description, value, onToggle,
 }: {
   icon: React.ComponentType<{ size: number; color: string }>;
   iconColor: string;
@@ -386,7 +313,7 @@ function SettingRow({
   onToggle: (v: boolean) => void;
 }) {
   return (
-    <View style={styles.settingRow} accessibilityRole="switch" accessibilityState={{ checked: value }}>
+    <View style={styles.settingRow}>
       <View style={[styles.settingIcon, { backgroundColor: iconColor + '12' }]}>
         <Icon size={17} color={iconColor} />
       </View>
@@ -405,11 +332,7 @@ function SettingRow({
 }
 
 function ActionRow({
-  icon: Icon,
-  iconColor,
-  label,
-  onPress,
-  danger = false,
+  icon: Icon, iconColor, label, onPress, danger = false,
 }: {
   icon: React.ComponentType<{ size: number; color: string }>;
   iconColor: string;
@@ -418,13 +341,7 @@ function ActionRow({
   danger?: boolean;
 }) {
   return (
-    <TouchableOpacity
-      style={styles.settingRow}
-      onPress={onPress}
-      activeOpacity={0.7}
-      accessibilityLabel={label}
-      accessibilityRole="button"
-    >
+    <TouchableOpacity style={styles.settingRow} onPress={onPress} activeOpacity={0.7}>
       <View style={[styles.settingIcon, { backgroundColor: iconColor + '12' }]}>
         <Icon size={17} color={iconColor} />
       </View>
@@ -437,111 +354,56 @@ function ActionRow({
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  safeArea: {
-    flex: 1,
-  },
+  container: { flex: 1, backgroundColor: Colors.background },
+  safeArea: { flex: 1 },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
+    flexDirection: 'row', alignItems: 'center',
+    paddingHorizontal: 16, paddingVertical: 12,
+    borderBottomWidth: 1, borderBottomColor: Colors.borderLight,
   },
   backBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: Colors.surfaceSecondary,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 40, height: 40, borderRadius: 12, backgroundColor: Colors.surfaceSecondary,
+    alignItems: 'center', justifyContent: 'center',
   },
   headerTitle: {
-    flex: 1,
-    fontSize: 17,
-    fontWeight: '600' as const,
-    color: Colors.text,
-    textAlign: 'center',
+    flex: 1, fontSize: 17, fontWeight: '600' as const, color: Colors.text, textAlign: 'center',
   },
-  headerSpacer: {
-    width: 40,
-  },
-  scrollContent: {
-    paddingBottom: 40,
-  },
-  section: {
-    marginTop: 24,
-    paddingHorizontal: 20,
-  },
+  headerSpacer: { width: 40 },
+  scrollContent: { paddingBottom: 40 },
+  section: { marginTop: 24, paddingHorizontal: 20 },
   sectionTitle: {
-    fontSize: 13,
-    fontWeight: '600' as const,
-    color: Colors.textSecondary,
-    textTransform: 'uppercase' as const,
-    letterSpacing: 0.5,
-    marginBottom: 8,
-    marginLeft: 4,
+    fontSize: 13, fontWeight: '600' as const, color: Colors.textSecondary,
+    textTransform: 'uppercase' as const, letterSpacing: 0.5, marginBottom: 8, marginLeft: 4,
   },
   sectionCard: {
-    backgroundColor: Colors.surface,
-    borderRadius: 16,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 1,
+    backgroundColor: Colors.surface, borderRadius: 16, overflow: 'hidden',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 6, elevation: 1,
   },
-  divider: {
-    height: 1,
-    backgroundColor: Colors.borderLight,
-    marginLeft: 60,
-  },
-  settingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 14,
-  },
+  divider: { height: 1, backgroundColor: Colors.borderLight, marginLeft: 60 },
+  settingRow: { flexDirection: 'row', alignItems: 'center', padding: 14 },
   settingIcon: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 34, height: 34, borderRadius: 10, alignItems: 'center', justifyContent: 'center',
   },
-  settingContent: {
-    flex: 1,
-    marginLeft: 12,
+  settingContent: { flex: 1, marginLeft: 12 },
+  settingLabel: { fontSize: 15, fontWeight: '500' as const, color: Colors.text },
+  settingDesc: { fontSize: 12, color: Colors.textTertiary, marginTop: 1 },
+  dangerText: { color: Colors.danger },
+  themeRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingTop: 14, paddingBottom: 8 },
+  themeLabel: { fontSize: 15, fontWeight: '500' as const, color: Colors.text, marginLeft: 12 },
+  themeOptions: {
+    flexDirection: 'row', gap: 8, paddingHorizontal: 14, paddingBottom: 14,
   },
-  settingLabel: {
-    fontSize: 15,
-    fontWeight: '500' as const,
-    color: Colors.text,
+  themeOption: {
+    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+    paddingVertical: 10, borderRadius: 10, backgroundColor: Colors.surfaceSecondary,
+    borderWidth: 1.5, borderColor: 'transparent',
   },
-  settingDesc: {
-    fontSize: 12,
-    color: Colors.textTertiary,
-    marginTop: 1,
+  themeOptionActive: {
+    backgroundColor: Colors.teal50, borderColor: Colors.primary,
   },
-  dangerText: {
-    color: Colors.danger,
-  },
-  aboutSection: {
-    alignItems: 'center',
-    paddingVertical: 32,
-  },
-  aboutText: {
-    fontSize: 13,
-    fontWeight: '600' as const,
-    color: Colors.textTertiary,
-  },
-  aboutSubtext: {
-    fontSize: 12,
-    color: Colors.textTertiary,
-    marginTop: 4,
-  },
+  themeOptionText: { fontSize: 13, fontWeight: '500' as const, color: Colors.textTertiary },
+  themeOptionTextActive: { color: Colors.primary, fontWeight: '600' as const },
+  aboutSection: { alignItems: 'center', paddingVertical: 32 },
+  aboutText: { fontSize: 13, fontWeight: '600' as const, color: Colors.textTertiary },
+  aboutSubtext: { fontSize: 12, color: Colors.textTertiary, marginTop: 4 },
 });

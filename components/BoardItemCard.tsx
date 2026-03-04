@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Link2, StickyNote, CheckSquare, ImageIcon, Square, CheckSquare2 } from 'lucide-react-native';
+import { Link2, StickyNote, CheckSquare, ImageIcon, Square, CheckSquare2, DollarSign, ListChecks } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import { BoardItem } from '@/types';
 
@@ -9,18 +9,22 @@ interface BoardItemCardProps {
   onToggleTodo?: () => void;
 }
 
-const TYPE_ICONS = {
+const TYPE_ICONS: Record<string, typeof Link2> = {
   link: Link2,
   note: StickyNote,
   todo: CheckSquare,
   photo: ImageIcon,
+  expense: DollarSign,
+  checklist: ListChecks,
 };
 
-const TYPE_COLORS = {
+const TYPE_COLORS: Record<string, string> = {
   link: '#2563EB',
   note: '#D97706',
   todo: '#059669',
   photo: '#DB2777',
+  expense: '#F97316',
+  checklist: '#7C3AED',
 };
 
 function BoardItemCardComponent({ item, onToggleTodo }: BoardItemCardProps) {

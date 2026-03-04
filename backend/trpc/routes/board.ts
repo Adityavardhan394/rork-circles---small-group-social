@@ -26,7 +26,7 @@ export const boardRouter = createTRPCRouter({
           circleId: z.string(),
           author: z.any(),
           title: z.string(),
-          type: z.enum(["link", "note", "todo", "photo"]),
+          type: z.enum(["link", "note", "todo", "photo", "expense", "checklist"]),
           content: z.string(),
           url: z.string().optional(),
           completed: z.boolean().optional(),

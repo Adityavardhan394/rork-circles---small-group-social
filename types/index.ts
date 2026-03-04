@@ -40,6 +40,8 @@ export interface Comment {
   userAvatar: string;
   text: string;
   createdAt: string;
+  reactions?: Record<string, string[]>;
+  mentions?: string[];
 }
 
 export interface Poll {
@@ -81,7 +83,7 @@ export interface BoardItem {
   circleId: string;
   author: User;
   title: string;
-  type: 'link' | 'note' | 'todo' | 'photo';
+  type: 'link' | 'note' | 'todo' | 'photo' | 'expense' | 'checklist';
   content: string;
   url?: string;
   completed?: boolean;
@@ -90,7 +92,7 @@ export interface BoardItem {
 
 export interface Notification {
   id: string;
-  type: 'post' | 'poll' | 'event' | 'invite' | 'reaction' | 'comment';
+  type: 'post' | 'poll' | 'event' | 'invite' | 'reaction' | 'comment' | 'message' | 'expense';
   circleId: string;
   circleName: string;
   circleEmoji: string;
@@ -101,3 +103,39 @@ export interface Notification {
   actorName: string;
   actorAvatar: string;
 }
+
+export interface Message {
+  id: string;
+  senderId: string;
+  senderName: string;
+  senderAvatar: string;
+  text: string;
+  createdAt: string;
+  read: boolean;
+}
+
+export interface Conversation {
+  id: string;
+  type: 'dm' | 'group';
+  circleId?: string;
+  circleName?: string;
+  circleEmoji?: string;
+  participants: User[];
+  messages: Message[];
+  lastMessage?: Message;
+  createdAt: string;
+}
+
+export interface Expense {
+  id: string;
+  circleId: string;
+  title: string;
+  amount: number;
+  paidBy: User;
+  splitAmong: string[];
+  settled: string[];
+  createdAt: string;
+  category: 'food' | 'rent' | 'transport' | 'entertainment' | 'shopping' | 'other';
+}
+
+export type ThemeMode = 'light' | 'dark' | 'system';

@@ -5,6 +5,8 @@ import React, { useEffect, useState, useCallback } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { UserProvider } from "@/providers/UserProvider";
 import { CirclesProvider } from "@/providers/CirclesProvider";
+import { ThemeProvider } from "@/providers/ThemeProvider";
+import { MessagesProvider } from "@/providers/MessagesProvider";
 import AnimatedSplashScreen from "@/components/SplashScreen";
 import { trpc, trpcClient } from "@/lib/trpc";
 
@@ -45,6 +47,18 @@ function RootLayoutNav() {
         options={{ presentation: "modal", headerShown: false }}
       />
       <Stack.Screen
+        name="chat"
+        options={{ presentation: "card", headerShown: false }}
+      />
+      <Stack.Screen
+        name="expenses"
+        options={{ presentation: "modal", headerShown: false }}
+      />
+      <Stack.Screen
+        name="analytics"
+        options={{ presentation: "modal", headerShown: false }}
+      />
+      <Stack.Screen
         name="onboarding"
         options={{ presentation: "fullScreenModal", headerShown: false }}
       />
@@ -67,12 +81,16 @@ export default function RootLayout() {
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
         <GestureHandlerRootView>
-          <UserProvider>
-            <CirclesProvider>
-              <RootLayoutNav />
-              {showSplash && <AnimatedSplashScreen onFinish={handleSplashFinish} />}
-            </CirclesProvider>
-          </UserProvider>
+          <ThemeProvider>
+            <UserProvider>
+              <CirclesProvider>
+                <MessagesProvider>
+                  <RootLayoutNav />
+                  {showSplash && <AnimatedSplashScreen onFinish={handleSplashFinish} />}
+                </MessagesProvider>
+              </CirclesProvider>
+            </UserProvider>
+          </ThemeProvider>
         </GestureHandlerRootView>
       </QueryClientProvider>
     </trpc.Provider>

@@ -36,7 +36,7 @@ export const notificationsRouter = createTRPCRouter({
         userId: z.string(),
         notification: z.object({
           id: z.string(),
-          type: z.enum(["post", "poll", "event", "invite", "reaction", "comment"]),
+          type: z.enum(["post", "poll", "event", "invite", "reaction", "comment", "message", "expense"]),
           circleId: z.string(),
           circleName: z.string(),
           circleEmoji: z.string(),

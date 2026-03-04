@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import createContextHook from '@nkzw/create-context-hook';
 import { useQuery } from '@tanstack/react-query';
-import { Circle, Post, Poll, CircleEvent, BoardItem, Notification } from '@/types';
+import { Circle, Post, Poll, CircleEvent, BoardItem, Notification, Expense, Comment } from '@/types';
 import { trpc, isBackendAvailable } from '@/lib/trpc';
 import { useUser } from '@/providers/UserProvider';
 
@@ -13,6 +13,7 @@ const STORAGE_KEYS = {
   events: 'huddle_events',
   board: 'huddle_board',
   notifications: 'huddle_notifications',
+  expenses: 'huddle_expenses',
 };
 
 export const [CirclesProvider, useCircles] = createContextHook(() => {
@@ -22,6 +23,7 @@ export const [CirclesProvider, useCircles] = createContextHook(() => {
   const [events, setEvents] = useState<CircleEvent[]>([]);
   const [boardItems, setBoardItems] = useState<BoardItem[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
   const [dataLoaded, setDataLoaded] = useState<boolean>(false);
   const { user } = useUser();
   const userId = user?.id ?? '';
@@ -56,13 +58,14 @@ export const [CirclesProvider, useCircles] = createContextHook(() => {
   const localDataQuery = useQuery({
     queryKey: ['localCirclesData'],
     queryFn: async () => {
-      const [sc, sp, spl, se, sb, sn] = await Promise.all([
+      const [sc, sp, spl, se, sb, sn, sex] = await Promise.all([
         AsyncStorage.getItem(STORAGE_KEYS.circles),
         AsyncStorage.getItem(STORAGE_KEYS.posts),
         AsyncStorage.getItem(STORAGE_KEYS.polls),
         AsyncStorage.getItem(STORAGE_KEYS.events),
         AsyncStorage.getItem(STORAGE_KEYS.board),
         AsyncStorage.getItem(STORAGE_KEYS.notifications),
+        AsyncStorage.getItem(STORAGE_KEYS.expenses),
       ]);
       return {
         circles: sc ? JSON.parse(sc) : [],
@@ -71,6 +74,7 @@ export const [CirclesProvider, useCircles] = createContextHook(() => {
         events: se ? JSON.parse(se) : [],
         board: sb ? JSON.parse(sb) : [],
         notifications: sn ? JSON.parse(sn) : [],
+        expenses: sex ? JSON.parse(sex) : [],
       };
     },
   });
@@ -83,6 +87,7 @@ export const [CirclesProvider, useCircles] = createContextHook(() => {
       setEvents(localDataQuery.data.events);
       setBoardItems(localDataQuery.data.board);
       setNotifications(localDataQuery.data.notifications);
+      setExpenses(localDataQuery.data.expenses);
       setDataLoaded(true);
       console.log('[CirclesProvider] Loaded local data');
     }
@@ -94,7 +99,6 @@ export const [CirclesProvider, useCircles] = createContextHook(() => {
       if (backendCircles.length > 0 || circles.length === 0) {
         setCircles(backendCircles);
         AsyncStorage.setItem(STORAGE_KEYS.circles, JSON.stringify(backendCircles));
-        console.log('[CirclesProvider] Synced circles from backend:', backendCircles.length);
       }
     }
   }, [circlesQuery.data, userId]);
@@ -263,6 +267,46 @@ export const [CirclesProvider, useCircles] = createContextHook(() => {
     }
   }, [userId, togglePinMutation, persistLocal]);
 
+  const addComment = useCallback((postId: string, comment: Comment) => {
+    setPosts(prev => {
+      const updated = prev.map(p => {
+        if (p.id !== postId) return p;
+        return { ...p, comments: [...p.comments, comment] };
+      });
+      persistLocal(STORAGE_KEYS.posts, updated);
+      return updated;
+    });
+    console.log('[CirclesProvider] Comment added to post:', postId);
+  }, [persistLocal]);
+
+  const toggleCommentReaction = useCallback((postId: string, commentId: string, emoji: string, reactUserId: string) => {
+    setPosts(prev => {
+      const updated = prev.map(p => {
+        if (p.id !== postId) return p;
+        return {
+          ...p,
+          comments: p.comments.map(c => {
+            if (c.id !== commentId) return c;
+            const reactions = c.reactions ?? {};
+            const currentVotes = reactions[emoji] || [];
+            const hasVoted = currentVotes.includes(reactUserId);
+            return {
+              ...c,
+              reactions: {
+                ...reactions,
+                [emoji]: hasVoted
+                  ? currentVotes.filter(id => id !== reactUserId)
+                  : [...currentVotes, reactUserId],
+              },
+            };
+          }),
+        };
+      });
+      persistLocal(STORAGE_KEYS.posts, updated);
+      return updated;
+    });
+  }, [persistLocal]);
+
   const addPoll = useCallback((poll: Poll) => {
     setPolls(prev => {
       const updated = [poll, ...prev];
@@ -301,6 +345,17 @@ export const [CirclesProvider, useCircles] = createContextHook(() => {
       votePollMutation.mutate({ userId, pollId, optionId, voterId });
     }
   }, [userId, votePollMutation, persistLocal]);
+
+  const closePoll = useCallback((pollId: string) => {
+    setPolls(prev => {
+      const updated = prev.map(p =>
+        p.id === pollId ? { ...p, closed: true } : p
+      );
+      persistLocal(STORAGE_KEYS.polls, updated);
+      return updated;
+    });
+    console.log('[CirclesProvider] Poll closed:', pollId);
+  }, [persistLocal]);
 
   const addEvent = useCallback((event: CircleEvent) => {
     setEvents(prev => {
@@ -368,6 +423,27 @@ export const [CirclesProvider, useCircles] = createContextHook(() => {
     }
   }, [userId, toggleBoardTodoMutation, persistLocal]);
 
+  const addExpense = useCallback((expense: Expense) => {
+    setExpenses(prev => {
+      const updated = [expense, ...prev];
+      persistLocal(STORAGE_KEYS.expenses, updated);
+      return updated;
+    });
+    console.log('[CirclesProvider] Expense added:', expense.title);
+  }, [persistLocal]);
+
+  const settleExpense = useCallback((expenseId: string, settledUserId: string) => {
+    setExpenses(prev => {
+      const updated = prev.map(e => {
+        if (e.id !== expenseId) return e;
+        if (e.settled.includes(settledUserId)) return e;
+        return { ...e, settled: [...e.settled, settledUserId] };
+      });
+      persistLocal(STORAGE_KEYS.expenses, updated);
+      return updated;
+    });
+  }, [persistLocal]);
+
   const markNotificationRead = useCallback((notifId: string) => {
     setNotifications(prev => {
       const updated = prev.map(n =>
@@ -399,6 +475,7 @@ export const [CirclesProvider, useCircles] = createContextHook(() => {
     setEvents([]);
     setBoardItems([]);
     setNotifications([]);
+    setExpenses([]);
     await Promise.all(
       Object.values(STORAGE_KEYS).map(key => AsyncStorage.removeItem(key))
     );
@@ -423,6 +500,10 @@ export const [CirclesProvider, useCircles] = createContextHook(() => {
     return boardItems.filter(b => b.circleId === circleId);
   }, [boardItems]);
 
+  const getCircleExpenses = useCallback((circleId: string) => {
+    return expenses.filter(e => e.circleId === circleId);
+  }, [expenses]);
+
   const getCircleById = useCallback((circleId: string) => {
     return circles.find(c => c.id === circleId);
   }, [circles]);
@@ -434,17 +515,23 @@ export const [CirclesProvider, useCircles] = createContextHook(() => {
     events,
     boardItems,
     notifications,
+    expenses,
     unreadCount,
     addCircle,
     addPost,
+    addComment,
     toggleReaction,
+    toggleCommentReaction,
     togglePin,
     addPoll,
     votePoll,
+    closePoll,
     addEvent,
     rsvpEvent,
     addBoardItem,
     toggleBoardTodo,
+    addExpense,
+    settleExpense,
     markNotificationRead,
     markAllNotificationsRead,
     resetAllData,
@@ -452,6 +539,7 @@ export const [CirclesProvider, useCircles] = createContextHook(() => {
     getCirclePolls,
     getCircleEvents,
     getCircleBoardItems,
+    getCircleExpenses,
     getCircleById,
     isLoading: localDataQuery.isLoading,
   };
