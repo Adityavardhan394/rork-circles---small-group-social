@@ -229,6 +229,12 @@ export default function ExpensesScreen() {
     setShowAddModal(false);
   }, [title, amount, category, selectedMembers, circle, user, addExpense, splitType, customSplits]);
 
+  const handleSettle = useCallback((expenseId: string) => {
+    if (!user) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    settleExpense(expenseId, user.id);
+  }, [user, settleExpense]);
+
   const handlePay = useCallback((member: UserType, payAmount: number) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setPayTarget({ member, amount: payAmount });
@@ -301,12 +307,6 @@ export default function ExpensesScreen() {
 
     setShowPayModal(false);
   }, [payTarget, user, expenses, handleSettle]);
-
-  const handleSettle = useCallback((expenseId: string) => {
-    if (!user) return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    settleExpense(expenseId, user.id);
-  }, [user, settleExpense]);
 
   const toggleMember = useCallback((memberId: string) => {
     setSelectedMembers(prev =>
