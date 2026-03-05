@@ -136,6 +136,8 @@ export interface Expense {
   settled: string[];
   createdAt: string;
   category: 'food' | 'rent' | 'transport' | 'entertainment' | 'shopping' | 'other';
+  splitType?: 'equal' | 'custom' | 'percentage';
+  customSplits?: Record<string, number>;
 }
 
 export type ThemeMode = 'light' | 'dark' | 'system';
