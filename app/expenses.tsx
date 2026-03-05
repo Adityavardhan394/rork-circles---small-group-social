@@ -236,7 +236,7 @@ export default function ExpensesScreen() {
   }, []);
 
   const openUPIApp = useCallback((appScheme: string) => {
-    if (!payTarget) return;
+    if (!payTarget || !user) return;
 
     const upiParams = new URLSearchParams({
       pa: '',
@@ -248,31 +248,59 @@ export default function ExpensesScreen() {
 
     const upiUrl = `${appScheme}?${upiParams.toString()}`;
 
+    const confirmSettlement = () => {
+      Alert.alert(
+        'Payment Confirmation',
+        `Did you complete the payment of ₹${payTarget.amount} to ${payTarget.member.name}?`,
+        [
+          { text: 'No, still pending', style: 'cancel' },
+          {
+            text: 'Yes, paid',
+            onPress: () => {
+              expenses.forEach(exp => {
+                if (exp.paidBy.id === payTarget.member.id && !exp.settled.includes(user.id) && exp.splitAmong.includes(user.id)) {
+                  handleSettle(exp.id);
+                }
+              });
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            },
+          },
+        ]
+      );
+    };
+
     if (Platform.OS === 'web') {
       Alert.alert(
         'UPI Payment',
         `Open your UPI app and pay ₹${payTarget.amount} to ${payTarget.member.name}`,
-        [{ text: 'OK' }]
+        [{ text: 'OK', onPress: confirmSettlement }]
       );
+      setShowPayModal(false);
       return;
     }
 
     Linking.canOpenURL(appScheme).then(supported => {
       if (supported) {
-        Linking.openURL(upiUrl).catch(() => {
-          Linking.openURL(`upi://pay?${upiParams.toString()}`).catch(() => {
+        Linking.openURL(upiUrl).then(() => {
+          setTimeout(confirmSettlement, 1000);
+        }).catch(() => {
+          Linking.openURL(`upi://pay?${upiParams.toString()}`).then(() => {
+            setTimeout(confirmSettlement, 1000);
+          }).catch(() => {
             Alert.alert('Error', 'Could not open UPI app. Please try another app.');
           });
         });
       } else {
-        Linking.openURL(`upi://pay?${upiParams.toString()}`).catch(() => {
+        Linking.openURL(`upi://pay?${upiParams.toString()}`).then(() => {
+          setTimeout(confirmSettlement, 1000);
+        }).catch(() => {
           Alert.alert('No UPI App', 'No UPI app found. Please install a UPI app to make payments.');
         });
       }
     });
 
     setShowPayModal(false);
-  }, [payTarget]);
+  }, [payTarget, user, expenses, handleSettle]);
 
   const handleSettle = useCallback((expenseId: string) => {
     if (!user) return;
@@ -540,7 +568,6 @@ export default function ExpensesScreen() {
                                 <TouchableOpacity
                                   style={styles.settleSmallBtn}
                                   onPress={() => {
-                                    handleSettle(exp.id);
                                     handlePay(exp.paidBy, Math.round(share));
                                   }}
                                 >
