@@ -229,10 +229,12 @@ export default function ExpensesScreen() {
     setShowAddModal(false);
   }, [title, amount, category, selectedMembers, circle, user, addExpense, splitType, customSplits]);
 
-  const handleSettle = useCallback((expenseId: string) => {
+  const handleSettle = useCallback((expenseId: string, targetUserId?: string) => {
     if (!user) return;
+    const settleId = targetUserId ?? user.id;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    settleExpense(expenseId, user.id);
+    settleExpense(expenseId, settleId);
+    console.log('[Expenses] Settled expense', expenseId, 'for user', settleId);
   }, [user, settleExpense]);
 
   const handlePay = useCallback((member: UserType, payAmount: number) => {
@@ -257,18 +259,19 @@ export default function ExpensesScreen() {
     const confirmSettlement = () => {
       Alert.alert(
         'Payment Confirmation',
-        `Did you complete the payment of ₹${payTarget.amount} to ${payTarget.member.name}?`,
+        `Did you complete the payment of ₹${payTarget.amount} to ${payTarget.member.name}? This will mark your share as settled.`,
         [
           { text: 'No, still pending', style: 'cancel' },
           {
-            text: 'Yes, paid',
+            text: 'Yes, I paid',
             onPress: () => {
               expenses.forEach(exp => {
                 if (exp.paidBy.id === payTarget.member.id && !exp.settled.includes(user.id) && exp.splitAmong.includes(user.id)) {
-                  handleSettle(exp.id);
+                  handleSettle(exp.id, user.id);
                 }
               });
               Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              Alert.alert('Payment Recorded', `Your payment to ${payTarget.member.name} has been marked as settled.`);
             },
           },
         ]
@@ -473,8 +476,37 @@ export default function ExpensesScreen() {
                             </TouchableOpacity>
                           )}
                           {debt.to === user?.id && (
-                            <View style={styles.remindBadge}>
-                              <Text style={styles.remindText}>Pending</Text>
+                            <View style={styles.pendingActions}>
+                              <View style={styles.remindBadge}>
+                                <Text style={styles.remindText}>Pending</Text>
+                              </View>
+                              <TouchableOpacity
+                                style={styles.markReceivedBtn}
+                                onPress={() => {
+                                  Alert.alert(
+                                    'Confirm Payment Received',
+                                    `Did you receive ₹${debt.amount.toLocaleString('en-IN')} from ${fromMember.name}?`,
+                                    [
+                                      { text: 'No', style: 'cancel' },
+                                      {
+                                        text: 'Yes, Received',
+                                        onPress: () => {
+                                          expenses.forEach(exp => {
+                                            if (exp.paidBy.id === user?.id && !exp.settled.includes(debt.from) && exp.splitAmong.includes(debt.from)) {
+                                              handleSettle(exp.id, debt.from);
+                                            }
+                                          });
+                                          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                                        },
+                                      },
+                                    ]
+                                  );
+                                }}
+                                activeOpacity={0.7}
+                              >
+                                <Check size={12} color={colors.success} />
+                                <Text style={styles.markReceivedText}>Mark Received</Text>
+                              </TouchableOpacity>
                             </View>
                           )}
                         </View>
@@ -803,15 +835,27 @@ export default function ExpensesScreen() {
                     style={styles.markPaidBtn}
                     onPress={() => {
                       if (payTarget && user) {
-                        expenses.forEach(exp => {
-                          if (exp.paidBy.id === payTarget.member.id && !exp.settled.includes(user.id) && exp.splitAmong.includes(user.id)) {
-                            handleSettle(exp.id);
-                          }
-                        });
-                        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                        Alert.alert('Marked as paid', `Your payment to ${payTarget.member.name} has been recorded.`);
+                        Alert.alert(
+                          'Confirm Payment',
+                          `Are you sure you want to mark ₹${payTarget.amount.toLocaleString('en-IN')} to ${payTarget.member.name} as paid?`,
+                          [
+                            { text: 'Cancel', style: 'cancel' },
+                            {
+                              text: 'Yes, Mark as Paid',
+                              onPress: () => {
+                                expenses.forEach(exp => {
+                                  if (exp.paidBy.id === payTarget.member.id && !exp.settled.includes(user.id) && exp.splitAmong.includes(user.id)) {
+                                    handleSettle(exp.id, user.id);
+                                  }
+                                });
+                                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                                Alert.alert('Payment Recorded', `Your payment to ${payTarget.member.name} has been marked as settled.`);
+                                setShowPayModal(false);
+                              },
+                            },
+                          ]
+                        );
                       }
-                      setShowPayModal(false);
                     }}
                     activeOpacity={0.7}
                   >
@@ -974,6 +1018,11 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     borderRadius: 10,
   },
   payNowText: { fontSize: 13, fontWeight: '600' as const, color: '#fff' },
+  pendingActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   remindBadge: {
     backgroundColor: colors.warning + '20',
     paddingHorizontal: 10,
@@ -981,6 +1030,16 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     borderRadius: 8,
   },
   remindText: { fontSize: 12, fontWeight: '500' as const, color: colors.warning },
+  markReceivedBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: colors.success + '15',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+  },
+  markReceivedText: { fontSize: 11, fontWeight: '600' as const, color: colors.success },
 
   allSettledCard: {
     alignItems: 'center',
