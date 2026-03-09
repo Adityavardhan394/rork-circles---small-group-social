@@ -108,18 +108,18 @@ export default function CircleDetailScreen() {
 
   useEffect(() => {
     Animated.timing(fadeAnim, { toValue: 1, duration: 400, useNativeDriver: true }).start();
-  }, [fadeAnim]);
+  }, []);
 
   useEffect(() => {
     if (initialTab !== 'feed') {
       const tabIndex = initialTab === 'plans' ? 1 : initialTab === 'board' ? 2 : 3;
       tabIndicatorAnim.setValue(tabIndex);
     }
-  }, [initialTab, tabIndicatorAnim]);
+  }, []);
 
-  const handleTabChange = useCallback((newTab: TabType) => {
-    setActiveTab(newTab);
-    const tabIndex = newTab === 'feed' ? 0 : newTab === 'plans' ? 1 : newTab === 'board' ? 2 : 3;
+  const handleTabChange = useCallback((tab: TabType) => {
+    setActiveTab(tab);
+    const tabIndex = tab === 'feed' ? 0 : tab === 'plans' ? 1 : tab === 'board' ? 2 : 3;
     Animated.spring(tabIndicatorAnim, {
       toValue: tabIndex,
       useNativeDriver: true,
@@ -152,7 +152,7 @@ export default function CircleDetailScreen() {
     if (!circle) return;
     try {
       await Share.share({
-        message: `Join my group "${circle.name}" on Huddle! Use invite code: ${circle.inviteCode}`,
+        message: `Join my huddle "${circle.name}" on Huddle! Use invite code: ${circle.inviteCode}`,
       });
     } catch (error) {
       console.log('Share error:', error);
@@ -181,7 +181,7 @@ export default function CircleDetailScreen() {
           <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
             <ArrowLeft size={22} color={colors.text} />
           </TouchableOpacity>
-          <EmptyState emoji="🔍" title="Group not found" subtitle="This group doesn't exist or has been removed" />
+          <EmptyState emoji="🔍" title="Huddle not found" subtitle="This huddle doesn't exist or has been removed" />
         </SafeAreaView>
       </View>
     );
@@ -191,7 +191,7 @@ export default function CircleDetailScreen() {
     <View style={styles.container}>
       <SafeAreaView edges={['top']} style={styles.safeArea}>
         <Animated.View style={[styles.headerContainer, { opacity: fadeAnim }]}>
-          <View style={styles.headerBg}>
+          <View style={[styles.headerBg, { backgroundColor: circle.color + '12' }]}>
             <View style={styles.headerTop}>
               <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
                 <ArrowLeft size={22} color={colors.text} />
@@ -235,12 +235,12 @@ export default function CircleDetailScreen() {
                   <Text style={styles.quickBtnText}>Chat</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.quickBtn} onPress={handleOpenExpenses}>
-                  <DollarSign size={14} color={colors.accentLight} />
+                  <DollarSign size={14} color={colors.accent} />
                   <Text style={styles.quickBtnText}>Expenses</Text>
                 </TouchableOpacity>
                 {isAdmin && (
                   <TouchableOpacity style={styles.quickBtn} onPress={handleOpenAnalytics}>
-                    <TrendingUp size={14} color="#7B6FE8" />
+                    <TrendingUp size={14} color="#7C3AED" />
                     <Text style={styles.quickBtnText}>Analytics</Text>
                   </TouchableOpacity>
                 )}
@@ -263,18 +263,18 @@ export default function CircleDetailScreen() {
           )}
 
           <View style={styles.tabBar}>
-            {(['feed', 'plans', 'board', 'media'] as TabType[]).map((tabItem) => (
+            {(['feed', 'plans', 'board', 'media'] as TabType[]).map((tab) => (
               <TouchableOpacity
-                key={tabItem}
+                key={tab}
                 style={styles.tab}
-                onPress={() => handleTabChange(tabItem)}
+                onPress={() => handleTabChange(tab)}
               >
-                {tabItem === 'feed' && <Send size={14} color={activeTab === tabItem ? colors.primary : colors.textTertiary} />}
-                {tabItem === 'plans' && <Calendar size={14} color={activeTab === tabItem ? colors.primary : colors.textTertiary} />}
-                {tabItem === 'board' && <Clipboard size={14} color={activeTab === tabItem ? colors.primary : colors.textTertiary} />}
-                {tabItem === 'media' && <ImageIcon size={14} color={activeTab === tabItem ? colors.primary : colors.textTertiary} />}
-                <Text style={[styles.tabText, activeTab === tabItem && styles.tabTextActive]}>
-                  {tabItem === 'feed' ? 'Feed' : tabItem === 'plans' ? 'Plans' : tabItem === 'board' ? 'Board' : 'Media'}
+                {tab === 'feed' && <Send size={14} color={activeTab === tab ? colors.primary : colors.textTertiary} />}
+                {tab === 'plans' && <Calendar size={14} color={activeTab === tab ? colors.primary : colors.textTertiary} />}
+                {tab === 'board' && <Clipboard size={14} color={activeTab === tab ? colors.primary : colors.textTertiary} />}
+                {tab === 'media' && <ImageIcon size={14} color={activeTab === tab ? colors.primary : colors.textTertiary} />}
+                <Text style={[styles.tabText, activeTab === tab && styles.tabTextActive]}>
+                  {tab === 'feed' ? 'Feed' : tab === 'plans' ? 'Plans' : tab === 'board' ? 'Board' : 'Media'}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -351,7 +351,7 @@ export default function CircleDetailScreen() {
                   style={styles.planActionBtn}
                   onPress={() => router.push(`/create-poll?circleId=${circle.id}`)}
                 >
-                  <BarChart3 size={18} color={colors.accentLight} />
+                  <BarChart3 size={18} color={colors.accent} />
                   <Text style={styles.planActionText}>Quick Poll</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -461,53 +461,55 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   safeArea: { flex: 1 },
   headerContainer: {},
-  headerBg: { paddingBottom: 12, backgroundColor: colors.surface, borderBottomLeftRadius: 24, borderBottomRightRadius: 24 },
+  headerBg: { paddingBottom: 12 },
   headerTop: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     paddingHorizontal: 16, paddingTop: 8,
   },
   backBtn: {
-    width: 42, height: 42, borderRadius: 21, backgroundColor: colors.surfaceSecondary,
+    width: 40, height: 40, borderRadius: 12, backgroundColor: colors.surface,
     alignItems: 'center', justifyContent: 'center',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 1,
   },
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   headerActionBtn: {
-    width: 38, height: 38, borderRadius: 19, backgroundColor: colors.surfaceSecondary,
+    width: 36, height: 36, borderRadius: 12, backgroundColor: colors.surface,
     alignItems: 'center', justifyContent: 'center',
   },
   membersBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: colors.surfaceSecondary, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 16,
+    backgroundColor: colors.surface, paddingHorizontal: 10, paddingVertical: 8, borderRadius: 12,
   },
   memberCount: { fontSize: 13, fontWeight: '600' as const, color: colors.text },
   circleInfo: { alignItems: 'center', paddingTop: 4 },
   emojiCircle: {
-    width: 52, height: 52, borderRadius: 18, alignItems: 'center', justifyContent: 'center', marginBottom: 6,
+    width: 50, height: 50, borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginBottom: 6,
   },
   emoji: { fontSize: 26 },
-  circleName: { fontSize: 22, fontWeight: '700' as const, color: colors.text, letterSpacing: -0.3 },
+  circleName: { fontSize: 20, fontWeight: '700' as const, color: colors.text, letterSpacing: -0.3 },
   circleDesc: { fontSize: 12, color: colors.textSecondary, marginTop: 3, textAlign: 'center', paddingHorizontal: 40 },
   avatarRow: { flexDirection: 'row', marginTop: 8 },
   memberAvatar: {
-    width: 28, height: 28, borderRadius: 14, borderWidth: 2, borderColor: colors.surface, overflow: 'hidden',
+    width: 26, height: 26, borderRadius: 13, borderWidth: 2, borderColor: colors.surface, overflow: 'hidden',
   },
   memberAvatarImg: { width: '100%', height: '100%' },
   quickRow: {
-    flexDirection: 'row', gap: 8, marginTop: 12,
+    flexDirection: 'row', gap: 8, marginTop: 10,
   },
   quickBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: colors.surfaceSecondary, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 14,
+    backgroundColor: colors.surface, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 3, elevation: 1,
   },
   quickBtnText: { fontSize: 12, fontWeight: '500' as const, color: colors.text },
   searchBarContainer: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
-    marginHorizontal: 16, marginTop: 8, paddingHorizontal: 12, paddingVertical: 8,
-    backgroundColor: colors.inputBg, borderRadius: 14, borderWidth: 1, borderColor: colors.border,
+    marginHorizontal: 16, marginTop: 4, paddingHorizontal: 12, paddingVertical: 8,
+    backgroundColor: colors.surface, borderRadius: 12,
   },
   searchInput: { flex: 1, fontSize: 14, color: colors.text },
   tabBar: {
-    flexDirection: 'row', paddingHorizontal: 20, paddingTop: 12, backgroundColor: colors.background, position: 'relative',
+    flexDirection: 'row', paddingHorizontal: 20, paddingTop: 8, backgroundColor: colors.background, position: 'relative',
   },
   tab: {
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4, paddingVertical: 10,
@@ -520,15 +522,14 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
   scrollContent: { paddingTop: 12, paddingBottom: 24 },
   createPostBar: {
     flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface,
-    marginHorizontal: 16, marginBottom: 12, padding: 14, borderRadius: 18, gap: 10,
-    borderWidth: 1, borderColor: colors.border,
+    marginHorizontal: 16, marginBottom: 12, padding: 12, borderRadius: 14, gap: 10,
   },
-  userAvatar: { width: 34, height: 34, borderRadius: 17 },
+  userAvatar: { width: 32, height: 32, borderRadius: 16 },
   createPostText: { fontSize: 14, color: colors.textTertiary, flex: 1 },
   planActions: { flexDirection: 'row', gap: 10, paddingHorizontal: 16, marginBottom: 16 },
   planActionBtn: {
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: colors.surface, padding: 14, borderRadius: 18, borderWidth: 1, borderColor: colors.border,
+    backgroundColor: colors.surface, padding: 14, borderRadius: 14,
   },
   planActionText: { fontSize: 14, fontWeight: '600' as const, color: colors.text },
   subsection: { marginBottom: 16 },
@@ -539,7 +540,7 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
   closePollBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     marginHorizontal: 20, marginTop: -6, marginBottom: 12, paddingVertical: 6, paddingHorizontal: 12,
-    backgroundColor: 'rgba(239,68,68,0.1)', borderRadius: 10, alignSelf: 'flex-start',
+    backgroundColor: colors.danger + '10', borderRadius: 8, alignSelf: 'flex-start',
   },
   closePollText: { fontSize: 12, fontWeight: '500' as const, color: colors.danger },
   mediaGrid: {
@@ -547,7 +548,7 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
   },
   mediaItem: {
     width: (SCREEN_WIDTH - 40) / 3, height: (SCREEN_WIDTH - 40) / 3,
-    borderRadius: 12, overflow: 'hidden',
+    borderRadius: 8, overflow: 'hidden',
   },
   mediaImage: { width: '100%', height: '100%' },
 });

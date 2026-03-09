@@ -172,7 +172,7 @@ export default function ExpensesScreen() {
       return;
     }
 
-    void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
     const splitMembers = selectedMembers.length > 0
       ? selectedMembers
@@ -232,13 +232,13 @@ export default function ExpensesScreen() {
   const handleSettle = useCallback((expenseId: string, targetUserId?: string) => {
     if (!user) return;
     const settleId = targetUserId ?? user.id;
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     settleExpense(expenseId, settleId);
     console.log('[Expenses] Settled expense', expenseId, 'for user', settleId);
   }, [user, settleExpense]);
 
   const handlePay = useCallback((member: UserType, payAmount: number) => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setPayTarget({ member, amount: payAmount });
     setShowPayModal(true);
   }, []);
@@ -270,7 +270,7 @@ export default function ExpensesScreen() {
                   handleSettle(exp.id, user.id);
                 }
               });
-              void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
               Alert.alert('Payment Recorded', `Your payment to ${payTarget.member.name} has been marked as settled.`);
             },
           },
@@ -288,7 +288,7 @@ export default function ExpensesScreen() {
       return;
     }
 
-    void Linking.canOpenURL(appScheme).then(supported => {
+    Linking.canOpenURL(appScheme).then(supported => {
       if (supported) {
         Linking.openURL(upiUrl).then(() => {
           setTimeout(confirmSettlement, 1000);
@@ -496,7 +496,7 @@ export default function ExpensesScreen() {
                                               handleSettle(exp.id, debt.from);
                                             }
                                           });
-                                          void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                                          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                                         },
                                       },
                                     ]
@@ -848,7 +848,7 @@ export default function ExpensesScreen() {
                                     handleSettle(exp.id, user.id);
                                   }
                                 });
-                                void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                                 Alert.alert('Payment Recorded', `Your payment to ${payTarget.member.name} has been marked as settled.`);
                                 setShowPayModal(false);
                               },
@@ -885,7 +885,7 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     borderBottomColor: colors.borderLight,
   },
   backBtn: {
-    width: 42, height: 42, borderRadius: 21,
+    width: 40, height: 40, borderRadius: 12,
     backgroundColor: colors.surfaceSecondary,
     alignItems: 'center', justifyContent: 'center',
   },
@@ -893,7 +893,7 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
   headerTitle: { fontSize: 17, fontWeight: '600' as const, color: colors.text },
   headerSubtitle: { fontSize: 12, color: colors.textSecondary, marginTop: 1 },
   addBtn: {
-    width: 42, height: 42, borderRadius: 21,
+    width: 40, height: 40, borderRadius: 12,
     backgroundColor: colors.primary,
     alignItems: 'center', justifyContent: 'center',
   },
@@ -939,9 +939,12 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     width: (SCREEN_WIDTH - 48) / 2 - 4,
     height: 40,
     backgroundColor: colors.surface,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
   },
   tab: {
     flex: 1,
@@ -1183,7 +1186,7 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     textTransform: 'uppercase' as const, letterSpacing: 0.5, marginBottom: 8,
   },
   textInput: {
-    backgroundColor: colors.inputBg, borderRadius: 16, padding: 14,
+    backgroundColor: colors.surface, borderRadius: 12, padding: 14,
     fontSize: 15, color: colors.text, borderWidth: 1, borderColor: colors.border,
   },
   categoryRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
@@ -1192,7 +1195,7 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10,
     backgroundColor: colors.surfaceSecondary, borderWidth: 1, borderColor: 'transparent',
   },
-  catChipActive: { backgroundColor: 'rgba(91,76,219,0.12)', borderColor: colors.primary },
+  catChipActive: { backgroundColor: colors.teal50, borderColor: colors.primary },
   catEmoji: { fontSize: 16 },
   catLabel: { fontSize: 13, color: colors.textSecondary },
   catLabelActive: { color: colors.primary, fontWeight: '600' as const },
@@ -1210,7 +1213,7 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     borderWidth: 1,
     borderColor: 'transparent',
   },
-  splitTypeChipActive: { backgroundColor: 'rgba(91,76,219,0.12)', borderColor: colors.primary },
+  splitTypeChipActive: { backgroundColor: colors.teal50, borderColor: colors.primary },
   splitTypeText: { fontSize: 13, color: colors.textSecondary, fontWeight: '500' as const },
   splitTypeTextActive: { color: colors.primary, fontWeight: '600' as const },
 
@@ -1333,10 +1336,10 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
     paddingVertical: 14,
-    borderRadius: 16,
+    borderRadius: 12,
     borderWidth: 1.5,
     borderColor: colors.primary,
-    backgroundColor: 'rgba(91,76,219,0.12)',
+    backgroundColor: colors.teal50,
   },
   markPaidText: { fontSize: 14, fontWeight: '600' as const, color: colors.primary },
 });

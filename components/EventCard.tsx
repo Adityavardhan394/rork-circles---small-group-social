@@ -24,7 +24,7 @@ function EventCardComponent({ event, onRsvp, currentUserId }: EventCardProps) {
 
   const handleRsvp = useCallback((status: 'yes' | 'maybe' | 'no') => {
     if (Platform.OS !== 'web') {
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     onRsvp(status);
   }, [onRsvp]);
@@ -150,12 +150,15 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
   card: {
     flexDirection: 'row',
     backgroundColor: colors.surface,
-    borderRadius: 20,
+    borderRadius: 16,
     marginHorizontal: 16,
     marginBottom: 12,
     padding: 14,
-    borderWidth: 1,
-    borderColor: colors.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 1,
   },
   dateStrip: {
     width: 50,
@@ -215,7 +218,7 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     gap: 4,
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 12,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: colors.border,
   },

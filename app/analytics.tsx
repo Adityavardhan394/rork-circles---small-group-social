@@ -184,8 +184,9 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
   },
   statCard: {
     flex: 1, minWidth: '45%', backgroundColor: colors.surface,
-    borderRadius: 20, padding: 16, alignItems: 'center',
-    borderWidth: 1, borderColor: colors.border,
+    borderRadius: 16, padding: 16, alignItems: 'center',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04, shadowRadius: 4, elevation: 1,
   },
   statIcon: {
     width: 40, height: 40, borderRadius: 12,
@@ -195,8 +196,7 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
   statLabel: { fontSize: 12, color: colors.textTertiary, marginTop: 2 },
   engagementCard: {
     backgroundColor: colors.surface, marginHorizontal: 20,
-    borderRadius: 20, padding: 16, marginBottom: 24,
-    borderWidth: 1, borderColor: colors.border,
+    borderRadius: 16, padding: 16, marginBottom: 24,
   },
   engagementRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 12 },
   engagementTitle: { fontSize: 15, fontWeight: '600' as const, color: colors.text },
@@ -214,8 +214,7 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
   },
   leaderRow: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: colors.surface, padding: 12, borderRadius: 16, marginBottom: 6,
-    borderWidth: 1, borderColor: colors.border,
+    backgroundColor: colors.surface, padding: 12, borderRadius: 14, marginBottom: 6,
   },
   leaderRank: { fontSize: 14, fontWeight: '700' as const, color: colors.textTertiary, width: 28 },
   leaderAvatar: { width: 36, height: 36, borderRadius: 18 },

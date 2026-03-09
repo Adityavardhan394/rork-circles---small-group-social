@@ -51,7 +51,7 @@ export default function CreateEventScreen() {
       return;
     }
     if (Platform.OS !== 'web') {
-      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
     const newEvent: CircleEvent = {
       id: `event-${Date.now()}`,
@@ -79,7 +79,7 @@ export default function CreateEventScreen() {
       return;
     }
     if (Platform.OS !== 'web') {
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     setStep('form');
   }, [selectedCircleId]);
@@ -302,7 +302,7 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     backgroundColor: colors.primary,
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 16,
+    borderRadius: 10,
   },
   nextBtnDisabled: {
     backgroundColor: colors.surfaceSecondary,
@@ -319,7 +319,7 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     backgroundColor: colors.primary,
     paddingHorizontal: 18,
     paddingVertical: 8,
-    borderRadius: 16,
+    borderRadius: 10,
   },
   createBtnDisabled: {
     backgroundColor: colors.surfaceSecondary,
@@ -354,8 +354,8 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     marginBottom: 8,
   },
   input: {
-    backgroundColor: colors.inputBg,
-    borderRadius: 16,
+    backgroundColor: colors.surface,
+    borderRadius: 14,
     padding: 14,
     fontSize: 15,
     color: colors.text,
@@ -374,13 +374,13 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
   quickChip: {
     paddingHorizontal: 14,
     paddingVertical: 8,
-    borderRadius: 14,
-    backgroundColor: colors.surfaceSecondary,
+    borderRadius: 10,
+    backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
   },
   quickChipActive: {
-    backgroundColor: 'rgba(91,76,219,0.12)',
+    backgroundColor: colors.teal50,
     borderColor: colors.primary,
   },
   quickChipText: {

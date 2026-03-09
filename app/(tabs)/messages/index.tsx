@@ -168,7 +168,7 @@ export default function MessagesScreen() {
                 <Text style={styles.emptyEmoji}>💬</Text>
                 <Text style={styles.emptyTitle}>No messages yet</Text>
                 <Text style={styles.emptySubtitle}>
-                  Join a group to start messaging people
+                  Join a huddle to start messaging people
                 </Text>
               </View>
             )}
@@ -196,31 +196,29 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     paddingBottom: 12,
   },
   title: {
-    fontSize: 32,
-    fontWeight: '800' as const,
+    fontSize: 26,
+    fontWeight: '700' as const,
     color: colors.text,
     letterSpacing: -0.5,
   },
   composeBtn: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: 'rgba(91,76,219,0.15)',
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: colors.teal50,
     alignItems: 'center',
     justifyContent: 'center',
   },
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.inputBg,
+    backgroundColor: colors.surface,
     marginHorizontal: 20,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    borderRadius: 16,
+    borderRadius: 12,
     gap: 8,
     marginBottom: 8,
-    borderWidth: 1,
-    borderColor: colors.border,
   },
   searchInput: {
     flex: 1,
@@ -235,7 +233,7 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     marginTop: 16,
   },
   sectionTitle: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '600' as const,
     color: colors.textSecondary,
     textTransform: 'uppercase' as const,
@@ -252,7 +250,7 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
   chatRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: colors.borderLight,
   },

@@ -22,7 +22,7 @@ function SkeletonItem({ width = '100%', height = 16, borderRadius = 8, style }: 
     );
     animation.start();
     return () => animation.stop();
-  }, [pulseAnim]);
+  }, []);
 
   return (
     <Animated.View
@@ -31,7 +31,7 @@ function SkeletonItem({ width = '100%', height = 16, borderRadius = 8, style }: 
           width: width as number,
           height,
           borderRadius,
-          backgroundColor: colors.surfaceSecondary,
+          backgroundColor: colors.stone200,
           opacity: pulseAnim,
         },
         style,
@@ -122,12 +122,10 @@ const createSkeletonStyles = (colors: ColorScheme) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.surface,
-    borderRadius: 20,
+    borderRadius: 16,
     padding: 16,
     marginHorizontal: 20,
     marginBottom: 10,
-    borderWidth: 1,
-    borderColor: colors.border,
   },
   circleContent: {
     flex: 1,
@@ -140,12 +138,10 @@ const createSkeletonStyles = (colors: ColorScheme) => StyleSheet.create({
   },
   postCard: {
     backgroundColor: colors.surface,
-    borderRadius: 20,
+    borderRadius: 16,
     marginHorizontal: 16,
     marginBottom: 12,
     padding: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
   },
   notifCard: {
     flexDirection: 'row',

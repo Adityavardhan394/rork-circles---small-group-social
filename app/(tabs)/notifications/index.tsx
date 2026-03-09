@@ -27,7 +27,7 @@ export default function NotificationsScreen() {
 
   useEffect(() => {
     Animated.timing(fadeAnim, { toValue: 1, duration: 400, useNativeDriver: true }).start();
-  }, [fadeAnim]);
+  }, []);
 
   const handleNotifPress = useCallback((notifId: string, circleId: string) => {
     markNotificationRead(notifId);
@@ -93,7 +93,7 @@ export default function NotificationsScreen() {
             <EmptyState
               emoji="🔔"
               title="No notifications"
-              subtitle="You're all caught up! Activity from your groups will show here."
+              subtitle="You're all caught up! Activity from your huddles will show here."
             />
           ) : (
             notifications.map(notif => (
@@ -144,8 +144,8 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     paddingBottom: 12,
   },
   title: {
-    fontSize: 32,
-    fontWeight: '800' as const,
+    fontSize: 26,
+    fontWeight: '700' as const,
     color: colors.text,
     letterSpacing: -0.5,
   },
@@ -153,10 +153,10 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 16,
-    backgroundColor: 'rgba(91,76,219,0.15)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 10,
+    backgroundColor: colors.teal50,
   },
   markAllText: {
     fontSize: 13,
@@ -174,15 +174,15 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     borderBottomColor: colors.borderLight,
   },
   notifCardUnread: {
-    backgroundColor: 'rgba(91,76,219,0.08)',
+    backgroundColor: colors.teal50,
   },
   notifLeft: {
     position: 'relative',
   },
   notifAvatar: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
   },
   unreadDot: {
     position: 'absolute',
@@ -191,9 +191,9 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: colors.primary,
+    backgroundColor: colors.accent,
     borderWidth: 2,
-    borderColor: colors.background,
+    borderColor: colors.teal50,
   },
   notifContent: {
     flex: 1,

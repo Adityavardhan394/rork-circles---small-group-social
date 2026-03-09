@@ -1,22 +1,24 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import createContextHook from '@nkzw/create-context-hook';
 import { useQuery } from '@tanstack/react-query';
 import { ThemeMode } from '@/types';
-import { LightColors } from '@/constants/colors';
+import { LightColors, DarkColors } from '@/constants/colors';
 
 const THEME_STORAGE_KEY = 'huddle_theme_mode';
 
 export type ColorScheme = typeof LightColors;
 
 export const [ThemeProvider, useTheme] = createContextHook(() => {
-  const [themeMode, setThemeMode] = useState<ThemeMode>('dark');
+  const systemScheme = useColorScheme();
+  const [themeMode, setThemeMode] = useState<ThemeMode>('system');
 
   const themeQuery = useQuery({
     queryKey: ['themeMode'],
     queryFn: async () => {
       const stored = await AsyncStorage.getItem(THEME_STORAGE_KEY);
-      return (stored as ThemeMode) ?? 'dark';
+      return (stored as ThemeMode) ?? 'system';
     },
   });
 
@@ -32,11 +34,14 @@ export const [ThemeProvider, useTheme] = createContextHook(() => {
     console.log('[ThemeProvider] Theme set to:', mode);
   }, []);
 
-  const isDark = true;
+  const isDark = useMemo(() => {
+    if (themeMode === 'system') return systemScheme === 'dark';
+    return themeMode === 'dark';
+  }, [themeMode, systemScheme]);
 
   const colors = useMemo<ColorScheme>(() => {
-    return LightColors;
-  }, []);
+    return isDark ? DarkColors : LightColors;
+  }, [isDark]);
 
-  return useMemo(() => ({ themeMode, setTheme, isDark, colors }), [themeMode, setTheme, isDark, colors]);
+  return { themeMode, setTheme, isDark, colors };
 });

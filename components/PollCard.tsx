@@ -17,11 +17,11 @@ function PollCardComponent({ poll, onVote, currentUserId }: PollCardProps) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const totalVotes = poll.options.reduce((sum, o) => sum + o.votes.length, 0);
-  const _userVotedOption = poll.options.find(o => o.votes.includes(currentUserId));
+  const userVotedOption = poll.options.find(o => o.votes.includes(currentUserId));
 
   const handleVote = useCallback((optionId: string) => {
     if (Platform.OS !== 'web') {
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     onVote(optionId);
   }, [onVote]);
@@ -67,12 +67,15 @@ export default React.memo(PollCardComponent);
 const createStyles = (colors: ColorScheme) => StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
-    borderRadius: 20,
+    borderRadius: 16,
     marginHorizontal: 16,
     marginBottom: 12,
     padding: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 1,
   },
   header: {
     flexDirection: 'row',
@@ -115,7 +118,7 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
   option: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 14,
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: colors.border,
     padding: 12,

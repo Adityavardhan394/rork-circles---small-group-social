@@ -21,7 +21,7 @@ const createBadgeStyles = (colors: ColorScheme) => StyleSheet.create({
     position: 'absolute',
     top: -4,
     right: -8,
-    backgroundColor: '#EF4444',
+    backgroundColor: colors.accent,
     borderRadius: 8,
     minWidth: 16,
     height: 16,
@@ -47,15 +47,12 @@ export default function TabLayout() {
         tabBarInactiveTintColor: colors.textTertiary,
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: colors.tabBarBg,
-          borderTopColor: 'rgba(255,255,255,0.05)',
-          borderTopWidth: 1,
-          elevation: 0,
-          shadowOpacity: 0,
+          backgroundColor: colors.surface,
+          borderTopColor: colors.borderLight,
         },
         tabBarLabelStyle: {
           fontSize: 11,
-          fontWeight: '600' as const,
+          fontWeight: '500' as const,
         },
       }}
     >
@@ -69,7 +66,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="search"
         options={{
-          title: "Groups",
+          title: "Discover",
           tabBarIcon: ({ color, size }) => <Search size={size} color={color} />,
         }}
       />
