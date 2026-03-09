@@ -44,11 +44,11 @@ function ActionSheetComponent({ visible, onClose, title, options }: ActionSheetP
         Animated.timing(fadeAnim, { toValue: 0, duration: 200, useNativeDriver: true }),
       ]).start();
     }
-  }, [visible]);
+  }, [visible, slideAnim, fadeAnim]);
 
   const handleOptionPress = useCallback((option: ActionSheetOption) => {
     if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     onClose();
     setTimeout(() => option.onPress(), 300);
@@ -109,11 +109,14 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     left: 0,
     right: 0,
     backgroundColor: colors.surface,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
     paddingTop: 8,
     paddingBottom: 34,
     paddingHorizontal: 20,
+    borderWidth: 1,
+    borderBottomWidth: 0,
+    borderColor: colors.border,
   },
   title: {
     fontSize: 13,
@@ -147,7 +150,7 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
   cancelBtn: {
     marginTop: 8,
     backgroundColor: colors.surfaceSecondary,
-    borderRadius: 14,
+    borderRadius: 16,
     paddingVertical: 14,
     alignItems: 'center',
   },

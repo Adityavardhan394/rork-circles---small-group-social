@@ -31,7 +31,7 @@ function EmptyStateComponent({ emoji, title, subtitle, actionLabel, onAction }: 
     );
     bounce.start();
     return () => bounce.stop();
-  }, []);
+  }, [fadeAnim, scaleAnim, bounceAnim]);
 
   return (
     <Animated.View
@@ -85,25 +85,25 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: colors.teal50,
+    backgroundColor: 'rgba(91,76,219,0.1)',
   },
   circle2: {
     position: 'absolute',
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: colors.teal100,
+    backgroundColor: 'rgba(91,76,219,0.18)',
   },
   emojiContainer: {
     width: 56,
     height: 56,
-    borderRadius: 18,
+    borderRadius: 20,
     backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
+    shadowColor: '#5B4CDB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.15,
     shadowRadius: 10,
     elevation: 3,
   },
@@ -127,13 +127,13 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     marginTop: 20,
     backgroundColor: colors.primary,
     paddingHorizontal: 28,
-    paddingVertical: 13,
-    borderRadius: 14,
+    paddingVertical: 14,
+    borderRadius: 22,
     shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   buttonText: {
     fontSize: 14,

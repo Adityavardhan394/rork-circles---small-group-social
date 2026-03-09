@@ -67,7 +67,7 @@ export default function CreatePollScreen() {
       return;
     }
     if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
     const now = new Date();
     const expires = new Date(now.getTime() + 48 * 60 * 60 * 1000);
@@ -99,7 +99,7 @@ export default function CreatePollScreen() {
       return;
     }
     if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     setStep('form');
   }, [selectedCircleId]);
@@ -259,7 +259,7 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     backgroundColor: colors.primary,
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 10,
+    borderRadius: 16,
   },
   nextBtnDisabled: {
     backgroundColor: colors.surfaceSecondary,
@@ -276,7 +276,7 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     backgroundColor: colors.primary,
     paddingHorizontal: 18,
     paddingVertical: 8,
-    borderRadius: 10,
+    borderRadius: 16,
   },
   createBtnDisabled: {
     backgroundColor: colors.surfaceSecondary,
@@ -330,8 +330,8 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     marginBottom: 24,
   },
   questionInput: {
-    backgroundColor: colors.surface,
-    borderRadius: 14,
+    backgroundColor: colors.inputBg,
+    borderRadius: 16,
     padding: 14,
     fontSize: 16,
     color: colors.text,
@@ -361,8 +361,8 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
   },
   optionInput: {
     flex: 1,
-    backgroundColor: colors.surface,
-    borderRadius: 12,
+    backgroundColor: colors.inputBg,
+    borderRadius: 14,
     padding: 12,
     fontSize: 14,
     color: colors.text,

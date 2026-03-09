@@ -22,10 +22,10 @@ import { useUser } from '@/providers/UserProvider';
 import { useCircles } from '@/providers/CirclesProvider';
 
 const MENU_ITEMS = [
-  { icon: Settings, label: 'Settings', color: '#0F766E', route: '/settings' },
-  { icon: Bell, label: 'Notifications', color: '#2563EB', route: null },
-  { icon: Shield, label: 'Privacy & Safety', color: '#059669', route: '/settings' },
-  { icon: CircleHelp, label: 'Help & Support', color: '#D97706', route: null },
+  { icon: Settings, label: 'Settings', color: '#5B4CDB', route: '/settings' },
+  { icon: Bell, label: 'Notifications', color: '#10B981', route: null },
+  { icon: Shield, label: 'Privacy & Safety', color: '#F59E0B', route: '/settings' },
+  { icon: CircleHelp, label: 'Help & Support', color: '#EF4444', route: null },
 ];
 
 export default function ProfileScreen() {
@@ -42,7 +42,7 @@ export default function ProfileScreen() {
 
   useEffect(() => {
     Animated.timing(fadeAnim, { toValue: 1, duration: 400, useNativeDriver: true }).start();
-  }, []);
+  }, [fadeAnim]);
 
   const handleLogout = useCallback(() => {
     Alert.alert(
@@ -56,7 +56,7 @@ export default function ProfileScreen() {
         }},
       ]
     );
-  }, []);
+  }, [logout, router]);
 
   const handleMenuPress = useCallback((route: string | null, label: string) => {
     if (route) {
@@ -113,7 +113,7 @@ export default function ProfileScreen() {
             accessibilityLabel="Open settings"
             accessibilityRole="button"
           >
-            <Settings size={20} color={colors.text} />
+            <Settings size={20} color={colors.textSecondary} />
           </TouchableOpacity>
         </View>
 
@@ -148,7 +148,7 @@ export default function ProfileScreen() {
               <View style={styles.statsRow}>
                 <View style={styles.stat} accessibilityLabel={`${circles.length} circles`}>
                   <Text style={styles.statValue}>{circles.length}</Text>
-                  <Text style={styles.statLabel}>Huddles</Text>
+                  <Text style={styles.statLabel}>Groups</Text>
                 </View>
                 <View style={styles.statDivider} />
                 <View style={styles.stat} accessibilityLabel={`${connectionCount} connections`}>
@@ -159,7 +159,7 @@ export default function ProfileScreen() {
             </View>
 
             <View style={styles.circlesSection}>
-              <Text style={styles.sectionTitle}>Your Huddles</Text>
+              <Text style={styles.sectionTitle}>Your Groups</Text>
               {circles.map(circle => (
                 <TouchableOpacity
                   key={circle.id}
@@ -169,7 +169,7 @@ export default function ProfileScreen() {
                   accessibilityLabel={`${circle.name}, ${circle.members.length} members`}
                   accessibilityRole="button"
                 >
-                  <View style={[styles.circleEmoji, { backgroundColor: circle.color + '15' }]}>
+                  <View style={[styles.circleEmoji, { backgroundColor: circle.color + '20' }]}>
                     <Text style={styles.circleEmojiText}>{circle.emoji}</Text>
                   </View>
                   <View style={styles.circleInfo}>
@@ -192,7 +192,7 @@ export default function ProfileScreen() {
                   accessibilityLabel={item.label}
                   accessibilityRole="button"
                 >
-                  <View style={[styles.menuIcon, { backgroundColor: item.color + '12' }]}>
+                  <View style={[styles.menuIcon, { backgroundColor: item.color + '15' }]}>
                     <item.icon size={18} color={item.color} />
                   </View>
                   <Text style={styles.menuLabel}>{item.label}</Text>
@@ -298,15 +298,15 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     paddingBottom: 12,
   },
   title: {
-    fontSize: 26,
-    fontWeight: '700' as const,
+    fontSize: 32,
+    fontWeight: '800' as const,
     color: colors.text,
     letterSpacing: -0.5,
   },
   settingsBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     backgroundColor: colors.surfaceSecondary,
     alignItems: 'center',
     justifyContent: 'center',
@@ -319,22 +319,21 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     backgroundColor: colors.surface,
     marginHorizontal: 20,
     padding: 24,
-    borderRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    elevation: 3,
+    borderRadius: 24,
     marginBottom: 24,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   avatarContainer: {
     position: 'relative',
     marginBottom: 12,
   },
   avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 28,
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    borderWidth: 3,
+    borderColor: colors.primary,
   },
   editAvatarBtn: {
     position: 'absolute',
@@ -342,7 +341,7 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     right: -4,
     width: 28,
     height: 28,
-    borderRadius: 10,
+    borderRadius: 14,
     backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
@@ -350,7 +349,7 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     borderColor: colors.surface,
   },
   name: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '700' as const,
     color: colors.text,
   },
@@ -363,14 +362,14 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
   statsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 16,
-    gap: 24,
+    marginTop: 18,
+    gap: 32,
   },
   stat: {
     alignItems: 'center',
   },
   statValue: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '700' as const,
     color: colors.text,
   },
@@ -381,7 +380,7 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
   },
   statDivider: {
     width: 1,
-    height: 24,
+    height: 28,
     backgroundColor: colors.border,
   },
   circlesSection: {
@@ -400,14 +399,16 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.surface,
-    padding: 12,
-    borderRadius: 14,
+    padding: 14,
+    borderRadius: 16,
     marginBottom: 6,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   circleEmoji: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
+    width: 38,
+    height: 38,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -437,13 +438,15 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     alignItems: 'center',
     backgroundColor: colors.surface,
     padding: 14,
-    borderRadius: 14,
+    borderRadius: 16,
     marginBottom: 6,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   menuIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
+    width: 38,
+    height: 38,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -460,11 +463,11 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     marginHorizontal: 20,
-    paddingVertical: 14,
-    borderRadius: 14,
+    paddingVertical: 16,
+    borderRadius: 20,
     backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.danger + '20',
+    borderColor: colors.danger + '30',
   },
   logoutText: {
     fontSize: 14,
@@ -488,12 +491,10 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     marginTop: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 10,
-    backgroundColor: colors.teal50,
-    borderWidth: 1,
-    borderColor: colors.teal100,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    borderRadius: 20,
+    backgroundColor: 'rgba(91,76,219,0.15)',
   },
   editProfileBtnText: {
     fontSize: 13,
@@ -502,14 +503,16 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: 'rgba(0,0,0,0.6)',
     justifyContent: 'flex-end',
   },
   modalContent: {
     backgroundColor: colors.background,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
     paddingBottom: 40,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -541,7 +544,7 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
   modalAvatar: {
     width: 100,
     height: 100,
-    borderRadius: 36,
+    borderRadius: 50,
   },
   modalAvatarOverlay: {
     position: 'absolute' as const,
@@ -569,8 +572,8 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     marginBottom: 6,
   },
   textInput: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
+    backgroundColor: colors.inputBg,
+    borderRadius: 16,
     padding: 14,
     fontSize: 15,
     color: colors.text,

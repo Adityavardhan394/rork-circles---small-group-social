@@ -83,7 +83,7 @@ export default function ChatScreen() {
   const handleSend = useCallback(() => {
     if (!text.trim() || !currentConv || !user) return;
     if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     const msg: Message = {
       id: `msg-${Date.now()}`,
@@ -217,9 +217,9 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     backgroundColor: colors.surface,
   },
   backBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     backgroundColor: colors.surfaceSecondary,
     alignItems: 'center',
     justifyContent: 'center',
@@ -305,11 +305,8 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
   bubbleOther: {
     backgroundColor: colors.surface,
     borderBottomLeftRadius: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   msgSenderName: {
     fontSize: 11,
@@ -340,7 +337,7 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderTopWidth: 1,
-    borderTopColor: colors.borderLight,
+    borderTopColor: colors.border,
     backgroundColor: colors.surface,
     gap: 8,
   },

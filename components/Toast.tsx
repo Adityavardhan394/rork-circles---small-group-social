@@ -19,10 +19,10 @@ function ToastComponent({ visible, message, type = 'success', onHide, duration =
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const ICON_MAP = useMemo(() => ({
-    success: { icon: Check, color: colors.success, bg: '#ECFDF5' },
-    error: { icon: X, color: colors.danger, bg: '#FEF2F2' },
-    warning: { icon: AlertTriangle, color: colors.warning, bg: '#FFFBEB' },
-    info: { icon: Info, color: '#2563EB', bg: '#EFF6FF' },
+    success: { icon: Check, color: colors.success, bg: 'rgba(16,185,129,0.15)' },
+    error: { icon: X, color: colors.danger, bg: 'rgba(239,68,68,0.15)' },
+    warning: { icon: AlertTriangle, color: colors.warning, bg: 'rgba(245,158,11,0.15)' },
+    info: { icon: Info, color: '#3B82F6', bg: 'rgba(59,130,246,0.15)' },
   }), [colors]);
   const translateY = useRef(new Animated.Value(-100)).current;
   const opacity = useRef(new Animated.Value(0)).current;
@@ -43,7 +43,7 @@ function ToastComponent({ visible, message, type = 'success', onHide, duration =
 
       return () => clearTimeout(timer);
     }
-  }, [visible]);
+  }, [visible, translateY, opacity, onHide, duration]);
 
   if (!visible) return null;
 
@@ -78,10 +78,12 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 14,
-    borderRadius: 14,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: colors.border,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
+    shadowOpacity: 0.2,
     shadowRadius: 12,
     elevation: 6,
     zIndex: 9999,

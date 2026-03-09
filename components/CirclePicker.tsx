@@ -109,7 +109,7 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.surface,
-    borderRadius: 14,
+    borderRadius: 18,
     padding: 14,
     gap: 12,
     borderWidth: 1.5,
@@ -117,7 +117,7 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
   },
   circleItemSelected: {
     borderColor: colors.primary,
-    backgroundColor: colors.teal50,
+    backgroundColor: 'rgba(91,76,219,0.12)',
   },
   emojiContainer: {
     width: 44,

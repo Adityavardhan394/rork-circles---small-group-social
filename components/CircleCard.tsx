@@ -1,10 +1,13 @@
 import React, { useRef, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated, Platform } from 'react-native';
 import { Image } from 'expo-image';
-import { ChevronRight } from 'lucide-react-native';
+import { Plus } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { useTheme, type ColorScheme } from '@/providers/ThemeProvider';
 import { Circle } from '@/types';
+
+const CARD_COLORS = ['#F5D5A8', '#B8E6C8', '#C5B8E8', '#F5D76E', '#A8D4F5', '#F5B8D5'];
+const CARD_TEXT_COLORS = ['#5C3D1A', '#1A4D2E', '#2E1A5C', '#5C4D1A', '#1A3D5C', '#5C1A3D'];
 
 interface CircleCardProps {
   circle: Circle;
@@ -14,12 +17,23 @@ interface CircleCardProps {
 
 function CircleCardComponent({ circle, latestActivity, onPress }: CircleCardProps) {
   const { colors } = useTheme();
-  const styles = useMemo(() => createStyles(colors), [colors]);
   const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  const colorIndex = useMemo(() => {
+    let hash = 0;
+    for (let i = 0; i < circle.id.length; i++) {
+      hash = circle.id.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return Math.abs(hash) % CARD_COLORS.length;
+  }, [circle.id]);
+
+  const cardBg = CARD_COLORS[colorIndex];
+  const cardText = CARD_TEXT_COLORS[colorIndex];
+  const styles = useMemo(() => createStyles(colors, cardBg, cardText), [colors, cardBg, cardText]);
 
   const handlePressIn = useCallback(() => {
     Animated.spring(scaleAnim, {
-      toValue: 0.97,
+      toValue: 0.96,
       useNativeDriver: true,
     }).start();
   }, [scaleAnim]);
@@ -34,12 +48,12 @@ function CircleCardComponent({ circle, latestActivity, onPress }: CircleCardProp
 
   const handlePress = useCallback(() => {
     if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     onPress();
   }, [onPress]);
 
-  const maxAvatars = 4;
+  const maxAvatars = 3;
   const visibleMembers = circle.members.slice(0, maxAvatars);
   const extraCount = circle.members.length - maxAvatars;
 
@@ -55,30 +69,34 @@ function CircleCardComponent({ circle, latestActivity, onPress }: CircleCardProp
         accessibilityLabel={`${circle.name}, ${circle.members.length} members, ${latestActivity || 'no activity'}`}
         accessibilityRole="button"
       >
-        <View style={[styles.emojiContainer, { backgroundColor: circle.color + '15' }]}>
-          <Text style={styles.emoji}>{circle.emoji}</Text>
-        </View>
-        <View style={styles.content}>
-          <Text style={styles.name} numberOfLines={1}>{circle.name}</Text>
-          <View style={styles.meta}>
-            <View style={styles.avatarRow}>
-              {visibleMembers.map((member, index) => (
-                <View key={member.id} style={[styles.avatarWrapper, { marginLeft: index > 0 ? -8 : 0, zIndex: maxAvatars - index }]}>
-                  <Image source={{ uri: member.avatar }} style={styles.avatar} />
-                </View>
-              ))}
-              {extraCount > 0 && (
-                <View style={[styles.avatarWrapper, styles.extraBadge, { marginLeft: -8 }]}>
-                  <Text style={styles.extraText}>+{extraCount}</Text>
-                </View>
-              )}
-            </View>
+        <View style={styles.cardHeader}>
+          <View style={styles.emojiContainer}>
+            <Text style={styles.emoji}>{circle.emoji}</Text>
+          </View>
+          <View style={styles.cardHeaderText}>
+            <Text style={styles.name} numberOfLines={1}>{circle.name}</Text>
             {latestActivity && (
               <Text style={styles.activity} numberOfLines={1}>{latestActivity}</Text>
             )}
           </View>
+          <TouchableOpacity style={styles.addBtn} onPress={handlePress}>
+            <Plus size={18} color={cardText} />
+          </TouchableOpacity>
         </View>
-        <ChevronRight size={18} color={colors.textTertiary} />
+        <View style={styles.cardFooter}>
+          <View style={styles.avatarRow}>
+            {visibleMembers.map((member, index) => (
+              <View key={member.id} style={[styles.avatarWrapper, { marginLeft: index > 0 ? -8 : 0, zIndex: maxAvatars - index }]}>
+                <Image source={{ uri: member.avatar }} style={styles.avatar} />
+              </View>
+            ))}
+            {extraCount > 0 && (
+              <View style={[styles.avatarWrapper, styles.extraBadge, { marginLeft: -8 }]}>
+                <Text style={styles.extraText}>{circle.members.length}+</Text>
+              </View>
+            )}
+          </View>
+        </View>
       </TouchableOpacity>
     </Animated.View>
   );
@@ -86,56 +104,67 @@ function CircleCardComponent({ circle, latestActivity, onPress }: CircleCardProp
 
 export default React.memo(CircleCardComponent);
 
-const createStyles = (colors: ColorScheme) => StyleSheet.create({
+const createStyles = (colors: ColorScheme, cardBg: string, cardText: string) => StyleSheet.create({
   card: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: 16,
+    backgroundColor: cardBg,
+    borderRadius: 20,
     padding: 16,
     marginHorizontal: 20,
-    marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    marginBottom: 12,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   emojiContainer: {
-    width: 48,
-    height: 48,
+    width: 42,
+    height: 42,
     borderRadius: 14,
+    backgroundColor: 'rgba(0,0,0,0.08)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   emoji: {
-    fontSize: 24,
+    fontSize: 20,
   },
-  content: {
+  cardHeaderText: {
     flex: 1,
     marginLeft: 12,
   },
   name: {
     fontSize: 16,
-    fontWeight: '600' as const,
-    color: colors.text,
-    marginBottom: 4,
+    fontWeight: '700' as const,
+    color: cardText,
+    marginBottom: 2,
   },
-  meta: {
-    flexDirection: 'row',
+  activity: {
+    fontSize: 12,
+    color: cardText,
+    opacity: 0.7,
+  },
+  addBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: cardText + '30',
+    borderStyle: 'dashed',
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'center',
+  },
+  cardFooter: {
+    marginTop: 12,
   },
   avatarRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   avatarWrapper: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 1.5,
-    borderColor: colors.surface,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: cardBg,
     overflow: 'hidden',
   },
   avatar: {
@@ -143,18 +172,13 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     height: '100%',
   },
   extraBadge: {
-    backgroundColor: colors.surfaceSecondary,
+    backgroundColor: 'rgba(0,0,0,0.12)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   extraText: {
     fontSize: 9,
-    fontWeight: '600' as const,
-    color: colors.textSecondary,
-  },
-  activity: {
-    fontSize: 12,
-    color: colors.textTertiary,
-    flex: 1,
+    fontWeight: '700' as const,
+    color: cardText,
   },
 });

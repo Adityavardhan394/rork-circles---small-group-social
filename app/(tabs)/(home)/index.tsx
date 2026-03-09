@@ -8,19 +8,19 @@ import {
   Animated,
   RefreshControl,
   Platform,
+  Dimensions,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   Plus,
-  Sparkles,
   Calendar,
   BarChart3,
   MessageCircle,
   MapPin,
   Clock,
-  Settings,
+  Search,
   Users,
 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
@@ -31,11 +31,15 @@ import CircleCard from '@/components/CircleCard';
 import EmptyState from '@/components/EmptyState';
 import { HomeSkeleton } from '@/components/SkeletonLoader';
 
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+const CATEGORY_PILLS = ['All', 'Music', 'Sports', 'Study', 'Travel', 'Gaming'] as const;
+
 const QUICK_ACTIONS = [
-  { id: 'circle', label: 'New Huddle', icon: Users, color: '#0F766E', bg: '#F0FDFA', route: '/create-circle' },
-  { id: 'event', label: 'Event', icon: Calendar, color: '#2563EB', bg: '#EFF6FF', route: '/create-event' },
-  { id: 'poll', label: 'Poll', icon: BarChart3, color: '#D97706', bg: '#FFFBEB', route: '/create-poll' },
-  { id: 'post', label: 'Post', icon: MessageCircle, color: '#DB2777', bg: '#FDF2F8', route: '/create-post' },
+  { id: 'circle', label: 'New Group', icon: Users, color: '#5B4CDB', bg: 'rgba(91,76,219,0.15)', route: '/create-circle' },
+  { id: 'event', label: 'Event', icon: Calendar, color: '#10B981', bg: 'rgba(16,185,129,0.15)', route: '/create-event' },
+  { id: 'poll', label: 'Poll', icon: BarChart3, color: '#F59E0B', bg: 'rgba(245,158,11,0.15)', route: '/create-poll' },
+  { id: 'post', label: 'Post', icon: MessageCircle, color: '#EF4444', bg: 'rgba(239,68,68,0.15)', route: '/create-post' },
 ] as const;
 
 function getTimeGreeting(): string {
@@ -54,6 +58,7 @@ export default function HomeScreen() {
   const contentSlide = useRef(new Animated.Value(0)).current;
   const hasNavigated = useRef(false);
   const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const animStarted = useRef(false);
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -110,7 +115,7 @@ export default function HomeScreen() {
 
   const handleQuickAction = useCallback((route: string) => {
     if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     router.push(route as never);
   }, [router]);
@@ -124,12 +129,8 @@ export default function HomeScreen() {
     setTimeout(() => setRefreshing(false), 1000);
   }, []);
 
-  const handleSettings = useCallback(() => {
-    router.push('/settings');
-  }, [router]);
-
-  const handleConnectionsPress = useCallback(() => {
-    router.push('/connections');
+  const handleSearchPress = useCallback(() => {
+    router.push('/(tabs)/search' as never);
   }, [router]);
 
   if (isLoading) {
@@ -140,8 +141,8 @@ export default function HomeScreen() {
             <View style={styles.headerLeft}>
               <View style={styles.avatarSkeleton} />
               <View>
-                <View style={{ width: 120, height: 16, backgroundColor: colors.stone200, borderRadius: 8 }} />
-                <View style={{ width: 80, height: 12, backgroundColor: colors.stone200, borderRadius: 6, marginTop: 6 }} />
+                <View style={{ width: 120, height: 16, backgroundColor: colors.surfaceSecondary, borderRadius: 8 }} />
+                <View style={{ width: 80, height: 12, backgroundColor: colors.surfaceSecondary, borderRadius: 6, marginTop: 6 }} />
               </View>
             </View>
           </View>
@@ -189,31 +190,53 @@ export default function HomeScreen() {
                   <View style={styles.onlineIndicator} />
                 </View>
                 <View>
-                  <Text style={styles.greetingSmall}>{getTimeGreeting()}</Text>
                   <Text style={styles.userName} numberOfLines={1}>{user?.name ?? 'there'}</Text>
+                  <Text style={styles.greetingSmall}>{getTimeGreeting()}</Text>
                 </View>
               </View>
               <TouchableOpacity
-                style={styles.settingsBtn}
-                onPress={handleSettings}
-                testID="settings-btn"
-                accessibilityLabel="Settings"
+                style={styles.searchBtn}
+                onPress={handleSearchPress}
+                testID="search-btn"
+                accessibilityLabel="Search"
               >
-                <Settings size={20} color={colors.textSecondary} />
+                <Search size={20} color={colors.textSecondary} />
               </TouchableOpacity>
+            </View>
+
+            <View style={styles.heroSection}>
+              <Text style={styles.heroTitle}>GroupStream</Text>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.pillsContainer}
+              >
+                {CATEGORY_PILLS.map((pill) => (
+                  <TouchableOpacity
+                    key={pill}
+                    style={[styles.pill, selectedCategory === pill && styles.pillActive]}
+                    onPress={() => setSelectedCategory(pill)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={[styles.pillText, selectedCategory === pill && styles.pillTextActive]}>
+                      {pill}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
             </View>
 
             {circles.length > 0 && (
               <View style={styles.statsStrip}>
                 <View style={styles.statItem}>
                   <Text style={styles.statNumber}>{circles.length}</Text>
-                  <Text style={styles.statLabel}>Huddles</Text>
+                  <Text style={styles.statLabel}>Groups</Text>
                 </View>
                 <View style={styles.statDivider} />
-                <TouchableOpacity style={styles.statItem} onPress={handleConnectionsPress} activeOpacity={0.7}>
+                <View style={styles.statItem}>
                   <Text style={styles.statNumber}>{totalMembers}</Text>
                   <Text style={styles.statLabel}>People</Text>
-                </TouchableOpacity>
+                </View>
                 <View style={styles.statDivider} />
                 <View style={styles.statItem}>
                   <Text style={styles.statNumber}>{upcomingEvents.length}</Text>
@@ -256,7 +279,7 @@ export default function HomeScreen() {
               <View style={styles.eventsSection}>
                 <View style={styles.sectionHeaderRow}>
                   <View style={styles.sectionHeaderLeft}>
-                    <Calendar size={15} color={colors.accent} />
+                    <Calendar size={15} color={colors.accentLight} />
                     <Text style={styles.sectionTitle}>Upcoming</Text>
                   </View>
                 </View>
@@ -265,35 +288,46 @@ export default function HomeScreen() {
                   showsHorizontalScrollIndicator={false}
                   contentContainerStyle={styles.eventsScroll}
                 >
-                  {upcomingEvents.map((event) => (
-                    <TouchableOpacity
-                      key={event.id}
-                      style={styles.eventCard}
-                      activeOpacity={0.8}
-                      onPress={() => router.push(`/circle/${event.circleId}?tab=plans`)}
-                    >
-                      <View style={styles.eventCardTop}>
-                        <Text style={styles.eventEmoji}>{event.circleEmoji}</Text>
-                        <View style={styles.eventRsvpBadge}>
-                          <Text style={styles.eventRsvpText}>
-                            {event.rsvps.yes.length} going
-                          </Text>
+                  {upcomingEvents.map((event, index) => {
+                    const cardColors = [colors.cardYellow, colors.cardMint, colors.cardLavender, colors.cardPeach];
+                    const textColors = [colors.cardYellowText, colors.cardMintText, colors.cardLavenderText, colors.cardPeachText];
+                    const cardBg = cardColors[index % cardColors.length];
+                    const cardText = textColors[index % textColors.length];
+                    return (
+                      <TouchableOpacity
+                        key={event.id}
+                        style={[styles.eventCard, { backgroundColor: cardBg }]}
+                        activeOpacity={0.8}
+                        onPress={() => router.push(`/circle/${event.circleId}?tab=plans`)}
+                      >
+                        <View style={styles.eventCardTop}>
+                          <Text style={[styles.eventEmoji, { color: cardText }]}>{event.circleEmoji}</Text>
+                          <View style={[styles.eventRsvpBadge, { backgroundColor: 'rgba(0,0,0,0.08)' }]}>
+                            <Text style={[styles.eventRsvpText, { color: cardText }]}>
+                              {event.rsvps.yes.length} going
+                            </Text>
+                          </View>
                         </View>
-                      </View>
-                      <Text style={styles.eventTitle} numberOfLines={1}>{event.title}</Text>
-                      <View style={styles.eventMeta}>
-                        <Clock size={11} color={colors.textTertiary} />
-                        <Text style={styles.eventMetaText}>{event.date} · {event.time}</Text>
-                      </View>
-                      {event.location && (
+                        <Text style={[styles.eventTitle, { color: cardText }]} numberOfLines={1}>{event.title}</Text>
                         <View style={styles.eventMeta}>
-                          <MapPin size={11} color={colors.textTertiary} />
-                          <Text style={styles.eventMetaText} numberOfLines={1}>{event.location}</Text>
+                          <Clock size={11} color={cardText} />
+                          <Text style={[styles.eventMetaText, { color: cardText }]}>{event.date} · {event.time}</Text>
                         </View>
-                      )}
-                      <Text style={styles.eventCircleName} numberOfLines={1}>{event.circleName}</Text>
-                    </TouchableOpacity>
-                  ))}
+                        {event.location && (
+                          <View style={styles.eventMeta}>
+                            <MapPin size={11} color={cardText} />
+                            <Text style={[styles.eventMetaText, { color: cardText }]} numberOfLines={1}>{event.location}</Text>
+                          </View>
+                        )}
+                        <View style={styles.eventJoinRow}>
+                          <Text style={[styles.eventCircleName, { color: cardText }]} numberOfLines={1}>{event.circleName}</Text>
+                          <View style={[styles.joinBtn, { backgroundColor: 'rgba(0,0,0,0.1)' }]}>
+                            <Text style={[styles.joinBtnText, { color: cardText }]}>Join now</Text>
+                          </View>
+                        </View>
+                      </TouchableOpacity>
+                    );
+                  })}
                 </ScrollView>
               </View>
             )}
@@ -302,8 +336,7 @@ export default function HomeScreen() {
               <View style={styles.circlesSection}>
                 <View style={styles.sectionHeaderRow}>
                   <View style={styles.sectionHeaderLeft}>
-                    <Sparkles size={15} color={colors.primary} />
-                    <Text style={styles.sectionTitle}>Your Huddles</Text>
+                    <Text style={styles.sectionTitle}>Popular Group</Text>
                   </View>
                   <TouchableOpacity
                     style={styles.newCircleChip}
@@ -326,9 +359,9 @@ export default function HomeScreen() {
             ) : (
               <EmptyState
                 emoji="🫧"
-                title="No huddles yet"
-                subtitle="Create your first huddle and invite your gang!"
-                actionLabel="Create Huddle"
+                title="No groups yet"
+                subtitle="Create your first group and invite your gang!"
+                actionLabel="Create Group"
                 onAction={() => handleQuickAction('/create-circle')}
               />
             )}
@@ -368,10 +401,10 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     flex: 1,
   },
   avatarRing: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    borderWidth: 2.5,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 2,
     borderColor: colors.primary,
     padding: 2,
     position: 'relative' as const,
@@ -379,7 +412,7 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
   headerAvatar: {
     width: '100%',
     height: '100%',
-    borderRadius: 22,
+    borderRadius: 20,
   },
   onlineIndicator: {
     position: 'absolute' as const,
@@ -395,28 +428,60 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
   greetingSmall: {
     fontSize: 13,
     color: colors.textSecondary,
-    fontWeight: '500' as const,
+    fontWeight: '400' as const,
   },
   userName: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '700' as const,
     color: colors.text,
     letterSpacing: -0.3,
     maxWidth: 200,
   },
-  settingsBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+  searchBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     backgroundColor: colors.surfaceSecondary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   avatarSkeleton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: colors.stone200,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: colors.surfaceSecondary,
+  },
+  heroSection: {
+    paddingHorizontal: 20,
+    marginTop: 8,
+  },
+  heroTitle: {
+    fontSize: 34,
+    fontWeight: '800' as const,
+    color: colors.text,
+    letterSpacing: -1,
+    marginBottom: 16,
+  },
+  pillsContainer: {
+    gap: 8,
+    paddingRight: 20,
+  },
+  pill: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 24,
+    backgroundColor: colors.pillBg,
+  },
+  pillActive: {
+    backgroundColor: colors.pillActiveBg,
+  },
+  pillText: {
+    fontSize: 14,
+    fontWeight: '600' as const,
+    color: colors.textSecondary,
+  },
+  pillTextActive: {
+    color: colors.white,
   },
   statsStrip: {
     flexDirection: 'row',
@@ -424,22 +489,17 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     justifyContent: 'space-around',
     backgroundColor: colors.surface,
     marginHorizontal: 20,
-    marginTop: 12,
-    borderRadius: 16,
-    paddingVertical: 14,
+    marginTop: 20,
+    borderRadius: 20,
+    paddingVertical: 16,
     paddingHorizontal: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 1,
   },
   statItem: {
     alignItems: 'center',
     flex: 1,
   },
   statNumber: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '700' as const,
     color: colors.text,
   },
@@ -452,11 +512,11 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
   statDivider: {
     width: 1,
     height: 24,
-    backgroundColor: colors.borderLight,
+    backgroundColor: colors.border,
   },
   quickActionsSection: {
     paddingHorizontal: 20,
-    marginTop: 20,
+    marginTop: 24,
   },
   sectionLabel: {
     fontSize: 13,
@@ -477,7 +537,7 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
   quickActionIcon: {
     width: 56,
     height: 56,
-    borderRadius: 18,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 6,
@@ -503,69 +563,70 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     gap: 6,
   },
   sectionTitle: {
-    fontSize: 13,
-    fontWeight: '600' as const,
-    color: colors.textSecondary,
-    textTransform: 'uppercase' as const,
-    letterSpacing: 0.5,
+    fontSize: 18,
+    fontWeight: '700' as const,
+    color: colors.text,
   },
   eventsScroll: {
     paddingHorizontal: 20,
     gap: 12,
   },
   eventCard: {
-    width: 180,
-    backgroundColor: colors.surface,
-    borderRadius: 16,
-    padding: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    width: SCREEN_WIDTH * 0.7,
+    borderRadius: 20,
+    padding: 16,
   },
   eventCardTop: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   eventEmoji: {
     fontSize: 22,
   },
   eventRsvpBadge: {
-    backgroundColor: colors.teal50,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
   },
   eventRsvpText: {
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '600' as const,
-    color: colors.primary,
   },
   eventTitle: {
-    fontSize: 15,
-    fontWeight: '600' as const,
-    color: colors.text,
-    marginBottom: 6,
+    fontSize: 17,
+    fontWeight: '700' as const,
+    marginBottom: 8,
   },
   eventMeta: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    marginBottom: 3,
+    marginBottom: 4,
   },
   eventMetaText: {
-    fontSize: 11,
-    color: colors.textTertiary,
+    fontSize: 12,
     flex: 1,
   },
+  eventJoinRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 8,
+  },
   eventCircleName: {
-    fontSize: 10,
-    color: colors.primary,
+    fontSize: 12,
     fontWeight: '600' as const,
-    marginTop: 6,
+  },
+  joinBtn: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 16,
+  },
+  joinBtnText: {
+    fontSize: 12,
+    fontWeight: '700' as const,
   },
   circlesSection: {
     marginTop: 24,
@@ -574,13 +635,13 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: colors.teal50,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 10,
+    backgroundColor: 'rgba(91,76,219,0.15)',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 16,
   },
   newCircleChipText: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600' as const,
     color: colors.primary,
   },

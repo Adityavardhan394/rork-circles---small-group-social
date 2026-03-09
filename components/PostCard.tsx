@@ -1,7 +1,7 @@
-import React, { useRef, useCallback, useState, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated, Alert, Platform, ScrollView } from 'react-native';
+import React, { useCallback, useState, useMemo } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Platform, ScrollView } from 'react-native';
 import { Image } from 'expo-image';
-import { MessageCircle, Pin, Clock, MoreHorizontal, Flag, UserX, Copy } from 'lucide-react-native';
+import { MessageCircle, Pin, Clock, MoreHorizontal, Flag, UserX } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { useTheme, type ColorScheme } from '@/providers/ThemeProvider';
 import { Post } from '@/types';
@@ -20,11 +20,10 @@ function PostCardComponent({ post, onReact, onPin, currentUserId }: PostCardProp
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const [showActions, setShowActions] = useState(false);
-  const scaleAnim = useRef(new Animated.Value(1)).current;
 
   const handleReact = useCallback((emoji: string) => {
     if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     onReact(emoji);
   }, [onReact]);
@@ -203,15 +202,12 @@ export default React.memo(PostCardComponent);
 const createStyles = (colors: ColorScheme) => StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
-    borderRadius: 16,
+    borderRadius: 20,
     marginHorizontal: 16,
     marginBottom: 12,
     padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 1,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   header: {
     flexDirection: 'row',

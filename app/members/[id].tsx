@@ -32,7 +32,7 @@ export default function MembersScreen() {
   const handleCopyCode = useCallback(async () => {
     if (!circle) return;
     if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
     Alert.alert('Invite Code', `Share this code: ${circle.inviteCode}\n\nAnyone can join with this code!`);
   }, [circle]);
@@ -269,11 +269,11 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     marginBottom: 10,
   },
   inviteCard: {
-    backgroundColor: colors.teal50,
-    borderRadius: 16,
+    backgroundColor: 'rgba(91,76,219,0.1)',
+    borderRadius: 20,
     padding: 16,
     borderWidth: 1,
-    borderColor: colors.teal100,
+    borderColor: colors.border,
   },
   codeContainer: {
     alignItems: 'center',
@@ -317,8 +317,10 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     alignItems: 'center',
     backgroundColor: colors.surface,
     padding: 12,
-    borderRadius: 14,
+    borderRadius: 16,
     marginBottom: 6,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   memberAvatar: {
     width: 44,
@@ -354,7 +356,7 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     paddingVertical: 14,
-    borderRadius: 14,
+    borderRadius: 20,
     borderWidth: 1.5,
     borderColor: colors.primary,
     borderStyle: 'dashed',

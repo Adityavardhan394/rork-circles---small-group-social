@@ -18,12 +18,17 @@ export default function AnimatedSplashScreen({ onFinish }: SplashScreenProps) {
   const taglineOpacity = useRef(new Animated.Value(0)).current;
   const taglineTranslateY = useRef(new Animated.Value(15)).current;
   const fadeOut = useRef(new Animated.Value(1)).current;
-
-  const dot1 = useRef(new Animated.Value(0)).current;
-  const dot2 = useRef(new Animated.Value(0)).current;
-  const dot3 = useRef(new Animated.Value(0)).current;
+  const glowAnim = useRef(new Animated.Value(0.3)).current;
 
   useEffect(() => {
+    const glowLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(glowAnim, { toValue: 0.6, duration: 1500, useNativeDriver: true }),
+        Animated.timing(glowAnim, { toValue: 0.3, duration: 1500, useNativeDriver: true }),
+      ])
+    );
+    glowLoop.start();
+
     Animated.sequence([
       Animated.parallel([
         Animated.spring(logoScale, {
@@ -62,37 +67,24 @@ export default function AnimatedSplashScreen({ onFinish }: SplashScreenProps) {
           useNativeDriver: true,
         }),
       ]),
-      Animated.stagger(150, [
-        Animated.sequence([
-          Animated.timing(dot1, { toValue: 1, duration: 250, useNativeDriver: true }),
-          Animated.timing(dot1, { toValue: 0.4, duration: 250, useNativeDriver: true }),
-        ]),
-        Animated.sequence([
-          Animated.timing(dot2, { toValue: 1, duration: 250, useNativeDriver: true }),
-          Animated.timing(dot2, { toValue: 0.4, duration: 250, useNativeDriver: true }),
-        ]),
-        Animated.sequence([
-          Animated.timing(dot3, { toValue: 1, duration: 250, useNativeDriver: true }),
-          Animated.timing(dot3, { toValue: 0.4, duration: 250, useNativeDriver: true }),
-        ]),
-      ]),
-      Animated.delay(300),
+      Animated.delay(600),
       Animated.timing(fadeOut, {
         toValue: 0,
         duration: 400,
         useNativeDriver: true,
       }),
     ]).start(() => {
+      glowLoop.stop();
       onFinish();
     });
-  }, []);
+  }, [logoScale, logoOpacity, textOpacity, textTranslateY, taglineOpacity, taglineTranslateY, fadeOut, glowAnim, onFinish]);
 
   return (
     <Animated.View style={[styles.container, { opacity: fadeOut }]}>
       <View style={styles.bgPattern}>
-        <View style={[styles.circle, styles.circle1]} />
-        <View style={[styles.circle, styles.circle2]} />
-        <View style={[styles.circle, styles.circle3]} />
+        <Animated.View style={[styles.glowCircle, styles.glow1, { opacity: glowAnim }]} />
+        <Animated.View style={[styles.glowCircle, styles.glow2, { opacity: glowAnim }]} />
+        <View style={[styles.glowCircle, styles.glow3]} />
       </View>
 
       <View style={styles.content}>
@@ -133,14 +125,8 @@ export default function AnimatedSplashScreen({ onFinish }: SplashScreenProps) {
             },
           ]}
         >
-          For your real groups.
+          Your groups, amplified.
         </Animated.Text>
-
-        <View style={styles.dotsRow}>
-          <Animated.View style={[styles.dot, { opacity: dot1 }]} />
-          <Animated.View style={[styles.dot, styles.dotMiddle, { opacity: dot2 }]} />
-          <Animated.View style={[styles.dot, { opacity: dot3 }]} />
-        </View>
       </View>
 
       <Animated.Text style={[styles.footer, { opacity: taglineOpacity }]}>
@@ -150,10 +136,10 @@ export default function AnimatedSplashScreen({ onFinish }: SplashScreenProps) {
   );
 }
 
-const createStyles = (colors: ColorScheme) => StyleSheet.create({
+const createStyles = (_colors: ColorScheme) => StyleSheet.create({
   container: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: colors.primaryDark,
+    backgroundColor: '#0D0820',
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 999,
@@ -162,29 +148,30 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     overflow: 'hidden',
   },
-  circle: {
+  glowCircle: {
     position: 'absolute',
     borderRadius: 999,
-    backgroundColor: 'rgba(20, 184, 166, 0.08)',
   },
-  circle1: {
+  glow1: {
     width: width * 1.2,
     height: width * 1.2,
     top: -width * 0.4,
     right: -width * 0.3,
+    backgroundColor: 'rgba(91, 76, 219, 0.15)',
   },
-  circle2: {
+  glow2: {
     width: width * 0.8,
     height: width * 0.8,
     bottom: -width * 0.2,
     left: -width * 0.3,
+    backgroundColor: 'rgba(123, 111, 232, 0.1)',
   },
-  circle3: {
+  glow3: {
     width: width * 0.5,
     height: width * 0.5,
     top: height * 0.35,
     right: -width * 0.15,
-    backgroundColor: 'rgba(249, 115, 22, 0.06)',
+    backgroundColor: 'rgba(245, 158, 11, 0.06)',
   },
   content: {
     alignItems: 'center',
@@ -195,10 +182,10 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     borderRadius: 32,
     overflow: 'hidden',
     marginBottom: 24,
-    shadowColor: '#000',
+    shadowColor: '#5B4CDB',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
+    shadowOpacity: 0.4,
+    shadowRadius: 24,
     elevation: 12,
   },
   logo: {
@@ -214,30 +201,16 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
   },
   tagline: {
     fontSize: 17,
-    color: 'rgba(255,255,255,0.65)',
+    color: 'rgba(255,255,255,0.55)',
     fontWeight: '500' as const,
     letterSpacing: 0.3,
     marginBottom: 32,
-  },
-  dotsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.primaryLight,
-  },
-  dotMiddle: {
-    marginHorizontal: 8,
-    backgroundColor: colors.accent,
   },
   footer: {
     position: 'absolute',
     bottom: 60,
     fontSize: 13,
-    color: 'rgba(255,255,255,0.35)',
+    color: 'rgba(255,255,255,0.25)',
     fontWeight: '400' as const,
     letterSpacing: 0.2,
   },

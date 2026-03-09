@@ -67,7 +67,7 @@ export default function CreatePostScreen() {
       return;
     }
     if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
     const now = new Date();
     const expires = selectedExpiry > 0
@@ -99,7 +99,7 @@ export default function CreatePostScreen() {
       return;
     }
     if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     setStep('compose');
   }, [selectedCircleId]);
@@ -268,7 +268,7 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     backgroundColor: colors.primary,
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 10,
+    borderRadius: 16,
   },
   nextBtnDisabled: {
     backgroundColor: colors.surfaceSecondary,
@@ -284,7 +284,7 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
   postBtn: {
     width: 40,
     height: 40,
-    borderRadius: 12,
+    borderRadius: 20,
     backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
@@ -358,8 +358,8 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     gap: 6,
     paddingVertical: 8,
     paddingHorizontal: 14,
-    borderRadius: 10,
-    backgroundColor: colors.teal50,
+    borderRadius: 14,
+    backgroundColor: 'rgba(91,76,219,0.12)',
   },
   toolbarText: {
     fontSize: 14,
@@ -384,13 +384,13 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
   expiryOption: {
     paddingHorizontal: 14,
     paddingVertical: 8,
-    borderRadius: 10,
+    borderRadius: 14,
     backgroundColor: colors.surfaceSecondary,
     borderWidth: 1,
     borderColor: 'transparent',
   },
   expiryOptionActive: {
-    backgroundColor: colors.teal50,
+    backgroundColor: 'rgba(91,76,219,0.12)',
     borderColor: colors.primary,
   },
   expiryOptionText: {

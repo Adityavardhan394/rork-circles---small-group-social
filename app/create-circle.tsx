@@ -36,7 +36,7 @@ export default function CreateCircleScreen() {
       return;
     }
     if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
     const inviteCode = name.trim().toUpperCase().replace(/\s+/g, '').slice(0, 6) + Math.floor(Math.random() * 100);
     const newCircle: Circle = {
@@ -177,7 +177,7 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     backgroundColor: colors.primary,
     paddingHorizontal: 18,
     paddingVertical: 8,
-    borderRadius: 10,
+    borderRadius: 16,
   },
   createBtnDisabled: {
     backgroundColor: colors.surfaceSecondary,
@@ -202,7 +202,7 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
   previewCircle: {
     width: 72,
     height: 72,
-    borderRadius: 22,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
@@ -227,8 +227,8 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     marginBottom: 8,
   },
   input: {
-    backgroundColor: colors.surface,
-    borderRadius: 14,
+    backgroundColor: colors.inputBg,
+    borderRadius: 16,
     padding: 14,
     fontSize: 15,
     color: colors.text,

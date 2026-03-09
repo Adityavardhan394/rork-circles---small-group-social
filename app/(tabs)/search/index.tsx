@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Platform,
+  Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Search, Plus, Hash, ArrowRight } from 'lucide-react-native';
@@ -14,6 +15,9 @@ import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { useTheme, type ColorScheme } from '@/providers/ThemeProvider';
 import { useCircles } from '@/providers/CirclesProvider';
+
+const CARD_COLORS = ['#F5D5A8', '#B8E6C8', '#C5B8E8', '#F5D76E', '#A8D4F5', '#F5B8D5'];
+const CARD_TEXT_COLORS = ['#5C3D1A', '#1A4D2E', '#2E1A5C', '#5C4D1A', '#1A3D5C', '#5C1A3D'];
 
 const SUGGESTED_CIRCLES = [
   { emoji: '🏠', name: 'Flatmate Huddle', desc: 'For roommates & flatmates' },
@@ -48,18 +52,18 @@ export default function SearchScreen() {
       return;
     }
     if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     const found = circles.find(c => c.inviteCode.toLowerCase() === joinCode.trim().toLowerCase());
     if (found) {
       setJoinSuccess(`You're already in ${found.name}`);
       if (Platform.OS !== 'web') {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
       }
     } else {
-      setJoinError('No huddle found with that code. Check and try again.');
+      setJoinError('No group found with that code. Check and try again.');
       if (Platform.OS !== 'web') {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       }
     }
     setTimeout(() => {
@@ -69,9 +73,9 @@ export default function SearchScreen() {
     setJoinCode('');
   }, [joinCode, circles]);
 
-  const handleTemplatePress = useCallback((templateName: string) => {
+  const handleTemplatePress = useCallback((_templateName: string) => {
     if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     router.push('/create-circle');
   }, [router]);
@@ -85,7 +89,10 @@ export default function SearchScreen() {
     <View style={styles.container}>
       <SafeAreaView edges={['top']} style={styles.safeArea}>
         <View style={styles.header}>
-          <Text style={styles.title} accessibilityRole="header">Discover</Text>
+          <Text style={styles.title} accessibilityRole="header">Groups</Text>
+          <TouchableOpacity style={styles.searchIconBtn}>
+            <Search size={20} color={colors.textSecondary} />
+          </TouchableOpacity>
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
@@ -93,11 +100,11 @@ export default function SearchScreen() {
             <Search size={18} color={colors.textTertiary} />
             <TextInput
               style={styles.searchInput}
-              placeholder="Search huddle templates..."
+              placeholder="Search group templates..."
               placeholderTextColor={colors.textTertiary}
               value={searchText}
               onChangeText={setSearchText}
-              accessibilityLabel="Search huddle templates"
+              accessibilityLabel="Search group templates"
             />
           </View>
 
@@ -119,7 +126,7 @@ export default function SearchScreen() {
               <TouchableOpacity
                 style={styles.joinBtn}
                 onPress={handleJoinWithCode}
-                accessibilityLabel="Join huddle with code"
+                accessibilityLabel="Join group with code"
                 accessibilityRole="button"
               >
                 <ArrowRight size={18} color={colors.white} />
@@ -137,14 +144,14 @@ export default function SearchScreen() {
             <TouchableOpacity
               style={styles.createCard}
               onPress={() => router.push('/create-circle')}
-              accessibilityLabel="Create a new huddle"
+              accessibilityLabel="Create a new group"
               accessibilityRole="button"
             >
               <View style={styles.createIconContainer}>
                 <Plus size={24} color={colors.primary} />
               </View>
               <View style={styles.createTextContainer}>
-                <Text style={styles.createTitle}>Create a new huddle</Text>
+                <Text style={styles.createTitle}>Create a new group</Text>
                 <Text style={styles.createDesc}>Start fresh with your own group</Text>
               </View>
               <ArrowRight size={18} color={colors.textTertiary} />
@@ -152,27 +159,23 @@ export default function SearchScreen() {
           </View>
 
           <View style={styles.templatesSection}>
-            <Text style={styles.sectionTitle}>Huddle templates</Text>
-            <Text style={styles.sectionSubtitle}>Quick-start ideas for your huddles</Text>
-            {filteredSuggestions.map((suggestion, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.templateCard}
-                onPress={() => handleTemplatePress(suggestion.name)}
-                activeOpacity={0.7}
-                accessibilityLabel={`${suggestion.name}: ${suggestion.desc}`}
-                accessibilityRole="button"
-              >
-                <View style={styles.templateEmoji}>
-                  <Text style={styles.templateEmojiText}>{suggestion.emoji}</Text>
-                </View>
-                <View style={styles.templateContent}>
-                  <Text style={styles.templateName}>{suggestion.name}</Text>
-                  <Text style={styles.templateDesc}>{suggestion.desc}</Text>
-                </View>
-                <ArrowRight size={16} color={colors.textTertiary} />
-              </TouchableOpacity>
-            ))}
+            <Text style={styles.sectionTitle}>Group templates</Text>
+            <Text style={styles.sectionSubtitle}>Quick-start ideas for your groups</Text>
+            <View style={styles.templateGrid}>
+              {filteredSuggestions.map((suggestion, index) => {
+                const cardBg = CARD_COLORS[index % CARD_COLORS.length];
+                const cardText = CARD_TEXT_COLORS[index % CARD_TEXT_COLORS.length];
+                return (
+                  <TemplateCard
+                    key={index}
+                    suggestion={suggestion}
+                    cardBg={cardBg}
+                    cardText={cardText}
+                    onPress={() => handleTemplatePress(suggestion.name)}
+                  />
+                );
+              })}
+            </View>
 
             {filteredSuggestions.length === 0 && searchText.length > 0 && (
               <View style={styles.noResults}>
@@ -182,7 +185,7 @@ export default function SearchScreen() {
                   style={styles.noResultsBtn}
                   onPress={() => router.push('/create-circle')}
                 >
-                  <Text style={styles.noResultsBtnText}>Create custom huddle</Text>
+                  <Text style={styles.noResultsBtnText}>Create custom group</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -190,6 +193,56 @@ export default function SearchScreen() {
         </ScrollView>
       </SafeAreaView>
     </View>
+  );
+}
+
+function TemplateCard({ suggestion, cardBg, cardText, onPress }: {
+  suggestion: { emoji: string; name: string; desc: string };
+  cardBg: string;
+  cardText: string;
+  onPress: () => void;
+}) {
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  const handlePressIn = useCallback(() => {
+    Animated.spring(scaleAnim, { toValue: 0.95, useNativeDriver: true }).start();
+  }, [scaleAnim]);
+
+  const handlePressOut = useCallback(() => {
+    Animated.spring(scaleAnim, { toValue: 1, friction: 3, useNativeDriver: true }).start();
+  }, [scaleAnim]);
+
+  return (
+    <Animated.View style={[{ transform: [{ scale: scaleAnim }], width: '48%' as any, marginBottom: 12 }]}>
+      <TouchableOpacity
+        style={[{
+          backgroundColor: cardBg,
+          borderRadius: 20,
+          padding: 16,
+          minHeight: 110,
+        }]}
+        onPress={onPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        activeOpacity={1}
+        accessibilityLabel={`${suggestion.name}: ${suggestion.desc}`}
+        accessibilityRole="button"
+      >
+        <View style={{
+          width: 36,
+          height: 36,
+          borderRadius: 12,
+          backgroundColor: 'rgba(0,0,0,0.08)',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: 10,
+        }}>
+          <Text style={{ fontSize: 18 }}>{suggestion.emoji}</Text>
+        </View>
+        <Text style={{ fontSize: 14, fontWeight: '700' as const, color: cardText, marginBottom: 2 }}>{suggestion.name}</Text>
+        <Text style={{ fontSize: 11, color: cardText, opacity: 0.7 }}>{suggestion.desc}</Text>
+      </TouchableOpacity>
+    </Animated.View>
   );
 }
 
@@ -202,15 +255,26 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     flex: 1,
   },
   header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 20,
     paddingTop: 8,
     paddingBottom: 12,
   },
   title: {
-    fontSize: 26,
-    fontWeight: '700' as const,
+    fontSize: 32,
+    fontWeight: '800' as const,
     color: colors.text,
     letterSpacing: -0.5,
+  },
+  searchIconBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: colors.surfaceSecondary,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   scrollContent: {
     paddingBottom: 24,
@@ -218,18 +282,15 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.surface,
+    backgroundColor: colors.inputBg,
     marginHorizontal: 20,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    borderRadius: 14,
+    borderRadius: 16,
     gap: 10,
     marginBottom: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   searchInput: {
     flex: 1,
@@ -262,10 +323,12 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.surface,
+    backgroundColor: colors.inputBg,
     paddingHorizontal: 14,
-    borderRadius: 12,
+    borderRadius: 16,
     gap: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   joinInput: {
     flex: 1,
@@ -276,7 +339,7 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
   joinBtn: {
     width: 48,
     height: 48,
-    borderRadius: 12,
+    borderRadius: 16,
     backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
@@ -288,17 +351,17 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
   createCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.teal50,
+    backgroundColor: colors.surface,
     padding: 16,
-    borderRadius: 16,
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: colors.teal100,
+    borderColor: colors.border,
   },
   createIconContainer: {
     width: 44,
     height: 44,
-    borderRadius: 14,
-    backgroundColor: colors.surface,
+    borderRadius: 16,
+    backgroundColor: 'rgba(91,76,219,0.15)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -319,43 +382,10 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
   templatesSection: {
     paddingHorizontal: 20,
   },
-  templateCard: {
+  templateGrid: {
     flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    padding: 14,
-    borderRadius: 14,
-    marginBottom: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.03,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  templateEmoji: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: colors.surfaceSecondary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  templateEmojiText: {
-    fontSize: 20,
-  },
-  templateContent: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  templateName: {
-    fontSize: 14,
-    fontWeight: '600' as const,
-    color: colors.text,
-  },
-  templateDesc: {
-    fontSize: 12,
-    color: colors.textSecondary,
-    marginTop: 1,
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
   noResults: {
     alignItems: 'center',
@@ -374,7 +404,7 @@ const createStyles = (colors: ColorScheme) => StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
     backgroundColor: colors.primary,
-    borderRadius: 12,
+    borderRadius: 20,
   },
   noResultsBtnText: {
     fontSize: 14,
